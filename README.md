@@ -32,6 +32,7 @@ If `LARK_AI_ENDPOINT` is not set, the app uses a local mock provider.
 - Persists both conversation history and learning state across sessions.
 - Supports multimodal prompts with image attachments (common image MIME types).
 - Accepts both native `reply` API responses and OpenAI-style `choices[].message.content` responses.
+- Injects built-in company knowledge base context for TikTok, Lark, Wix, ByteDance, Shopify, and Amazon when prompts reference those companies.
 
 ## Testing
 ```bash

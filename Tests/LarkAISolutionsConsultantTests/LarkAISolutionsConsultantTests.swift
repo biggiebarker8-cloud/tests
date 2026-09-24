@@ -144,4 +144,37 @@ struct LarkAISolutionsConsultantTests {
         #expect(captured.contains(where: { $0.role == .system && $0.content.contains("User profile context") }))
         #expect(!controller.memories.isEmpty)
     }
+
+    @Test
+    func controllerInjectsCompanyKnowledgeBaseContext() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Create a TikTok Shop and Shopify rollout plan for our commerce team")
+
+        let captured = await provider.lastMessages()
+        let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
+
+        #expect(knowledgeMessage?.content.contains("Company: TikTok") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Shopify") == true)
+    }
+
+    @Test
+    func controllerSkipsKnowledgeBaseContextForUnmatchedPrompt() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Help me write a launch retrospective")
+
+        let captured = await provider.lastMessages()
+        #expect(!captured.contains(where: { $0.role == .system && $0.content.contains("company knowledge base context") }))
+    }
 }

@@ -710,6 +710,152 @@ public actor LearningEngine {
     }
 }
 
+private struct CompanyKnowledgeBaseEntry: Sendable {
+    let name: String
+    let aliases: [String]
+    let overview: String
+    let products: [String]
+    let useCases: [String]
+    let considerations: [String]
+
+    func matches(_ text: String) -> Bool {
+        aliases.contains { alias in
+            let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: alias) + #"(?!\w)"#
+            return text.range(of: pattern, options: .regularExpression) != nil
+        }
+    }
+}
+
+private enum CompanyKnowledgeBaseCatalog {
+    static let entries: [CompanyKnowledgeBaseEntry] = [
+        CompanyKnowledgeBaseEntry(
+            name: "TikTok",
+            aliases: ["tiktok", "tik tok"],
+            overview: "Short-form video and commerce platform focused on discovery, creator-led campaigns, live selling, and performance marketing.",
+            products: [
+                "TikTok For Business ad formats for awareness, acquisition, and retargeting",
+                "TikTok Shop for in-app product discovery, checkout, affiliates, and creator commerce",
+                "Creator partnerships, Spark Ads, and user-generated content amplification"
+            ],
+            useCases: [
+                "Driving consumer demand with creator-first campaigns and short-form storytelling",
+                "Launching social commerce motions that connect content, creators, and conversion",
+                "Testing rapid content iteration with performance signals from paid and organic channels"
+            ],
+            considerations: [
+                "Creative velocity and authenticity usually matter more than polished brand production",
+                "Measurement plans should separate awareness, engagement, and commerce outcomes",
+                "Operational readiness is needed for creator management, moderation, and fulfillment"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Lark",
+            aliases: ["lark"],
+            overview: "ByteDance workplace collaboration suite that combines messaging, docs, meetings, calendar, approvals, knowledge sharing, and workflow automation.",
+            products: [
+                "Messenger, Meetings, Calendar, Email, and collaborative Docs, Sheets, and Wiki",
+                "Base and approval workflows for lightweight no-code operations and data management",
+                "Open platform integrations, bots, and automation for enterprise process orchestration"
+            ],
+            useCases: [
+                "Replacing fragmented workplace tools with a more unified collaboration stack",
+                "Standardizing internal operations, approvals, onboarding, and knowledge management",
+                "Improving cross-functional execution with shared documents, meetings, and workflows"
+            ],
+            considerations: [
+                "Adoption plans should cover governance, workspace structure, permissions, and templates",
+                "Migration planning is important for documents, chat norms, and admin controls",
+                "Value realization often depends on connecting collaboration habits to business workflows"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Wix",
+            aliases: ["wix"],
+            overview: "Website creation and digital business platform for SMBs, creators, and brands with commerce, scheduling, marketing, and app extensibility.",
+            products: [
+                "Website builder, CMS, SEO, analytics, and branded design tooling",
+                "Wix Stores, bookings, events, memberships, and payments for online business operations",
+                "Velo developer platform and app marketplace for custom experiences and integrations"
+            ],
+            useCases: [
+                "Helping small businesses launch and manage web presence without heavy engineering",
+                "Combining site publishing with commerce, appointments, and lead generation",
+                "Extending packaged site workflows with custom logic, apps, and integrations"
+            ],
+            considerations: [
+                "Template, CMS, and app choices should align with content model and scale expectations",
+                "Commerce and scheduling flows need attention to payments, fulfillment, and customer lifecycle",
+                "Custom extensibility is available, but platform constraints should be mapped early"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "ByteDance",
+            aliases: ["bytedance", "byte dance"],
+            overview: "Global technology company known for recommendation systems, creator ecosystems, collaboration software, and large-scale consumer platforms.",
+            products: [
+                "Consumer products including TikTok and other content discovery platforms",
+                "Enterprise collaboration offerings such as Lark for productivity and workflow management",
+                "Advertising, creator monetization, and ecosystem services built on recommendation infrastructure"
+            ],
+            useCases: [
+                "Studying product strategy centered on discovery engines, engagement loops, and ecosystem growth",
+                "Connecting consumer attention platforms with enterprise and monetization opportunities",
+                "Benchmarking large-scale operations across content, creators, ads, and collaboration tools"
+            ],
+            considerations: [
+                "Strategies should distinguish consumer platform priorities from enterprise software priorities",
+                "Regulatory, trust, safety, and data governance topics often shape deployment decisions",
+                "Cross-product narratives work best when grounded in measurable business outcomes"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Shopify",
+            aliases: ["shopify"],
+            overview: "Commerce operating system for merchants spanning storefronts, checkout, payments, back-office workflows, apps, and omnichannel selling.",
+            products: [
+                "Online Store, Shop app, checkout, and headless commerce options",
+                "Shopify Payments, Shop Pay, POS, fulfillment tooling, and order operations",
+                "App ecosystem, B2B capabilities, internationalization, and marketing integrations"
+            ],
+            useCases: [
+                "Launching and scaling direct-to-consumer and omnichannel commerce programs",
+                "Unifying storefront, conversion, and order operations on a shared merchant platform",
+                "Extending commerce workflows through apps, APIs, and partner integrations"
+            ],
+            considerations: [
+                "Architecture choices should weigh theme-based, headless, and B2B requirements",
+                "Checkout, payments, taxes, and fulfillment constraints affect implementation scope",
+                "Growth plans should connect merchandising, conversion, retention, and operational efficiency"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Amazon",
+            aliases: ["amazon", "aws"],
+            overview: "Broad commerce and cloud ecosystem spanning marketplace operations, retail media, fulfillment, and AWS infrastructure services.",
+            products: [
+                "Amazon marketplace, seller tools, fulfillment, and retail media opportunities",
+                "AWS compute, storage, data, AI, security, and developer platform services",
+                "Customer engagement surfaces including Prime, advertising, and operational logistics"
+            ],
+            useCases: [
+                "Designing marketplace or seller strategies that balance catalog growth and operational control",
+                "Planning cloud architecture, modernization, and AI initiatives on AWS",
+                "Coordinating commerce, advertising, logistics, and infrastructure decisions across Amazon channels"
+            ],
+            considerations: [
+                "Marketplace, retail, and AWS conversations should be scoped clearly because buying motions differ",
+                "Cost, security, compliance, and operating model decisions are central for AWS recommendations",
+                "Fulfillment, inventory, and advertising dependencies often drive commercial outcomes"
+            ]
+        )
+    ]
+
+    static func relevantEntries(for text: String) -> [CompanyKnowledgeBaseEntry] {
+        let normalized = text.lowercased()
+        return entries.filter { $0.matches(normalized) }
+    }
+}
+
 @MainActor
 public final class ChatSessionController {
     public enum Status: Equatable {
@@ -803,6 +949,10 @@ public final class ChatSessionController {
                 }
             }
 
+            if let knowledgeBaseContext = knowledgeBaseContextMessage(for: trimmed) {
+                providerMessages.insert(knowledgeBaseContext, at: 0)
+            }
+
             let reply = try await provider.response(for: providerMessages)
             messages.append(ChatMessage(role: .assistant, content: reply))
 
@@ -841,6 +991,29 @@ public final class ChatSessionController {
         return ChatMessage(
             role: .system,
             content: "User profile context - top topics: [\(topics)] ; recent goals: [\(goals)]"
+        )
+    }
+
+    private func knowledgeBaseContextMessage(for text: String) -> ChatMessage? {
+        let entries = CompanyKnowledgeBaseCatalog.relevantEntries(for: text)
+        guard !entries.isEmpty else {
+            return nil
+        }
+
+        let payload = entries.map { entry in
+            """
+            Company: \(entry.name)
+            Overview: \(entry.overview)
+            Core products: \(entry.products.joined(separator: " | "))
+            Common use cases: \(entry.useCases.joined(separator: " | "))
+            Key considerations: \(entry.considerations.joined(separator: " | "))
+            """
+        }
+        .joined(separator: "\n\n")
+
+        return ChatMessage(
+            role: .system,
+            content: "Use this company knowledge base context when it improves the response:\n\(payload)"
         )
     }
 }
