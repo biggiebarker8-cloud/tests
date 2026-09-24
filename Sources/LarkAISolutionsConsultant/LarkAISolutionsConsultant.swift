@@ -759,6 +759,59 @@ private enum CompanyKnowledgeBaseCatalog {
             ]
         ),
         CompanyKnowledgeBaseEntry(
+            name: "TikTok Agency",
+            aliases: ["tiktok agency", "tik tok agency", "tiktok dashboard", "tiktok dashboards", "tt agency"],
+            overview: "Agency-focused TikTok operating context for campaign execution, creator programs, storefront growth, and multi-account performance management.",
+            products: [
+                "TikTok Ads Manager dashboards for campaign, audience, creative, and performance analysis",
+                "TikTok Business Center dashboards for account governance, permissions, and partner collaboration",
+                "TikTok Shop Seller Center dashboards for product, order, affiliate, and conversion operations",
+                "TikTok Creator Marketplace dashboards for creator sourcing, collaboration, and campaign reporting",
+                "TikTok Analytics dashboards for content engagement, audience behavior, and retention trends"
+            ],
+            useCases: [
+                "Operating full-funnel TikTok media programs for multiple clients with consistent reporting",
+                "Coordinating paid, organic, creator, and commerce motions with shared agency playbooks",
+                "Unifying dashboard insights across ads, creators, content, and shop performance"
+            ],
+            considerations: [
+                "Agency workflows should define account ownership, approval chains, and client data boundaries",
+                "Dashboard interpretations need consistent KPI definitions across campaign and commerce teams",
+                "Performance operations improve when creative testing cadences are synchronized with reporting cycles"
+            ],
+            plugins: [
+                "Agency reporting plug-ins that consolidate Ads Manager, Shop, and creator metrics",
+                "Client dashboard connectors for automated exports, scheduled updates, and stakeholder digests",
+                "Campaign operations plug-ins for approvals, creative routing, and publishing coordination"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Microsoft",
+            aliases: ["microsoft", "msft", "microsoft 365", "office 365", "m365", "azure", "dynamics", "power platform"],
+            overview: "Enterprise ecosystem spanning productivity suites, cloud infrastructure, analytics, CRM/ERP, security, and workflow automation platforms.",
+            products: [
+                "Microsoft 365 apps including Teams, Outlook, SharePoint, OneDrive, and Office collaboration tools",
+                "Azure services for compute, data, AI, identity, security, and integration architecture",
+                "Dynamics 365 for CRM, ERP, customer service, sales, and operations management",
+                "Power Platform including Power BI dashboards, Power Apps, and Power Automate workflows"
+            ],
+            useCases: [
+                "Building secure enterprise collaboration and document workflows across distributed teams",
+                "Running cloud-native data, analytics, and AI initiatives with governance controls",
+                "Connecting business operations through CRM/ERP data and low-code automation pipelines"
+            ],
+            considerations: [
+                "Recommendations should account for identity, tenant governance, compliance, and access controls",
+                "Architecture choices should align workload requirements across Microsoft 365, Azure, and Dynamics",
+                "Dashboard strategies should standardize KPI definitions and data lineage across Power BI and source systems"
+            ],
+            plugins: [
+                "Teams and SharePoint plug-ins for collaboration workflows, approvals, and knowledge routing",
+                "Azure integration connectors for event processing, identity-aware APIs, and data pipelines",
+                "Power BI dashboard plug-ins for executive reporting, campaign visibility, and operational analytics"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
             name: "Lark",
             aliases: ["lark"],
             overview: "ByteDance workplace collaboration suite that combines messaging, docs, meetings, calendar, approvals, knowledge sharing, and workflow automation.",
@@ -864,11 +917,15 @@ private enum CompanyKnowledgeBaseCatalog {
             overview: "Global technology company known for recommendation systems, creator ecosystems, collaboration software, and large-scale consumer platforms.",
             products: [
                 "Consumer products including TikTok and other content discovery platforms",
+                "ByteDance creative tooling for short-video production, editing, and creator publishing",
+                "AI-assisted video and image generation capabilities for campaign and content workflows",
                 "Enterprise collaboration offerings such as Lark for productivity and workflow management",
                 "Advertising, creator monetization, and ecosystem services built on recommendation infrastructure"
             ],
             useCases: [
                 "Studying product strategy centered on discovery engines, engagement loops, and ecosystem growth",
+                "Planning short-video content pipelines with creation, review, distribution, and optimization loops",
+                "Designing image and visual asset generation workflows for rapid campaign iteration",
                 "Connecting consumer attention platforms with enterprise and monetization opportunities",
                 "Benchmarking large-scale operations across content, creators, ads, and collaboration tools"
             ],
@@ -880,7 +937,59 @@ private enum CompanyKnowledgeBaseCatalog {
             plugins: [
                 "Cross-ecosystem connectors that bridge collaboration, creator, and ad operations",
                 "Analytics plug-ins that map engagement signals to operating metrics",
+                "Video creation and publishing connectors for creator operations and campaign handoff",
+                "Image generation and asset-management integrations for design-to-distribution workflows",
                 "Workflow integrations for campaign coordination across ByteDance properties"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Canva",
+            aliases: ["canva"],
+            overview: "Design platform for creating graphics, presentations, marketing assets, short videos, and collaborative brand content.",
+            products: [
+                "Templates, brand kits, and design collaboration features for marketing and creative teams",
+                "AI-assisted image generation, editing, and copy support for faster content production",
+                "Video and animation tooling for short-form social content and campaign assets"
+            ],
+            useCases: [
+                "Producing consistent branded visuals across social, web, and sales collateral",
+                "Scaling creative throughput using templates, collaborative review, and reusable brand systems",
+                "Connecting image and short-video creation workflows with publishing and campaign operations"
+            ],
+            considerations: [
+                "Brand governance should define template controls, approval checkpoints, and asset ownership",
+                "Output formats and dimensions should be aligned to destination channels before production",
+                "Cross-tool workflows work best when export, storage, and publishing automations are standardized"
+            ],
+            plugins: [
+                "Brand-kit and template plug-ins for consistent visual identity across teams",
+                "Publishing connectors for social scheduling, campaign distribution, and content calendars",
+                "Asset storage and review plug-ins for approval routing and handoff workflows"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "AnyCross",
+            aliases: ["anycross", "any cross"],
+            overview: "Cross-platform automation context for coordinating creative assets, campaign operations, and multi-channel publishing.",
+            products: [
+                "Cross-platform workflow automation for creative, content, and commerce teams",
+                "Connector orchestration for syncing assets, metadata, and campaign status between systems",
+                "Operational routing for approvals, task updates, and publishing handoffs"
+            ],
+            useCases: [
+                "Unifying image, comic, and short-video production workflows across multiple tools",
+                "Automating asset and campaign synchronization between design, collaboration, and social platforms",
+                "Reducing manual coordination with event-driven workflow and approval routing"
+            ],
+            considerations: [
+                "Integration governance should define data ownership, sync precedence, and rollback plans",
+                "Workflow reliability depends on clear retry, alerting, and exception-handling patterns",
+                "Security controls should be consistent across all connected systems and plug-ins"
+            ],
+            plugins: [
+                "Cross-platform sync plug-ins for creative assets, metadata, and campaign states",
+                "Workflow orchestration connectors for approvals, assignments, and publishing pipelines",
+                "Monitoring plug-ins for integration health, retries, and operational visibility"
             ]
         ),
         CompanyKnowledgeBaseEntry(
@@ -1021,6 +1130,18 @@ private enum CompanyKnowledgeBaseCatalog {
         if names.contains("Munus") && names.contains("Lark") {
             suggestions.append("Munus + Lark operational workflow routing for approvals, updates, and task visibility")
         }
+        if names.contains("Canva") && names.contains("TikTok") {
+            suggestions.append("Canva + TikTok short-video and image asset workflows with brand-safe publishing handoff")
+        }
+        if names.contains("AnyCross") && names.count > 1 {
+            suggestions.append("AnyCross orchestration across matched platforms for asset sync, approval routing, and campaign automation")
+        }
+        if names.contains("Microsoft") && names.contains("TikTok Agency") {
+            suggestions.append("Microsoft Power BI + TikTok Agency dashboards for unified client reporting, campaign insights, and operational scorecards")
+        }
+        if names.contains("Microsoft") && names.contains("TikTok") {
+            suggestions.append("Microsoft collaboration and analytics plug-ins for TikTok campaign planning, execution, and performance reporting")
+        }
 
         if suggestions.isEmpty, names.count > 1 {
             suggestions.append("Use API, event, and workflow plug-ins that keep data ownership clear across the matched platforms")
@@ -1049,7 +1170,7 @@ private enum SkillKnowledgeBaseCatalog {
     static let entries: [SkillKnowledgeBaseEntry] = [
         SkillKnowledgeBaseEntry(
             name: "Image Creation",
-            aliases: ["image creation", "create image", "generate image", "make image", "illustration"],
+            aliases: ["image creation", "create image", "generate image", "make image", "illustration", "picture design", "picture generation", "visual design"],
             overview: "Creates net-new visual concepts, marketing graphics, scenes, and styled artwork from prompts or briefs.",
             workflows: [
                 "Turn product, campaign, or story briefs into structured visual directions",
@@ -1091,7 +1212,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Comic Book Creation",
-            aliases: ["comic book", "comic", "graphic novel", "storyboard", "manga"],
+            aliases: ["comic book", "comic", "comic creation", "graphic novel", "storyboard", "manga"],
             overview: "Builds comic-style narratives with panel planning, characters, scene continuity, and visual storytelling structure.",
             workflows: [
                 "Break stories into pages, scenes, and panels with pacing guidance",
@@ -1111,8 +1232,176 @@ private enum SkillKnowledgeBaseCatalog {
             autoActivateOnImageInput: false
         ),
         SkillKnowledgeBaseEntry(
+            name: "Picture Design",
+            aliases: ["picture design", "photo design", "poster design", "graphic design", "flyer design", "social design"],
+            overview: "Designs polished pictures for ads, social posts, campaign collateral, and brand storytelling across channels.",
+            workflows: [
+                "Translate briefs into picture concepts with layout, typography, color, and hierarchy direction",
+                "Adapt visuals for multiple sizes, channels, and placements while preserving brand consistency",
+                "Plan review and iteration loops for copy placement, CTA clarity, and conversion-focused design"
+            ],
+            outputs: [
+                "Picture design concepts, style routes, and channel-specific layout recommendations",
+                "Export checklists covering dimensions, formats, and accessibility-oriented readability",
+                "Revision notes for design QA, stakeholder approvals, and publishing handoff"
+            ],
+            plugins: [
+                "Picture design plug-ins for templates, typography systems, and brand-safe composition",
+                "Channel-resize connectors for multi-platform output generation and packaging",
+                "Creative review plug-ins for annotation, approvals, and version governance"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Short Video Creation",
+            aliases: ["short video", "short videos", "video creation", "video generation", "reels", "tiktok video", "clip creation"],
+            overview: "Creates short-form videos with scripting, shot planning, editing direction, and publishing-ready recommendations.",
+            workflows: [
+                "Convert campaign goals into short-video concepts, hooks, and storyboard sequences",
+                "Plan script beats, visual pacing, captions, and CTA placement for high-retention formats",
+                "Coordinate edit, review, and publishing handoffs across creative and distribution teams"
+            ],
+            outputs: [
+                "Short-video concepts, script drafts, shot lists, and pacing recommendations",
+                "Editing guidance for transitions, overlays, captions, and soundtrack direction",
+                "Publishing checklists for platform formats, metadata, and test-and-learn iteration loops"
+            ],
+            plugins: [
+                "Short-video editing plug-ins for sequencing, captioning, and rapid iteration workflows",
+                "Publishing connectors for social distribution, scheduling, and performance tracking",
+                "Asset-sync plug-ins for linking scripts, footage, approvals, and final exports"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Website Building",
+            aliases: ["website building", "build website", "website builder", "web builder", "web design", "multiple website building capabilities"],
+            overview: "Designs and organizes website-building workflows across landing pages, commerce pages, content hubs, and multi-page site structures.",
+            workflows: [
+                "Translate business goals into site architecture, navigation patterns, and conversion pathways",
+                "Plan reusable templates and component systems for multiple websites or campaigns",
+                "Coordinate build, QA, publishing, and iteration workflows across web and content teams"
+            ],
+            outputs: [
+                "Website blueprints, page maps, section-level content briefs, and conversion-focused layout guidance",
+                "Multi-site rollout checklists for branding, SEO readiness, and launch sequencing",
+                "Builder-compatible implementation guidance for forms, CMS content, analytics tags, and integrations"
+            ],
+            plugins: [
+                "Website builder plug-ins for CMS blocks, forms, SEO configuration, and template systems",
+                "Publishing connectors for staged rollouts, content approvals, and release coordination",
+                "Analytics and optimization integrations for funnel visibility and iteration planning"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Website Permissions Management",
+            aliases: ["website permissions", "all permissions", "permission management", "access control", "permissions except payments", "administrative charges"],
+            overview: "Defines website-role permission bundles for content and operations while excluding payment and administrative charge privileges.",
+            workflows: [
+                "Set role-based access for editing, publishing, media, SEO, analytics, and integrations",
+                "Grant broad website permissions with explicit restrictions on payment and billing authority",
+                "Audit permission scope to keep collaboration fast while preserving sensitive financial controls"
+            ],
+            outputs: [
+                "Permission matrix templates for editors, marketers, designers, analysts, and support teams",
+                "Allowed permissions: page editing, media upload, content publishing, SEO settings, analytics viewing, integration configuration",
+                "Excluded permissions: payment processing, refunds, payout controls, and administrative charges"
+            ],
+            plugins: [
+                "Role-based access plug-ins for workflow approvals and publish controls",
+                "Audit-log connectors for tracking permission changes and operational accountability",
+                "Compliance integrations for least-privilege access and policy enforcement"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Core Memory Vault",
+            aliases: ["core memory", "memory core", "store knowledge", "store memories", "memory continuity", "memory continuality", "daily memory backup", "memory backup"],
+            overview: "Builds persistent memory plans for references, preferences, and reusable knowledge with continuity and backup discipline.",
+            workflows: [
+                "Capture durable references from prompts and image-driven creative sessions for future reuse",
+                "Organize memory into preference, project, and worldbuilding layers with continuity checkpoints",
+                "Define daily backup and restore routines for memory resilience and long-term context reliability"
+            ],
+            outputs: [
+                "Core memory schemas for references, insights, and reusable design decisions",
+                "Daily memory backup guidance with continuity checkpoints and recovery notes",
+                "Knowledge-capture plans that support continual learning from user feedback and accepted outputs"
+            ],
+            plugins: [
+                "Memory vault plug-ins for persistent context capture, indexing, and retrieval",
+                "Backup automation connectors for scheduled snapshots and restore workflows",
+                "Knowledge graph integrations for cross-project memory linking and continuity tracking"
+            ],
+            autoActivateOnImageInput: true
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Story Universe Continuity",
+            aliases: ["story lines", "storyline", "story continuity", "characters", "character backstory", "lore", "ip", "universe develop", "worldbuilding"],
+            overview: "Manages story universes with recurring characters, lore systems, timeline continuity, and new character/design creation.",
+            workflows: [
+                "Track storyline arcs, character goals, and backstory dependencies across multi-part narratives",
+                "Create new characters, factions, and visual designs that align with established universe rules",
+                "Maintain lore canon, IP tone guides, and continuity checks during expansion of each universe"
+            ],
+            outputs: [
+                "Storyline memory maps with arc status, unresolved threads, and continuity anchors",
+                "Character dossiers with traits, backstory, relationships, and visual design references",
+                "Lore and universe bibles covering world rules, timeline chronology, and IP consistency"
+            ],
+            plugins: [
+                "Character database plug-ins for searchable cast profiles and relationship graphs",
+                "Lore management connectors for canon tracking, timeline validation, and revision history",
+                "Creative ideation plug-ins for generating new character concepts and universe expansions"
+            ],
+            autoActivateOnImageInput: true
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Assistant Personality Styling",
+            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation"],
+            overview: "Shapes response tone to be blunt, honest, sassy, and lightly sarcastic while still constructive, respectful, and idea-focused.",
+            workflows: [
+                "Set tone guidelines that keep direct feedback clear without becoming rude or dismissive",
+                "Blend playful sarcasm with practical steps and actionable idea-development support",
+                "Refine brainstorming style to challenge weak ideas and improve stronger concepts quickly"
+            ],
+            outputs: [
+                "Tone profile settings for blunt/honest but not-mean assistant behavior",
+                "Idea-generation structures that include critique, alternatives, and next-step recommendations",
+                "Style guardrails that preserve respectful language while keeping responses sharp and confident"
+            ],
+            plugins: [
+                "Personality-tuning plug-ins for tone presets, guardrails, and response style controls",
+                "Brainstorming connectors for idea scoring, variant generation, and concept iteration",
+                "Conversation QA integrations that track helpfulness, clarity, and tone consistency"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Voice and Hearing Interaction",
+            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "speech to text", "text to speech", "audio input", "audio output"],
+            overview: "Supports voice-first interaction planning with hearing (speech input), speaking (audio output), and conversational turn management.",
+            workflows: [
+                "Capture spoken user requests and convert them into structured prompt-ready text",
+                "Generate spoken responses with tone control, pacing guidance, and readability checks",
+                "Coordinate multimodal sessions that combine voice, text, and visual-reference workflows"
+            ],
+            outputs: [
+                "Voice interaction flows for speech recognition, clarification prompts, and transcript handoff",
+                "Audio response guidelines for concise delivery, emphasis, and user-friendly cadence",
+                "Accessibility-oriented recommendations for captioning, transcript storage, and replay controls"
+            ],
+            plugins: [
+                "Speech-to-text plug-ins for hearing user input and preserving conversation transcripts",
+                "Text-to-speech connectors for natural voice output and persona-aligned delivery",
+                "Audio session integrations for microphone handling, playback routing, and transcription logs"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
             name: "Adaptive Self Learning",
-            aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically"],
+            aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically", "learn what you like", "how you like it", "analyze everything"],
             overview: "Strengthens personalization by reusing learned preferences, recurring goals, and prior context to improve future responses.",
             workflows: [
                 "Reinforce repeated user themes and preferred solution patterns over time",
