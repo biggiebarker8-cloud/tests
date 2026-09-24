@@ -255,7 +255,7 @@ private struct APIMessage: Codable {
     }
 }
 
-private struct APIResponse: Codable {
+private struct APIResponse: Decodable {
     let reply: String
 
     init(from decoder: Decoder) throws {
@@ -281,11 +281,11 @@ private struct APIResponse: Codable {
         case choices
     }
 
-    private struct OpenAIChoice: Codable {
+    private struct OpenAIChoice: Decodable {
         let message: OpenAIMessage
     }
 
-    private struct OpenAIMessage: Codable {
+    private struct OpenAIMessage: Decodable {
         let content: OpenAIContent
 
         var textContent: String {
@@ -307,7 +307,7 @@ private struct APIResponse: Codable {
         }
     }
 
-    private enum OpenAIContent: Codable {
+    private enum OpenAIContent: Decodable {
         case text(String)
         case parts([OpenAIContentPart])
 
@@ -321,7 +321,7 @@ private struct APIResponse: Codable {
         }
     }
 
-    private enum OpenAIContentPart: Codable {
+    private enum OpenAIContentPart: Decodable {
         case text(String)
         case other
 
