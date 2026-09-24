@@ -720,10 +720,14 @@ private struct CompanyKnowledgeBaseEntry: Sendable {
     let plugins: [String]
 
     func matches(_ text: String) -> Bool {
-        aliases.contains { alias in
-            let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: alias) + #"(?!\w)"#
-            return text.range(of: pattern, options: .regularExpression) != nil
-        }
+        containsAlias(in: text, aliases: aliases)
+    }
+}
+
+private func containsAlias(in text: String, aliases: [String]) -> Bool {
+    aliases.contains { alias in
+        let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: alias) + #"(?!\w)"#
+        return text.range(of: pattern, options: .regularExpression) != nil
     }
 }
 
@@ -1027,6 +1031,152 @@ private enum CompanyKnowledgeBaseCatalog {
     }
 }
 
+private struct SkillKnowledgeBaseEntry: Sendable {
+    let name: String
+    let aliases: [String]
+    let overview: String
+    let workflows: [String]
+    let outputs: [String]
+    let plugins: [String]
+    let autoActivateOnImageInput: Bool
+
+    func matches(_ text: String, hasImageAttachments: Bool) -> Bool {
+        containsAlias(in: text, aliases: aliases) || (autoActivateOnImageInput && hasImageAttachments)
+    }
+}
+
+private enum SkillKnowledgeBaseCatalog {
+    static let entries: [SkillKnowledgeBaseEntry] = [
+        SkillKnowledgeBaseEntry(
+            name: "Image Creation",
+            aliases: ["image creation", "create image", "generate image", "make image", "illustration"],
+            overview: "Creates net-new visual concepts, marketing graphics, scenes, and styled artwork from prompts or briefs.",
+            workflows: [
+                "Turn product, campaign, or story briefs into structured visual directions",
+                "Generate multiple creative routes with style, framing, and tone variations",
+                "Prepare prompt iterations for ads, editorial art, or branded visuals"
+            ],
+            outputs: [
+                "Concept art briefs, scene prompts, character prompts, and campaign image directions",
+                "Variant suggestions for aspect ratio, tone, composition, and art style",
+                "Production notes for review, revision, and approval workflows"
+            ],
+            plugins: [
+                "Image generation plug-ins connected to campaign, content, and asset workflows",
+                "Brand-kit plug-ins that preserve style, palette, and composition guidance",
+                "Asset routing connectors for approvals, publishing, and DAM storage"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Image Editing",
+            aliases: ["image editing", "edit image", "retouch", "enhance image", "background removal"],
+            overview: "Edits existing images for cleanup, recomposition, annotation, styling, resizing, and iterative refinement.",
+            workflows: [
+                "Use attached images as source material for revision, annotation, or transformation",
+                "Plan edit passes for cleanup, crops, overlays, or style adjustments",
+                "Translate feedback into concrete edit goals and approval-ready revisions"
+            ],
+            outputs: [
+                "Edit instructions, revision goals, before/after checkpoints, and QA criteria",
+                "Recommendations for crops, overlays, text placement, and visual hierarchy",
+                "Iteration notes for asset handoff, approvals, and publishing"
+            ],
+            plugins: [
+                "Image editing plug-ins for crops, retouching, inpainting, and annotation",
+                "Review and approval connectors for creative feedback loops",
+                "Asset versioning integrations for teams managing multiple revisions"
+            ],
+            autoActivateOnImageInput: true
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Comic Book Creation",
+            aliases: ["comic book", "comic", "graphic novel", "storyboard", "manga"],
+            overview: "Builds comic-style narratives with panel planning, characters, scene continuity, and visual storytelling structure.",
+            workflows: [
+                "Break stories into pages, scenes, and panels with pacing guidance",
+                "Define recurring characters, settings, style references, and dialogue intent",
+                "Coordinate illustration, lettering, and revision loops across a full comic workflow"
+            ],
+            outputs: [
+                "Page-by-page outlines, panel prompts, character sheets, and scene directions",
+                "Tone, pacing, and continuity guidance for longer-form visual storytelling",
+                "Production checklists for lettering, layouts, revisions, and export readiness"
+            ],
+            plugins: [
+                "Storyboard and layout plug-ins for page planning and panel sequencing",
+                "Character consistency connectors for recurring cast and world-building assets",
+                "Publishing workflows for asset review, lettering, and export handoff"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Adaptive Self Learning",
+            aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically"],
+            overview: "Strengthens personalization by reusing learned preferences, recurring goals, and prior context to improve future responses.",
+            workflows: [
+                "Reinforce repeated user themes and preferred solution patterns over time",
+                "Adapt skill and plug-in suggestions using prior conversations and recent goals",
+                "Promote durable knowledge that sharpens future recommendations"
+            ],
+            outputs: [
+                "Persistent memory summaries, updated topic trends, and evolving user goals",
+                "Recommendations that reflect prior workflows, priorities, and recurring requests",
+                "Context carryover that improves follow-up prompts and multi-turn planning"
+            ],
+            plugins: [
+                "Memory and retrieval plug-ins for durable recall across sessions",
+                "Feedback connectors that reinforce accepted workflows and revisions",
+                "Analytics integrations that expose learning trends and adoption patterns"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Plug-in and Skill Automation",
+            aliases: ["auto add plug-ins", "auto-add plug-ins", "auto add plugins", "auto-add plugins", "auto add skills", "auto-add skills", "skills automation"],
+            overview: "Automatically recommends relevant plug-ins and skills based on prompt intent, matched platforms, and available image inputs.",
+            workflows: [
+                "Detect platform and creative intent to preselect useful plug-ins and skills",
+                "Bundle image, workflow, and platform capabilities into one guided response",
+                "Suggest cross-platform automations when multiple systems are involved"
+            ],
+            outputs: [
+                "Auto-selected skill lists tailored to the request",
+                "Auto-selected plug-in suggestions aligned to platforms and media workflows",
+                "Guidance for orchestration between creative tools, collaboration tools, and commerce platforms"
+            ],
+            plugins: [
+                "Intent-routing plug-ins that map prompts to the right capabilities",
+                "Workflow orchestration connectors that chain skills across multiple steps",
+                "Cross-platform automation plug-ins for syncing creative, content, and operational tasks"
+            ],
+            autoActivateOnImageInput: false
+        )
+    ]
+
+    static func relevantEntries(for text: String, imageAttachments: [ChatImageAttachment]) -> [SkillKnowledgeBaseEntry] {
+        let normalized = text.lowercased()
+        let hasImageAttachments = !imageAttachments.isEmpty
+        return entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
+    }
+
+    static func autoSelectedSkillNames(for entries: [SkillKnowledgeBaseEntry], imageAttachments: [ChatImageAttachment]) -> [String] {
+        var skills = entries.map(\.name)
+        if !imageAttachments.isEmpty && !skills.contains("Multimodal Image Input") {
+            skills.append("Multimodal Image Input")
+        }
+        return Array(NSOrderedSet(array: skills)) as? [String] ?? skills
+    }
+
+    static func autoSelectedPlugins(
+        for skillEntries: [SkillKnowledgeBaseEntry],
+        matchedCompanies: [CompanyKnowledgeBaseEntry]
+    ) -> [String] {
+        let plugins = skillEntries.flatMap(\.plugins) + matchedCompanies.flatMap(\.plugins)
+        return Array(NSOrderedSet(array: plugins.prefix(8).map { $0 })) as? [String] ?? Array(plugins.prefix(8))
+    }
+}
+
 @MainActor
 public final class ChatSessionController {
     public enum Status: Equatable {
@@ -1120,7 +1270,17 @@ public final class ChatSessionController {
                 }
             }
 
-            if let knowledgeBaseContext = knowledgeBaseContextMessage(for: trimmed) {
+            let matchedCompanies = CompanyKnowledgeBaseCatalog.relevantEntries(for: trimmed)
+
+            if let skillContext = skillContextMessage(
+                for: trimmed,
+                imageAttachments: imageAttachments,
+                matchedCompanies: matchedCompanies
+            ) {
+                providerMessages.insert(skillContext, at: 0)
+            }
+
+            if let knowledgeBaseContext = knowledgeBaseContextMessage(for: trimmed, matchedEntries: matchedCompanies) {
                 providerMessages.insert(knowledgeBaseContext, at: 0)
             }
 
@@ -1165,8 +1325,8 @@ public final class ChatSessionController {
         )
     }
 
-    private func knowledgeBaseContextMessage(for text: String) -> ChatMessage? {
-        let entries = CompanyKnowledgeBaseCatalog.relevantEntries(for: text)
+    private func knowledgeBaseContextMessage(for text: String, matchedEntries: [CompanyKnowledgeBaseEntry]? = nil) -> ChatMessage? {
+        let entries = matchedEntries ?? CompanyKnowledgeBaseCatalog.relevantEntries(for: text)
         guard !entries.isEmpty else {
             return nil
         }
@@ -1196,6 +1356,46 @@ public final class ChatSessionController {
         return ChatMessage(
             role: .system,
             content: "Use this company knowledge base context when it improves the response:\n\(payload)\(crossPluginPayload)"
+        )
+    }
+
+    private func skillContextMessage(
+        for text: String,
+        imageAttachments: [ChatImageAttachment],
+        matchedCompanies: [CompanyKnowledgeBaseEntry]
+    ) -> ChatMessage? {
+        let entries = SkillKnowledgeBaseCatalog.relevantEntries(for: text, imageAttachments: imageAttachments)
+        guard !entries.isEmpty else {
+            return nil
+        }
+
+        let payload = entries.map { entry in
+            """
+            Skill: \(entry.name)
+            Overview: \(entry.overview)
+            Common workflows: \(entry.workflows.joined(separator: " | "))
+            Typical outputs: \(entry.outputs.joined(separator: " | "))
+            Recommended plug-ins: \(entry.plugins.joined(separator: " | "))
+            """
+        }
+        .joined(separator: "\n\n")
+
+        let autoSkills = SkillKnowledgeBaseCatalog.autoSelectedSkillNames(for: entries, imageAttachments: imageAttachments)
+        let autoPlugins = SkillKnowledgeBaseCatalog.autoSelectedPlugins(for: entries, matchedCompanies: matchedCompanies)
+
+        var automationContext: [String] = []
+        if !autoSkills.isEmpty {
+            automationContext.append("Auto-selected skills: \(autoSkills.joined(separator: " | "))")
+        }
+        if !autoPlugins.isEmpty {
+            automationContext.append("Auto-selected plug-ins: \(autoPlugins.joined(separator: " | "))")
+        }
+
+        let automationPayload = automationContext.isEmpty ? "" : "\n\n" + automationContext.joined(separator: "\n")
+
+        return ChatMessage(
+            role: .system,
+            content: "Use this skill context when it improves the response:\n\(payload)\(automationPayload)"
         )
     }
 }
