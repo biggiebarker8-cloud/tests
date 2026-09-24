@@ -244,6 +244,30 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsMicrosoftAndTikTokAgencyKnowledgeContext() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Add Microsoft knowledge base and TikTok agency complete knowledge base with all TikTok dashboards")
+
+        let captured = await provider.lastMessages()
+        let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
+
+        #expect(knowledgeMessage?.content.contains("Company: Microsoft") == true)
+        #expect(knowledgeMessage?.content.contains("Company: TikTok Agency") == true)
+        #expect(knowledgeMessage?.content.contains("TikTok Ads Manager dashboards") == true)
+        #expect(knowledgeMessage?.content.contains("TikTok Business Center dashboards") == true)
+        #expect(knowledgeMessage?.content.contains("TikTok Shop Seller Center dashboards") == true)
+        #expect(knowledgeMessage?.content.contains("TikTok Creator Marketplace dashboards") == true)
+        #expect(knowledgeMessage?.content.contains("TikTok Analytics dashboards") == true)
+        #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == true)
+    }
+
+    @Test
     func controllerMatchesPictureDesignAliasToImageCreationSkill() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(

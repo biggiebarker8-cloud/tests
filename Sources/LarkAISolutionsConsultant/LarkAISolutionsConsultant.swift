@@ -759,6 +759,59 @@ private enum CompanyKnowledgeBaseCatalog {
             ]
         ),
         CompanyKnowledgeBaseEntry(
+            name: "TikTok Agency",
+            aliases: ["tiktok agency", "tik tok agency", "tiktok dashboard", "tiktok dashboards", "tt agency"],
+            overview: "Agency-focused TikTok operating context for campaign execution, creator programs, storefront growth, and multi-account performance management.",
+            products: [
+                "TikTok Ads Manager dashboards for campaign, audience, creative, and performance analysis",
+                "TikTok Business Center dashboards for account governance, permissions, and partner collaboration",
+                "TikTok Shop Seller Center dashboards for product, order, affiliate, and conversion operations",
+                "TikTok Creator Marketplace dashboards for creator sourcing, collaboration, and campaign reporting",
+                "TikTok Analytics dashboards for content engagement, audience behavior, and retention trends"
+            ],
+            useCases: [
+                "Operating full-funnel TikTok media programs for multiple clients with consistent reporting",
+                "Coordinating paid, organic, creator, and commerce motions with shared agency playbooks",
+                "Unifying dashboard insights across ads, creators, content, and shop performance"
+            ],
+            considerations: [
+                "Agency workflows should define account ownership, approval chains, and client data boundaries",
+                "Dashboard interpretations need consistent KPI definitions across campaign and commerce teams",
+                "Performance operations improve when creative testing cadences are synchronized with reporting cycles"
+            ],
+            plugins: [
+                "Agency reporting plug-ins that consolidate Ads Manager, Shop, and creator metrics",
+                "Client dashboard connectors for automated exports, scheduled updates, and stakeholder digests",
+                "Campaign operations plug-ins for approvals, creative routing, and publishing coordination"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Microsoft",
+            aliases: ["microsoft", "msft", "microsoft 365", "office 365", "m365", "azure", "dynamics", "power platform"],
+            overview: "Enterprise ecosystem spanning productivity suites, cloud infrastructure, analytics, CRM/ERP, security, and workflow automation platforms.",
+            products: [
+                "Microsoft 365 apps including Teams, Outlook, SharePoint, OneDrive, and Office collaboration tools",
+                "Azure services for compute, data, AI, identity, security, and integration architecture",
+                "Dynamics 365 for CRM, ERP, customer service, sales, and operations management",
+                "Power Platform including Power BI dashboards, Power Apps, and Power Automate workflows"
+            ],
+            useCases: [
+                "Building secure enterprise collaboration and document workflows across distributed teams",
+                "Running cloud-native data, analytics, and AI initiatives with governance controls",
+                "Connecting business operations through CRM/ERP data and low-code automation pipelines"
+            ],
+            considerations: [
+                "Recommendations should account for identity, tenant governance, compliance, and access controls",
+                "Architecture choices should align workload requirements across Microsoft 365, Azure, and Dynamics",
+                "Dashboard strategies should standardize KPI definitions and data lineage across Power BI and source systems"
+            ],
+            plugins: [
+                "Teams and SharePoint plug-ins for collaboration workflows, approvals, and knowledge routing",
+                "Azure integration connectors for event processing, identity-aware APIs, and data pipelines",
+                "Power BI dashboard plug-ins for executive reporting, campaign visibility, and operational analytics"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
             name: "Lark",
             aliases: ["lark"],
             overview: "ByteDance workplace collaboration suite that combines messaging, docs, meetings, calendar, approvals, knowledge sharing, and workflow automation.",
@@ -1082,6 +1135,12 @@ private enum CompanyKnowledgeBaseCatalog {
         }
         if names.contains("AnyCross") && names.count > 1 {
             suggestions.append("AnyCross orchestration across matched platforms for asset sync, approval routing, and campaign automation")
+        }
+        if names.contains("Microsoft") && names.contains("TikTok Agency") {
+            suggestions.append("Microsoft Power BI + TikTok Agency dashboards for unified client reporting, campaign insights, and operational scorecards")
+        }
+        if names.contains("Microsoft") && names.contains("TikTok") {
+            suggestions.append("Microsoft collaboration and analytics plug-ins for TikTok campaign planning, execution, and performance reporting")
         }
 
         if suggestions.isEmpty, names.count > 1 {
