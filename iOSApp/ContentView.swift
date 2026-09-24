@@ -1,4 +1,6 @@
 import SwiftUI
+import PhotosUI
+import UniformTypeIdentifiers
 import LarkAISolutionsConsultant
 
 @MainActor
@@ -10,6 +12,7 @@ final class ChatViewModel: ObservableObject {
     @Published var input: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    @Published var pendingAttachments: [ChatImageAttachment] = []
 
     private let controller: ChatSessionController
 
@@ -40,8 +43,10 @@ final class ChatViewModel: ObservableObject {
 
     func send() async {
         let currentInput = input
+        let currentAttachments = pendingAttachments
         input = ""
-        await controller.send(currentInput)
+        pendingAttachments = []
+        await controller.send(currentInput, imageAttachments: currentAttachments)
         sync()
     }
 
@@ -71,10 +76,24 @@ final class ChatViewModel: ObservableObject {
             errorMessage = message
         }
     }
+
+    func addImageAttachment(data: Data, mimeType: String) {
+        pendingAttachments.append(
+            ChatImageAttachment(
+                mimeType: mimeType,
+                base64Data: data.base64EncodedString()
+            )
+        )
+    }
+
+    func clearPendingAttachments() {
+        pendingAttachments = []
+    }
 }
 
 struct ContentView: View {
     @ObservedObject var viewModel: ChatViewModel
+    @State private var selectedPhotoItems: [PhotosPickerItem] = []
 
     var body: some View {
         NavigationStack {
@@ -142,12 +161,34 @@ struct ContentView: View {
                 HStack {
                     TextField("Describe your challenge", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
+                    PhotosPicker(
+                        selection: $selectedPhotoItems,
+                        maxSelectionCount: 6,
+                        matching: .images
+                    ) {
+                        Image(systemName: "photo.on.rectangle")
+                    }
+                    .disabled(viewModel.isLoading)
                     Button("Send") {
                         Task { await viewModel.send() }
                     }
-                    .disabled(viewModel.isLoading)
+                    .disabled(viewModel.isLoading || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty))
                 }
                 .padding()
+
+                if !viewModel.pendingAttachments.isEmpty {
+                    HStack(spacing: 12) {
+                        Text("Attached images: \(viewModel.pendingAttachments.count)")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                        Button("Remove") {
+                            viewModel.clearPendingAttachments()
+                        }
+                        .font(.footnote)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                }
 
                 if viewModel.isLoading {
                     ProgressView("Consulting…")
@@ -161,6 +202,31 @@ struct ContentView: View {
                         Task { await viewModel.clear() }
                     }
                 }
+                .onChange(of: selectedPhotoItems) { _, newItems in
+                    Task {
+                        await loadSelectedPhotos(newItems)
+                    }
+                }
+            }
+
+            private func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
+                guard !items.isEmpty else { return }
+
+                for item in items {
+                    guard let imageData = try? await item.loadTransferable(type: Data.self) else {
+                        continue
+                    }
+
+                    let mimeType = item.supportedContentTypes
+                        .first(where: { $0.conforms(to: .image) })?
+                        .preferredMIMEType ?? "image/jpeg"
+
+                    if mimeType.hasPrefix("image/") {
+                        viewModel.addImageAttachment(data: imageData, mimeType: mimeType)
+                    }
+                }
+
+                selectedPhotoItems = []
             }
         }
     }
