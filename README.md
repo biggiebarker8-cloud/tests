@@ -13,7 +13,7 @@ This repository contains the foundation for a standalone iPhone consultant app, 
   - controller layer for MVP chat flow
 - iOS app source scaffold in `/iOSApp` using SwiftUI
 - Initial V1 scope and roadmap docs in `/docs`
-- CI workflow to run `swift test`
+- CI workflow to run `swift test` on both pushes and pull requests
 
 ## Configuration
 Set these environment variables for real API integration:
