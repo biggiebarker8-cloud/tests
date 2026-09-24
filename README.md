@@ -30,6 +30,8 @@ If `LARK_AI_ENDPOINT` is not set, the app uses a local mock provider.
 - Tracks top topics and recent user goals over time.
 - Recalls relevant memories and injects them into provider prompts for personalization.
 - Persists both conversation history and learning state across sessions.
+- Supports multimodal prompts with image attachments (common image MIME types).
+- Accepts both native `reply` API responses and OpenAI-style `choices[].message.content` responses.
 
 ## Testing
 ```bash

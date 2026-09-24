@@ -16,13 +16,33 @@ public struct ChatMessage: Codable, Equatable, Identifiable, Sendable {
     public let id: UUID
     public let role: Role
     public let content: String
+    public let attachments: [ChatImageAttachment]
     public let createdAt: Date
 
-    public init(id: UUID = UUID(), role: Role, content: String, createdAt: Date = Date()) {
+    public init(
+        id: UUID = UUID(),
+        role: Role,
+        content: String,
+        attachments: [ChatImageAttachment] = [],
+        createdAt: Date = Date()
+    ) {
         self.id = id
         self.role = role
         self.content = content
+        self.attachments = attachments
         self.createdAt = createdAt
+    }
+}
+
+public struct ChatImageAttachment: Codable, Equatable, Identifiable, Sendable {
+    public let id: UUID
+    public let mimeType: String
+    public let base64Data: String
+
+    public init(id: UUID = UUID(), mimeType: String, base64Data: String) {
+        self.id = id
+        self.mimeType = mimeType
+        self.base64Data = base64Data
     }
 }
 
@@ -109,15 +129,20 @@ public struct HTTPAIProvider: AIProvider {
             throw ConsultantError.missingEndpoint
         }
 
-        guard let latestUserMessage = messages.last(where: { $0.role == .user })?.content.trimmingCharacters(in: .whitespacesAndNewlines),
-              !latestUserMessage.isEmpty
+        guard let latestUserMessage = messages.last(where: { $0.role == .user }),
+              !latestUserMessage.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !latestUserMessage.attachments.isEmpty
         else {
             throw ConsultantError.emptyUserInput
         }
 
         let payload = APIRequest(
             model: configuration.model,
-            messages: messages.map { .init(role: $0.role.rawValue, content: $0.content) }
+            messages: messages.map {
+                .init(
+                    role: $0.role.rawValue,
+                    content: APIMessage.Content(from: $0)
+                )
+            }
         )
 
         let requestOperation = {
@@ -159,11 +184,162 @@ private struct APIRequest: Codable {
 
 private struct APIMessage: Codable {
     let role: String
-    let content: String
+    let content: Content
+
+    enum Content: Codable {
+        case text(String)
+        case multimodal([Part])
+
+        init(from message: ChatMessage) {
+            let trimmed = message.content.trimmingCharacters(in: .whitespacesAndNewlines)
+            if message.attachments.isEmpty {
+                self = .text(trimmed)
+                return
+            }
+
+            var parts: [Part] = []
+            if !trimmed.isEmpty {
+                parts.append(.text(trimmed))
+            }
+
+            parts.append(
+                contentsOf: message.attachments.map {
+                    .imageURL("data:\($0.mimeType);base64,\($0.base64Data)")
+                }
+            )
+            self = .multimodal(parts)
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let text = try? container.decode(String.self) {
+                self = .text(text)
+                return
+            }
+            self = .multimodal(try container.decode([Part].self))
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            switch self {
+            case .text(let value):
+                try container.encode(value)
+            case .multimodal(let parts):
+                try container.encode(parts)
+            }
+        }
+    }
+
+    struct Part: Codable {
+        struct ImageURLPayload: Codable {
+            let url: String
+        }
+
+        let type: String
+        let text: String?
+        let imageURL: ImageURLPayload?
+
+        static func text(_ value: String) -> Part {
+            Part(type: "text", text: value, imageURL: nil)
+        }
+
+        static func imageURL(_ dataURL: String) -> Part {
+            Part(type: "image_url", text: nil, imageURL: .init(url: dataURL))
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case type
+            case text
+            case imageURL = "image_url"
+        }
+    }
 }
 
 private struct APIResponse: Codable {
     let reply: String
+
+    init(from decoder: Decoder) throws {
+        if let keyed = try? decoder.container(keyedBy: CodingKeys.self),
+           let directReply = try? keyed.decode(String.self, forKey: .reply) {
+            reply = directReply
+            return
+        }
+
+        let keyed = try decoder.container(keyedBy: OpenAICodingKeys.self)
+        let choices = try keyed.decode([OpenAIChoice].self, forKey: .choices)
+        guard let first = choices.first else {
+            throw ConsultantError.invalidResponse
+        }
+        reply = first.message.textContent
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case reply
+    }
+
+    private enum OpenAICodingKeys: String, CodingKey {
+        case choices
+    }
+
+    private struct OpenAIChoice: Codable {
+        let message: OpenAIMessage
+    }
+
+    private struct OpenAIMessage: Codable {
+        let content: OpenAIContent
+
+        var textContent: String {
+            switch content {
+            case .text(let value):
+                return value
+            case .parts(let parts):
+                return parts
+                    .compactMap { part in
+                        switch part {
+                        case .text(let value):
+                            return value
+                        case .other:
+                            return nil
+                        }
+                    }
+                    .joined(separator: "\n")
+            }
+        }
+    }
+
+    private enum OpenAIContent: Codable {
+        case text(String)
+        case parts([OpenAIContentPart])
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let text = try? container.decode(String.self) {
+                self = .text(text)
+                return
+            }
+            self = .parts(try container.decode([OpenAIContentPart].self))
+        }
+    }
+
+    private enum OpenAIContentPart: Codable {
+        case text(String)
+        case other
+
+        private enum CodingKeys: String, CodingKey {
+            case type
+            case text
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let type = try container.decode(String.self, forKey: .type)
+            if type == "text" {
+                self = .text(try container.decode(String.self, forKey: .text))
+            } else {
+                self = .other
+            }
+        }
+    }
 }
 
 public protocol ConversationStore: Sendable {
@@ -590,34 +766,41 @@ public final class ChatSessionController {
     }
 
     public func send(_ text: String) async {
+        await send(text, imageAttachments: [])
+    }
+
+    public func send(_ text: String, imageAttachments: [ChatImageAttachment]) async {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
+        guard !trimmed.isEmpty || !imageAttachments.isEmpty else {
             status = .error("Message cannot be empty")
             return
         }
 
         status = .loading
-        let userMessage = ChatMessage(role: .user, content: trimmed)
+        let userMessage = ChatMessage(role: .user, content: trimmed, attachments: imageAttachments)
         messages.append(userMessage)
 
         do {
             try await store.save(messages)
 
-            let updatedState = await learningEngine.learn(from: trimmed, existing: memories, profile: learningProfile)
-            memories = updatedState.memories
-            learningProfile = updatedState.profile
-
-            let recalledMemories = await learningEngine.recall(for: trimmed, memories: memories, limit: 3)
             var providerMessages = messages
-            if let memoryContext = memoryContextMessage(recalledMemories) {
-                providerMessages.insert(memoryContext, at: 0)
-                for recalled in recalledMemories {
-                    memories = await learningEngine.markRecalled(recalled, in: memories)
-                }
-            }
 
-            if let profileContext = profileContextMessage() {
-                providerMessages.insert(profileContext, at: 0)
+            if !trimmed.isEmpty {
+                let updatedState = await learningEngine.learn(from: trimmed, existing: memories, profile: learningProfile)
+                memories = updatedState.memories
+                learningProfile = updatedState.profile
+
+                let recalledMemories = await learningEngine.recall(for: trimmed, memories: memories, limit: 3)
+                if let memoryContext = memoryContextMessage(recalledMemories) {
+                    providerMessages.insert(memoryContext, at: 0)
+                    for recalled in recalledMemories {
+                        memories = await learningEngine.markRecalled(recalled, in: memories)
+                    }
+                }
+
+                if let profileContext = profileContextMessage() {
+                    providerMessages.insert(profileContext, at: 0)
+                }
             }
 
             let reply = try await provider.response(for: providerMessages)

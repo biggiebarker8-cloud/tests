@@ -58,6 +58,22 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func imageOnlyMessageIsAccepted() async throws {
+        let store = InMemoryConversationStore()
+        let controller = ChatSessionController(provider: MockAIProvider(), store: store)
+        let attachment = ChatImageAttachment(
+            mimeType: "image/png",
+            base64Data: Data([0x01, 0x02, 0x03]).base64EncodedString()
+        )
+
+        await controller.send("", imageAttachments: [attachment])
+
+        #expect(controller.messages.count == 2)
+        #expect(controller.messages[0].attachments.count == 1)
+        #expect(controller.status == .idle)
+    }
+
+    @Test
     func fileStoreRoundTrip() async throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
