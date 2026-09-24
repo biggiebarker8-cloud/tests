@@ -144,4 +144,108 @@ struct LarkAISolutionsConsultantTests {
         #expect(captured.contains(where: { $0.role == .system && $0.content.contains("User profile context") }))
         #expect(!controller.memories.isEmpty)
     }
+
+    @Test
+    func controllerInjectsCompanyKnowledgeBaseContext() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Create a TikTok Shop and Shopify rollout plan for our commerce team")
+
+        let captured = await provider.lastMessages()
+        let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
+
+        #expect(knowledgeMessage?.content.contains("Company: TikTok") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Shopify") == true)
+        #expect(knowledgeMessage?.content.contains("Recommended plug-ins:") == true)
+        #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == true)
+    }
+
+    @Test
+    func controllerSkipsKnowledgeBaseContextForUnmatchedPrompt() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Help me write a launch retrospective")
+
+        let captured = await provider.lastMessages()
+        #expect(!captured.contains(where: { $0.role == .system && $0.content.contains("company knowledge base context") }))
+    }
+
+    @Test
+    func controllerInjectsExpandedPluginCoverage() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Add plugins for Facebook, Instagram, Claude AI, Munus, and Lark")
+
+        let captured = await provider.lastMessages()
+        let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
+
+        #expect(knowledgeMessage?.content.contains("Company: Facebook") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Instagram") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Claude AI") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Munus") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Lark") == true)
+    }
+
+    @Test
+    func controllerInjectsCreativeSkillContext() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Add image creation, image editing, and comic book creation skills")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Image Creation") == true)
+        #expect(skillMessage?.content.contains("Skill: Image Editing") == true)
+        #expect(skillMessage?.content.contains("Skill: Comic Book Creation") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+        #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
+    }
+
+    @Test
+    func controllerAutoAddsImageAndLearningSkills() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+        let attachment = ChatImageAttachment(
+            mimeType: "image/png",
+            base64Data: Data([0xAA, 0xBB, 0xCC]).base64EncodedString()
+        )
+
+        await controller.send(
+            "Enable maximum self learning and auto add plug-ins and skills",
+            imageAttachments: [attachment]
+        )
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Image Editing") == true)
+        #expect(skillMessage?.content.contains("Skill: Adaptive Self Learning") == true)
+        #expect(skillMessage?.content.contains("Skill: Plug-in and Skill Automation") == true)
+        #expect(skillMessage?.content.contains("Multimodal Image Input") == true)
+    }
 }
