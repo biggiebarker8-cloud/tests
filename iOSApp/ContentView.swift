@@ -208,26 +208,26 @@ struct ContentView: View {
                     await loadSelectedPhotos(newItems)
                 }
             }
+        }
+    }
 
-            private func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
-                guard !items.isEmpty else { return }
+    private func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
+        guard !items.isEmpty else { return }
 
-                for item in items {
-                    guard let imageData = try? await item.loadTransferable(type: Data.self) else {
-                        continue
-                    }
+        for item in items {
+            guard let imageData = try? await item.loadTransferable(type: Data.self) else {
+                continue
+            }
 
-                    let mimeType = item.supportedContentTypes
-                        .first(where: { $0.conforms(to: .image) })?
-                        .preferredMIMEType ?? "image/jpeg"
+            let mimeType = item.supportedContentTypes
+                .first(where: { $0.conforms(to: .image) })?
+                .preferredMIMEType ?? "image/jpeg"
 
-                    if mimeType.hasPrefix("image/") {
-                        viewModel.addImageAttachment(data: imageData, mimeType: mimeType)
-                    }
-                }
-
-                selectedPhotoItems = []
+            if mimeType.hasPrefix("image/") {
+                viewModel.addImageAttachment(data: imageData, mimeType: mimeType)
             }
         }
+
+        selectedPhotoItems = []
     }
 }
