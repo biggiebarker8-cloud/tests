@@ -202,10 +202,10 @@ struct ContentView: View {
                         Task { await viewModel.clear() }
                     }
                 }
-                .onChange(of: selectedPhotoItems) { _, newItems in
-                    Task {
-                        await loadSelectedPhotos(newItems)
-                    }
+            }
+            .onChange(of: selectedPhotoItems) { _, newItems in
+                Task {
+                    await loadSelectedPhotos(newItems)
                 }
             }
 
