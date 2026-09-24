@@ -8,6 +8,8 @@ This repository contains the foundation for a standalone iPhone consultant app, 
   - provider abstraction (`AIProvider`)
   - HTTP + mock providers
   - local conversation persistence
+  - adaptive learning engine (topic extraction + goal tracking)
+  - advanced long-term memory store with semantic recall
   - controller layer for MVP chat flow
 - iOS app source scaffold in `/iOSApp` using SwiftUI
 - Initial V1 scope and roadmap docs in `/docs`
@@ -21,6 +23,13 @@ Set these environment variables for real API integration:
 - `LARK_AI_MAX_RETRIES` (optional)
 
 If `LARK_AI_ENDPOINT` is not set, the app uses a local mock provider.
+
+## Learning and memory capabilities
+- Learns durable memory summaries from user prompts.
+- Reinforces recurring themes to strengthen important memories.
+- Tracks top topics and recent user goals over time.
+- Recalls relevant memories and injects them into provider prompts for personalization.
+- Persists both conversation history and learning state across sessions.
 
 ## Testing
 ```bash

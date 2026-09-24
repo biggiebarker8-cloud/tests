@@ -4,6 +4,9 @@ import LarkAISolutionsConsultant
 @MainActor
 final class ChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage] = []
+    @Published var memories: [LearnedMemory] = []
+    @Published var topTopics: [String] = []
+    @Published var userGoals: [String] = []
     @Published var input: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
@@ -19,10 +22,14 @@ final class ChatViewModel: ObservableObject {
         let historyURL = appSupport
             .appendingPathComponent("LarkAISolutionsConsultant", isDirectory: true)
             .appendingPathComponent("conversation.json")
+        let learningURL = appSupport
+            .appendingPathComponent("LarkAISolutionsConsultant", isDirectory: true)
+            .appendingPathComponent("learning.json")
 
         self.controller = ChatSessionController(
             provider: provider,
-            store: FileConversationStore(fileURL: historyURL)
+            store: FileConversationStore(fileURL: historyURL),
+            learningStore: FileLearningStore(fileURL: learningURL)
         )
     }
 
@@ -45,6 +52,12 @@ final class ChatViewModel: ObservableObject {
 
     private func sync() {
         messages = controller.messages
+        memories = controller.memories
+            .sorted(by: { $0.strength > $1.strength })
+            .prefix(5)
+            .map { $0 }
+        topTopics = controller.learningProfile.topTopics
+        userGoals = Array(controller.learningProfile.userGoals.suffix(3))
 
         switch controller.status {
         case .loading:
@@ -66,6 +79,24 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             VStack {
+                if !viewModel.topTopics.isEmpty || !viewModel.userGoals.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        if !viewModel.topTopics.isEmpty {
+                            Text("Learned Topics: \(viewModel.topTopics.joined(separator: ", "))")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                        if !viewModel.userGoals.isEmpty {
+                            Text("Recent Goals: \(viewModel.userGoals.joined(separator: " • "))")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                }
+
                 if viewModel.messages.isEmpty {
                     ContentUnavailableView(
                         "Start a consulting session",
@@ -83,6 +114,21 @@ struct ContentView: View {
                         .padding(.vertical, 4)
                     }
                     .listStyle(.plain)
+                }
+
+                if !viewModel.memories.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Memory Highlights")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        ForEach(viewModel.memories) { memory in
+                            Text("• \(memory.summary)")
+                                .font(.footnote)
+                                .lineLimit(2)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
                 }
 
                 if let error = viewModel.errorMessage {
