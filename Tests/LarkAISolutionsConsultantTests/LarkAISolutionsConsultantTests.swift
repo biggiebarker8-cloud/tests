@@ -289,6 +289,29 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsCoreMemoryAndUniverseContinuitySkills() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Add core memory to store pictures for reference and designs and creation features to remember story lines characters backstory and help create new characters and designs and lore ip and each universe develop, add memory back up daily and memory continuality and ability to learn what you like how you like it and analyze everything and store knowledge and memories")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Core Memory Vault") == true)
+        #expect(skillMessage?.content.contains("Skill: Story Universe Continuity") == true)
+        #expect(skillMessage?.content.contains("Skill: Adaptive Self Learning") == true)
+        #expect(skillMessage?.content.contains("Daily memory backup guidance") == true)
+        #expect(skillMessage?.content.contains("backstory") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+        #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
+    }
+
+    @Test
     func controllerMatchesPictureDesignAliasToImageCreationSkill() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(

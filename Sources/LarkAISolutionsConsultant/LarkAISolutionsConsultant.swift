@@ -1316,8 +1316,50 @@ private enum SkillKnowledgeBaseCatalog {
             autoActivateOnImageInput: false
         ),
         SkillKnowledgeBaseEntry(
+            name: "Core Memory Vault",
+            aliases: ["core memory", "memory core", "store knowledge", "store memories", "memory continuity", "memory continuality", "daily memory backup", "memory backup"],
+            overview: "Builds persistent memory plans for references, preferences, and reusable knowledge with continuity and backup discipline.",
+            workflows: [
+                "Capture durable references from prompts and image-driven creative sessions for future reuse",
+                "Organize memory into preference, project, and worldbuilding layers with continuity checkpoints",
+                "Define daily backup and restore routines for memory resilience and long-term context reliability"
+            ],
+            outputs: [
+                "Core memory schemas for references, insights, and reusable design decisions",
+                "Daily memory backup guidance with continuity checkpoints and recovery notes",
+                "Knowledge-capture plans that support continual learning from user feedback and accepted outputs"
+            ],
+            plugins: [
+                "Memory vault plug-ins for persistent context capture, indexing, and retrieval",
+                "Backup automation connectors for scheduled snapshots and restore workflows",
+                "Knowledge graph integrations for cross-project memory linking and continuity tracking"
+            ],
+            autoActivateOnImageInput: true
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Story Universe Continuity",
+            aliases: ["story lines", "storyline", "story continuity", "characters", "character backstory", "lore", "ip", "universe develop", "worldbuilding"],
+            overview: "Manages story universes with recurring characters, lore systems, timeline continuity, and new character/design creation.",
+            workflows: [
+                "Track storyline arcs, character goals, and backstory dependencies across multi-part narratives",
+                "Create new characters, factions, and visual designs that align with established universe rules",
+                "Maintain lore canon, IP tone guides, and continuity checks during expansion of each universe"
+            ],
+            outputs: [
+                "Storyline memory maps with arc status, unresolved threads, and continuity anchors",
+                "Character dossiers with traits, backstory, relationships, and visual design references",
+                "Lore and universe bibles covering world rules, timeline chronology, and IP consistency"
+            ],
+            plugins: [
+                "Character database plug-ins for searchable cast profiles and relationship graphs",
+                "Lore management connectors for canon tracking, timeline validation, and revision history",
+                "Creative ideation plug-ins for generating new character concepts and universe expansions"
+            ],
+            autoActivateOnImageInput: true
+        ),
+        SkillKnowledgeBaseEntry(
             name: "Adaptive Self Learning",
-            aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically"],
+            aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically", "learn what you like", "how you like it", "analyze everything"],
             overview: "Strengthens personalization by reusing learned preferences, recurring goals, and prior context to improve future responses.",
             workflows: [
                 "Reinforce repeated user themes and preferred solution patterns over time",
