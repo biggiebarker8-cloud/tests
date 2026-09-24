@@ -312,6 +312,29 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsPersonalityAndVoiceHearingSkills() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Add assistant personality blunt and honest but not mean sassy and sarcastic and helpful in creating ideas, add voice and hearing abilities")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Assistant Personality Styling") == true)
+        #expect(skillMessage?.content.contains("Skill: Voice and Hearing Interaction") == true)
+        #expect(skillMessage?.content.contains("blunt, honest, sassy, and lightly sarcastic") == true)
+        #expect(skillMessage?.content.contains("Speech-to-text") == true)
+        #expect(skillMessage?.content.contains("Text-to-speech") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+        #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
+    }
+
+    @Test
     func controllerMatchesPictureDesignAliasToImageCreationSkill() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(

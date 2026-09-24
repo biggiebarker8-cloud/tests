@@ -1358,6 +1358,48 @@ private enum SkillKnowledgeBaseCatalog {
             autoActivateOnImageInput: true
         ),
         SkillKnowledgeBaseEntry(
+            name: "Assistant Personality Styling",
+            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation"],
+            overview: "Shapes response tone to be blunt, honest, sassy, and lightly sarcastic while still constructive, respectful, and idea-focused.",
+            workflows: [
+                "Set tone guidelines that keep direct feedback clear without becoming rude or dismissive",
+                "Blend playful sarcasm with practical steps and actionable idea-development support",
+                "Refine brainstorming style to challenge weak ideas and improve stronger concepts quickly"
+            ],
+            outputs: [
+                "Tone profile settings for blunt/honest but not-mean assistant behavior",
+                "Idea-generation structures that include critique, alternatives, and next-step recommendations",
+                "Style guardrails that preserve respectful language while keeping responses sharp and confident"
+            ],
+            plugins: [
+                "Personality-tuning plug-ins for tone presets, guardrails, and response style controls",
+                "Brainstorming connectors for idea scoring, variant generation, and concept iteration",
+                "Conversation QA integrations that track helpfulness, clarity, and tone consistency"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Voice and Hearing Interaction",
+            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "speech to text", "text to speech", "audio input", "audio output"],
+            overview: "Supports voice-first interaction planning with hearing (speech input), speaking (audio output), and conversational turn management.",
+            workflows: [
+                "Capture spoken user requests and convert them into structured prompt-ready text",
+                "Generate spoken responses with tone control, pacing guidance, and readability checks",
+                "Coordinate multimodal sessions that combine voice, text, and visual-reference workflows"
+            ],
+            outputs: [
+                "Voice interaction flows for speech recognition, clarification prompts, and transcript handoff",
+                "Audio response guidelines for concise delivery, emphasis, and user-friendly cadence",
+                "Accessibility-oriented recommendations for captioning, transcript storage, and replay controls"
+            ],
+            plugins: [
+                "Speech-to-text plug-ins for hearing user input and preserving conversation transcripts",
+                "Text-to-speech connectors for natural voice output and persona-aligned delivery",
+                "Audio session integrations for microphone handling, playback routing, and transcription logs"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
             name: "Adaptive Self Learning",
             aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically", "learn what you like", "how you like it", "analyze everything"],
             overview: "Strengthens personalization by reusing learned preferences, recurring goals, and prior context to improve future responses.",
