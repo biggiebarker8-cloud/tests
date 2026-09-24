@@ -202,6 +202,26 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsStructuredDomainTemplateContext() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("I need a rollout plan for architecture and security governance")
+
+        let captured = await provider.lastMessages()
+        let templateMessage = captured.first(where: { $0.role == .system && $0.content.contains("structured domain template context") })
+
+        #expect(templateMessage?.content.contains("Template: Rollout Planning") == true)
+        #expect(templateMessage?.content.contains("Template: Architecture Guidance") == true)
+        #expect(templateMessage?.content.contains("Template: Security Governance") == true)
+        #expect(templateMessage?.content.contains("Suggested deliverables:") == true)
+    }
+
+    @Test
     func controllerInjectsCreativeSkillContext() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
