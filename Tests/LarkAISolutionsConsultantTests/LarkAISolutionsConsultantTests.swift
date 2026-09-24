@@ -161,6 +161,8 @@ struct LarkAISolutionsConsultantTests {
 
         #expect(knowledgeMessage?.content.contains("Company: TikTok") == true)
         #expect(knowledgeMessage?.content.contains("Company: Shopify") == true)
+        #expect(knowledgeMessage?.content.contains("Recommended plug-ins:") == true)
+        #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == true)
     }
 
     @Test
@@ -176,5 +178,26 @@ struct LarkAISolutionsConsultantTests {
 
         let captured = await provider.lastMessages()
         #expect(!captured.contains(where: { $0.role == .system && $0.content.contains("company knowledge base context") }))
+    }
+
+    @Test
+    func controllerInjectsExpandedPluginCoverage() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Add plugins for Facebook, Instagram, Claude AI, Munus, and Lark")
+
+        let captured = await provider.lastMessages()
+        let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
+
+        #expect(knowledgeMessage?.content.contains("Company: Facebook") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Instagram") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Claude AI") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Munus") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Lark") == true)
     }
 }

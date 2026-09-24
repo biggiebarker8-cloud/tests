@@ -717,6 +717,7 @@ private struct CompanyKnowledgeBaseEntry: Sendable {
     let products: [String]
     let useCases: [String]
     let considerations: [String]
+    let plugins: [String]
 
     func matches(_ text: String) -> Bool {
         aliases.contains { alias in
@@ -746,6 +747,11 @@ private enum CompanyKnowledgeBaseCatalog {
                 "Creative velocity and authenticity usually matter more than polished brand production",
                 "Measurement plans should separate awareness, engagement, and commerce outcomes",
                 "Operational readiness is needed for creator management, moderation, and fulfillment"
+            ],
+            plugins: [
+                "TikTok Shop catalog and order sync for social commerce operations",
+                "TikTok Ads conversion tracking and campaign audience activation",
+                "Creator workflow connectors for briefs, approvals, and content publishing"
             ]
         ),
         CompanyKnowledgeBaseEntry(
@@ -766,6 +772,11 @@ private enum CompanyKnowledgeBaseCatalog {
                 "Adoption plans should cover governance, workspace structure, permissions, and templates",
                 "Migration planning is important for documents, chat norms, and admin controls",
                 "Value realization often depends on connecting collaboration habits to business workflows"
+            ],
+            plugins: [
+                "Bots and workflow plug-ins for approvals, notifications, and data routing",
+                "Document and calendar integrations for operating cadence automation",
+                "Knowledge and service-desk connectors for employee support workflows"
             ]
         ),
         CompanyKnowledgeBaseEntry(
@@ -786,6 +797,61 @@ private enum CompanyKnowledgeBaseCatalog {
                 "Template, CMS, and app choices should align with content model and scale expectations",
                 "Commerce and scheduling flows need attention to payments, fulfillment, and customer lifecycle",
                 "Custom extensibility is available, but platform constraints should be mapped early"
+            ],
+            plugins: [
+                "Store, booking, and CRM plug-ins for packaged business operations",
+                "Marketing automation connectors for forms, leads, and lifecycle messaging",
+                "Custom Velo-based integrations for unique data and workflow requirements"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Facebook",
+            aliases: ["facebook", "meta ads", "facebook ads"],
+            overview: "Meta’s social platform and advertising ecosystem used for audience targeting, community engagement, lead generation, and commerce promotion.",
+            products: [
+                "Facebook Pages, Groups, Shops, and lead generation surfaces",
+                "Meta Ads Manager for audience, creative, conversion, and remarketing workflows",
+                "Business portfolio, pixel, conversion API, and catalog management capabilities"
+            ],
+            useCases: [
+                "Running paid acquisition, retargeting, and demand generation campaigns",
+                "Building communities and lifecycle touchpoints around owned audiences",
+                "Supporting social commerce flows through catalogs, ads, and landing experiences"
+            ],
+            considerations: [
+                "Audience strategy, attribution quality, and creative testing strongly influence performance",
+                "Catalog, pixel, and conversion API setup should be validated end-to-end",
+                "Governance is important for ad accounts, assets, access, and compliance"
+            ],
+            plugins: [
+                "Meta Pixel and Conversion API plug-ins for attribution and optimization",
+                "Catalog feed connectors for Shops, dynamic ads, and remarketing",
+                "Lead sync plug-ins that route Facebook forms into CRM and automation tools"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Instagram",
+            aliases: ["instagram", "insta"],
+            overview: "Visual social platform used for brand storytelling, creator collaboration, engagement, discovery, and commerce activation inside the Meta ecosystem.",
+            products: [
+                "Feed, Stories, Reels, DMs, creator collaboration, and shopping surfaces",
+                "Instagram professional tools connected to Meta ads and reporting workflows",
+                "Catalog-driven product discovery and creator-led traffic generation"
+            ],
+            useCases: [
+                "Growing engagement with visual storytelling and creator-led campaigns",
+                "Connecting organic content and paid media through shared creative and audience loops",
+                "Driving product discovery and social proof for commerce brands"
+            ],
+            considerations: [
+                "Short-form creative testing and creator coordination are usually central to success",
+                "Content, commerce, and attribution workflows should be coordinated with the wider Meta stack",
+                "Operational planning is needed for moderation, response handling, and creator approvals"
+            ],
+            plugins: [
+                "Product-tag and catalog plug-ins for shoppable content experiences",
+                "Scheduling and approval connectors for content calendars and creators",
+                "Inbox and social listening plug-ins for community management workflows"
             ]
         ),
         CompanyKnowledgeBaseEntry(
@@ -806,6 +872,11 @@ private enum CompanyKnowledgeBaseCatalog {
                 "Strategies should distinguish consumer platform priorities from enterprise software priorities",
                 "Regulatory, trust, safety, and data governance topics often shape deployment decisions",
                 "Cross-product narratives work best when grounded in measurable business outcomes"
+            ],
+            plugins: [
+                "Cross-ecosystem connectors that bridge collaboration, creator, and ad operations",
+                "Analytics plug-ins that map engagement signals to operating metrics",
+                "Workflow integrations for campaign coordination across ByteDance properties"
             ]
         ),
         CompanyKnowledgeBaseEntry(
@@ -826,6 +897,11 @@ private enum CompanyKnowledgeBaseCatalog {
                 "Architecture choices should weigh theme-based, headless, and B2B requirements",
                 "Checkout, payments, taxes, and fulfillment constraints affect implementation scope",
                 "Growth plans should connect merchandising, conversion, retention, and operational efficiency"
+            ],
+            plugins: [
+                "Sales-channel plug-ins for TikTok, Amazon, Facebook, and Instagram commerce sync",
+                "Checkout, loyalty, subscriptions, and retention apps for conversion growth",
+                "ERP, inventory, and fulfillment connectors for back-office operations"
             ]
         ),
         CompanyKnowledgeBaseEntry(
@@ -846,6 +922,61 @@ private enum CompanyKnowledgeBaseCatalog {
                 "Marketplace, retail, and AWS conversations should be scoped clearly because buying motions differ",
                 "Cost, security, compliance, and operating model decisions are central for AWS recommendations",
                 "Fulfillment, inventory, and advertising dependencies often drive commercial outcomes"
+            ],
+            plugins: [
+                "Marketplace catalog, inventory, and repricing connectors for seller operations",
+                "Advertising and attribution plug-ins for retail media optimization",
+                "AWS workflow integrations for data, AI, and operational automation"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Claude AI",
+            aliases: ["claude ai", "claude", "anthropic"],
+            overview: "AI assistant platform used for drafting, analysis, summarization, support workflows, and agent-style automation.",
+            products: [
+                "Claude conversational models for writing, reasoning, and analysis tasks",
+                "API-based integrations for internal tools, assistants, and workflow automation",
+                "Safety-oriented AI deployment patterns for enterprise productivity use cases"
+            ],
+            useCases: [
+                "Embedding AI into support, research, documentation, and operations workflows",
+                "Accelerating drafting, summarization, and structured analysis use cases",
+                "Powering agent-like assistants that coordinate across internal systems"
+            ],
+            considerations: [
+                "Prompt design, data access boundaries, and evaluation plans should be explicit",
+                "Human review and guardrails are important for high-impact or external-facing flows",
+                "Adoption depends on connecting AI outputs to repeatable operational workflows"
+            ],
+            plugins: [
+                "Knowledge-base and document retrieval plug-ins for grounded answers",
+                "Workflow connectors that move Claude outputs into tickets, docs, and chat tools",
+                "Evaluation and monitoring plug-ins for quality, safety, and prompt iteration"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Munus",
+            aliases: ["munus"],
+            overview: "Operations-oriented platform context for coordinating service delivery, internal workflows, and business process execution.",
+            products: [
+                "Workflow, task, and operating process management capabilities",
+                "Business operations coordination for service and delivery teams",
+                "Integration points for routing updates between operational systems"
+            ],
+            useCases: [
+                "Standardizing recurring operational processes across teams",
+                "Coordinating delivery workflows with approvals, updates, and handoffs",
+                "Connecting execution data to reporting and operational visibility"
+            ],
+            considerations: [
+                "Process mapping and ownership should be defined before workflow automation expands",
+                "Data quality and handoff rules matter when multiple systems are connected",
+                "Value is strongest when workflows align to measurable service outcomes"
+            ],
+            plugins: [
+                "Workflow-routing plug-ins for status updates, approvals, and escalations",
+                "Reporting connectors that move operational data into dashboards",
+                "Task and service integrations for cross-team execution visibility"
             ]
         )
     ]
@@ -853,6 +984,46 @@ private enum CompanyKnowledgeBaseCatalog {
     static func relevantEntries(for text: String) -> [CompanyKnowledgeBaseEntry] {
         let normalized = text.lowercased()
         return entries.filter { $0.matches(normalized) }
+    }
+
+    static func shouldIncludeCrossPlatformPlugins(for text: String, matchedEntries: [CompanyKnowledgeBaseEntry]) -> Bool {
+        let normalized = text.lowercased()
+        let pluginSignals = ["plugin", "plug-in", "plugins", "integration", "integrations", "connector", "connectors"]
+        let crossSignals = ["cross", "cross-platform", "cross platform", "multi-platform", "multi platform"]
+        return matchedEntries.count > 1
+            || pluginSignals.contains(where: normalized.contains)
+            || crossSignals.contains(where: normalized.contains)
+    }
+
+    static func crossPlatformPlugins(for entries: [CompanyKnowledgeBaseEntry]) -> [String] {
+        var suggestions: [String] = []
+
+        let names = Set(entries.map(\.name))
+        if names.contains("TikTok") && names.contains("Shopify") {
+            suggestions.append("TikTok Shop + Shopify product, catalog, and order synchronization")
+        }
+        if names.contains("Facebook") && names.contains("Instagram") {
+            suggestions.append("Meta campaign, catalog, and inbox workflow plug-ins shared across Facebook and Instagram")
+        }
+        if names.contains("Amazon") && names.contains("Shopify") {
+            suggestions.append("Amazon marketplace + Shopify inventory, fulfillment, and pricing coordination")
+        }
+        if names.contains("Lark") && names.contains("Claude AI") {
+            suggestions.append("Lark + Claude AI workflow plug-ins for summarization, approvals, and knowledge assistance")
+        }
+        if names.contains("Wix") && names.contains("Instagram") {
+            suggestions.append("Wix + Instagram lead capture and social commerce handoff automations")
+        }
+        if names.contains("Munus") && names.contains("Lark") {
+            suggestions.append("Munus + Lark operational workflow routing for approvals, updates, and task visibility")
+        }
+
+        if suggestions.isEmpty, names.count > 1 {
+            suggestions.append("Use API, event, and workflow plug-ins that keep data ownership clear across the matched platforms")
+            suggestions.append("Prioritize cross-platform connectors for identity, content sync, conversion tracking, and operational handoffs")
+        }
+
+        return suggestions
     }
 }
 
@@ -1007,13 +1178,24 @@ public final class ChatSessionController {
             Core products: \(entry.products.joined(separator: " | "))
             Common use cases: \(entry.useCases.joined(separator: " | "))
             Key considerations: \(entry.considerations.joined(separator: " | "))
+            Recommended plug-ins: \(entry.plugins.joined(separator: " | "))
             """
         }
         .joined(separator: "\n\n")
 
+        let crossPluginPayload: String
+        if CompanyKnowledgeBaseCatalog.shouldIncludeCrossPlatformPlugins(for: text, matchedEntries: entries) {
+            let suggestions = CompanyKnowledgeBaseCatalog.crossPlatformPlugins(for: entries)
+            crossPluginPayload = suggestions.isEmpty
+                ? ""
+                : "\n\nCross-platform plug-in ideas: \(suggestions.joined(separator: " | "))"
+        } else {
+            crossPluginPayload = ""
+        }
+
         return ChatMessage(
             role: .system,
-            content: "Use this company knowledge base context when it improves the response:\n\(payload)"
+            content: "Use this company knowledge base context when it improves the response:\n\(payload)\(crossPluginPayload)"
         )
     }
 }
