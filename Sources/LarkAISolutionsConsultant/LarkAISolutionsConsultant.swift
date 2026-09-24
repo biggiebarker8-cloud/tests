@@ -1466,6 +1466,73 @@ private enum SkillKnowledgeBaseCatalog {
     }
 }
 
+private struct DomainTemplateEntry: Sendable {
+    let name: String
+    let aliases: [String]
+    let overview: String
+    let focusAreas: [String]
+    let deliverables: [String]
+
+    func matches(_ text: String) -> Bool {
+        containsAlias(in: text, aliases: aliases)
+    }
+}
+
+private enum DomainTemplateCatalog {
+    static let entries: [DomainTemplateEntry] = [
+        DomainTemplateEntry(
+            name: "Rollout Planning",
+            aliases: ["rollout plan", "rollout", "launch plan", "go live", "deployment strategy"],
+            overview: "Organize recommendations into a staged rollout plan with readiness checks, ownership, and measurable outcomes.",
+            focusAreas: [
+                "Define scope, target users, risks, dependencies, and launch sequencing",
+                "Break work into phases such as pilot, enablement, launch, and post-launch optimization",
+                "Call out stakeholder communication, training, support, and success metrics"
+            ],
+            deliverables: [
+                "Phased rollout plan",
+                "Readiness checklist",
+                "Risk mitigation actions"
+            ]
+        ),
+        DomainTemplateEntry(
+            name: "Architecture Guidance",
+            aliases: ["architecture", "technical design", "system design", "solution design"],
+            overview: "Frame recommendations as architecture guidance that balances system boundaries, extensibility, and operational tradeoffs.",
+            focusAreas: [
+                "Identify core components, responsibilities, data flows, and integration points",
+                "Explain tradeoffs around scalability, maintainability, observability, and failure handling",
+                "Highlight constraints, assumptions, and future extension paths"
+            ],
+            deliverables: [
+                "Component breakdown",
+                "Tradeoff summary",
+                "Recommended next design decisions"
+            ]
+        ),
+        DomainTemplateEntry(
+            name: "Security Governance",
+            aliases: ["security governance", "security review", "access control", "compliance", "governance"],
+            overview: "Shape recommendations around governance controls, access boundaries, operational safeguards, and auditability.",
+            focusAreas: [
+                "Cover identity, permissions, data handling, logging, and review workflows",
+                "Flag policy, compliance, incident response, and exception-management considerations",
+                "Separate preventive controls from monitoring and remediation steps"
+            ],
+            deliverables: [
+                "Control checklist",
+                "Governance responsibilities",
+                "Monitoring and audit considerations"
+            ]
+        )
+    ]
+
+    static func relevantEntries(for text: String) -> [DomainTemplateEntry] {
+        let normalized = text.lowercased()
+        return entries.filter { $0.matches(normalized) }
+    }
+}
+
 @MainActor
 public final class ChatSessionController {
     public enum Status: Equatable {
@@ -1567,6 +1634,10 @@ public final class ChatSessionController {
                 matchedCompanies: matchedCompanies
             ) {
                 providerMessages.insert(skillContext, at: 0)
+            }
+
+            if let domainTemplateContext = domainTemplateContextMessage(for: trimmed) {
+                providerMessages.insert(domainTemplateContext, at: 0)
             }
 
             if let knowledgeBaseContext = knowledgeBaseContextMessage(for: trimmed, matchedEntries: matchedCompanies) {
@@ -1685,6 +1756,28 @@ public final class ChatSessionController {
         return ChatMessage(
             role: .system,
             content: "Use this skill context when it improves the response:\n\(payload)\(automationPayload)"
+        )
+    }
+
+    private func domainTemplateContextMessage(for text: String) -> ChatMessage? {
+        let entries = DomainTemplateCatalog.relevantEntries(for: text)
+        guard !entries.isEmpty else {
+            return nil
+        }
+
+        let payload = entries.map { entry in
+            """
+            Template: \(entry.name)
+            Overview: \(entry.overview)
+            Focus areas: \(entry.focusAreas.joined(separator: " | "))
+            Suggested deliverables: \(entry.deliverables.joined(separator: " | "))
+            """
+        }
+        .joined(separator: "\n\n")
+
+        return ChatMessage(
+            role: .system,
+            content: "Use this structured domain template context when it improves the response:\n\(payload)"
         )
     }
 }
