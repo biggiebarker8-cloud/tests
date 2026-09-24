@@ -210,16 +210,55 @@ struct LarkAISolutionsConsultantTests {
             learningStore: InMemoryLearningStore()
         )
 
-        await controller.send("Add image creation, image editing, and comic book creation skills")
+        await controller.send("Add comic creation, picture design, and short videos capabilities")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Comic Book Creation") == true)
+        #expect(skillMessage?.content.contains("Skill: Picture Design") == true)
+        #expect(skillMessage?.content.contains("Skill: Short Video Creation") == true)
+        #expect(skillMessage?.content.contains("Recommended plug-ins:") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+        #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
+    }
+
+    @Test
+    func controllerInjectsAnyCrossCanvaAndByteDanceKnowledgeContext() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Add AnyCross, Canva, and ByteDance video and picture generating features with plugin support")
+
+        let captured = await provider.lastMessages()
+        let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
+
+        #expect(knowledgeMessage?.content.contains("Company: AnyCross") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Canva") == true)
+        #expect(knowledgeMessage?.content.contains("Company: ByteDance") == true)
+        #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == true)
+    }
+
+    @Test
+    func controllerMatchesPictureDesignAliasToImageCreationSkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Need picture design capabilities for our social team")
 
         let captured = await provider.lastMessages()
         let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
 
         #expect(skillMessage?.content.contains("Skill: Image Creation") == true)
-        #expect(skillMessage?.content.contains("Skill: Image Editing") == true)
-        #expect(skillMessage?.content.contains("Skill: Comic Book Creation") == true)
-        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
-        #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
+        #expect(skillMessage?.content.contains("Skill: Picture Design") == true)
     }
 
     @Test

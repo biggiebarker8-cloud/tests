@@ -864,11 +864,15 @@ private enum CompanyKnowledgeBaseCatalog {
             overview: "Global technology company known for recommendation systems, creator ecosystems, collaboration software, and large-scale consumer platforms.",
             products: [
                 "Consumer products including TikTok and other content discovery platforms",
+                "ByteDance creative tooling for short-video production, editing, and creator publishing",
+                "AI-assisted video and image generation capabilities for campaign and content workflows",
                 "Enterprise collaboration offerings such as Lark for productivity and workflow management",
                 "Advertising, creator monetization, and ecosystem services built on recommendation infrastructure"
             ],
             useCases: [
                 "Studying product strategy centered on discovery engines, engagement loops, and ecosystem growth",
+                "Planning short-video content pipelines with creation, review, distribution, and optimization loops",
+                "Designing image and visual asset generation workflows for rapid campaign iteration",
                 "Connecting consumer attention platforms with enterprise and monetization opportunities",
                 "Benchmarking large-scale operations across content, creators, ads, and collaboration tools"
             ],
@@ -880,7 +884,59 @@ private enum CompanyKnowledgeBaseCatalog {
             plugins: [
                 "Cross-ecosystem connectors that bridge collaboration, creator, and ad operations",
                 "Analytics plug-ins that map engagement signals to operating metrics",
+                "Video creation and publishing connectors for creator operations and campaign handoff",
+                "Image generation and asset-management integrations for design-to-distribution workflows",
                 "Workflow integrations for campaign coordination across ByteDance properties"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Canva",
+            aliases: ["canva"],
+            overview: "Design platform for creating graphics, presentations, marketing assets, short videos, and collaborative brand content.",
+            products: [
+                "Templates, brand kits, and design collaboration features for marketing and creative teams",
+                "AI-assisted image generation, editing, and copy support for faster content production",
+                "Video and animation tooling for short-form social content and campaign assets"
+            ],
+            useCases: [
+                "Producing consistent branded visuals across social, web, and sales collateral",
+                "Scaling creative throughput using templates, collaborative review, and reusable brand systems",
+                "Connecting image and short-video creation workflows with publishing and campaign operations"
+            ],
+            considerations: [
+                "Brand governance should define template controls, approval checkpoints, and asset ownership",
+                "Output formats and dimensions should be aligned to destination channels before production",
+                "Cross-tool workflows work best when export, storage, and publishing automations are standardized"
+            ],
+            plugins: [
+                "Brand-kit and template plug-ins for consistent visual identity across teams",
+                "Publishing connectors for social scheduling, campaign distribution, and content calendars",
+                "Asset storage and review plug-ins for approval routing and handoff workflows"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "AnyCross",
+            aliases: ["anycross", "any cross"],
+            overview: "Cross-platform automation context for coordinating creative assets, campaign operations, and multi-channel publishing.",
+            products: [
+                "Cross-platform workflow automation for creative, content, and commerce teams",
+                "Connector orchestration for syncing assets, metadata, and campaign status between systems",
+                "Operational routing for approvals, task updates, and publishing handoffs"
+            ],
+            useCases: [
+                "Unifying image, comic, and short-video production workflows across multiple tools",
+                "Automating asset and campaign synchronization between design, collaboration, and social platforms",
+                "Reducing manual coordination with event-driven workflow and approval routing"
+            ],
+            considerations: [
+                "Integration governance should define data ownership, sync precedence, and rollback plans",
+                "Workflow reliability depends on clear retry, alerting, and exception-handling patterns",
+                "Security controls should be consistent across all connected systems and plug-ins"
+            ],
+            plugins: [
+                "Cross-platform sync plug-ins for creative assets, metadata, and campaign states",
+                "Workflow orchestration connectors for approvals, assignments, and publishing pipelines",
+                "Monitoring plug-ins for integration health, retries, and operational visibility"
             ]
         ),
         CompanyKnowledgeBaseEntry(
@@ -1021,6 +1077,12 @@ private enum CompanyKnowledgeBaseCatalog {
         if names.contains("Munus") && names.contains("Lark") {
             suggestions.append("Munus + Lark operational workflow routing for approvals, updates, and task visibility")
         }
+        if names.contains("Canva") && names.contains("TikTok") {
+            suggestions.append("Canva + TikTok short-video and image asset workflows with brand-safe publishing handoff")
+        }
+        if names.contains("AnyCross") && names.count > 1 {
+            suggestions.append("AnyCross orchestration across matched platforms for asset sync, approval routing, and campaign automation")
+        }
 
         if suggestions.isEmpty, names.count > 1 {
             suggestions.append("Use API, event, and workflow plug-ins that keep data ownership clear across the matched platforms")
@@ -1049,7 +1111,7 @@ private enum SkillKnowledgeBaseCatalog {
     static let entries: [SkillKnowledgeBaseEntry] = [
         SkillKnowledgeBaseEntry(
             name: "Image Creation",
-            aliases: ["image creation", "create image", "generate image", "make image", "illustration"],
+            aliases: ["image creation", "create image", "generate image", "make image", "illustration", "picture design", "picture generation", "visual design"],
             overview: "Creates net-new visual concepts, marketing graphics, scenes, and styled artwork from prompts or briefs.",
             workflows: [
                 "Turn product, campaign, or story briefs into structured visual directions",
@@ -1091,7 +1153,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Comic Book Creation",
-            aliases: ["comic book", "comic", "graphic novel", "storyboard", "manga"],
+            aliases: ["comic book", "comic", "comic creation", "graphic novel", "storyboard", "manga"],
             overview: "Builds comic-style narratives with panel planning, characters, scene continuity, and visual storytelling structure.",
             workflows: [
                 "Break stories into pages, scenes, and panels with pacing guidance",
@@ -1107,6 +1169,48 @@ private enum SkillKnowledgeBaseCatalog {
                 "Storyboard and layout plug-ins for page planning and panel sequencing",
                 "Character consistency connectors for recurring cast and world-building assets",
                 "Publishing workflows for asset review, lettering, and export handoff"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Picture Design",
+            aliases: ["picture design", "photo design", "poster design", "graphic design", "flyer design", "social design"],
+            overview: "Designs polished pictures for ads, social posts, campaign collateral, and brand storytelling across channels.",
+            workflows: [
+                "Translate briefs into picture concepts with layout, typography, color, and hierarchy direction",
+                "Adapt visuals for multiple sizes, channels, and placements while preserving brand consistency",
+                "Plan review and iteration loops for copy placement, CTA clarity, and conversion-focused design"
+            ],
+            outputs: [
+                "Picture design concepts, style routes, and channel-specific layout recommendations",
+                "Export checklists covering dimensions, formats, and accessibility-oriented readability",
+                "Revision notes for design QA, stakeholder approvals, and publishing handoff"
+            ],
+            plugins: [
+                "Picture design plug-ins for templates, typography systems, and brand-safe composition",
+                "Channel-resize connectors for multi-platform output generation and packaging",
+                "Creative review plug-ins for annotation, approvals, and version governance"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Short Video Creation",
+            aliases: ["short video", "short videos", "video creation", "video generation", "reels", "tiktok video", "clip creation"],
+            overview: "Creates short-form videos with scripting, shot planning, editing direction, and publishing-ready recommendations.",
+            workflows: [
+                "Convert campaign goals into short-video concepts, hooks, and storyboard sequences",
+                "Plan script beats, visual pacing, captions, and CTA placement for high-retention formats",
+                "Coordinate edit, review, and publishing handoffs across creative and distribution teams"
+            ],
+            outputs: [
+                "Short-video concepts, script drafts, shot lists, and pacing recommendations",
+                "Editing guidance for transitions, overlays, captions, and soundtrack direction",
+                "Publishing checklists for platform formats, metadata, and test-and-learn iteration loops"
+            ],
+            plugins: [
+                "Short-video editing plug-ins for sequencing, captioning, and rapid iteration workflows",
+                "Publishing connectors for social distribution, scheduling, and performance tracking",
+                "Asset-sync plug-ins for linking scripts, footage, approvals, and final exports"
             ],
             autoActivateOnImageInput: false
         ),
