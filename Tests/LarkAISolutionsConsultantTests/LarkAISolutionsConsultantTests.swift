@@ -268,6 +268,27 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsWebsiteBuildingAndRestrictedPermissionSkills() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Add multiple website building capabilities, add all permissions except payments and administrative charges")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Website Building") == true)
+        #expect(skillMessage?.content.contains("Skill: Website Permissions Management") == true)
+        #expect(skillMessage?.content.contains("Excluded permissions: payment processing, refunds, payout controls, and administrative charges") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+        #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
+    }
+
+    @Test
     func controllerMatchesPictureDesignAliasToImageCreationSkill() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(

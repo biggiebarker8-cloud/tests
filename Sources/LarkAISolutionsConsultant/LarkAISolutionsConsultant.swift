@@ -1274,6 +1274,48 @@ private enum SkillKnowledgeBaseCatalog {
             autoActivateOnImageInput: false
         ),
         SkillKnowledgeBaseEntry(
+            name: "Website Building",
+            aliases: ["website building", "build website", "website builder", "web builder", "web design", "multiple website building capabilities"],
+            overview: "Designs and organizes website-building workflows across landing pages, commerce pages, content hubs, and multi-page site structures.",
+            workflows: [
+                "Translate business goals into site architecture, navigation patterns, and conversion pathways",
+                "Plan reusable templates and component systems for multiple websites or campaigns",
+                "Coordinate build, QA, publishing, and iteration workflows across web and content teams"
+            ],
+            outputs: [
+                "Website blueprints, page maps, section-level content briefs, and conversion-focused layout guidance",
+                "Multi-site rollout checklists for branding, SEO readiness, and launch sequencing",
+                "Builder-compatible implementation guidance for forms, CMS content, analytics tags, and integrations"
+            ],
+            plugins: [
+                "Website builder plug-ins for CMS blocks, forms, SEO configuration, and template systems",
+                "Publishing connectors for staged rollouts, content approvals, and release coordination",
+                "Analytics and optimization integrations for funnel visibility and iteration planning"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Website Permissions Management",
+            aliases: ["website permissions", "all permissions", "permission management", "access control", "permissions except payments", "administrative charges"],
+            overview: "Defines website-role permission bundles for content and operations while excluding payment and administrative charge privileges.",
+            workflows: [
+                "Set role-based access for editing, publishing, media, SEO, analytics, and integrations",
+                "Grant broad website permissions with explicit restrictions on payment and billing authority",
+                "Audit permission scope to keep collaboration fast while preserving sensitive financial controls"
+            ],
+            outputs: [
+                "Permission matrix templates for editors, marketers, designers, analysts, and support teams",
+                "Allowed permissions: page editing, media upload, content publishing, SEO settings, analytics viewing, integration configuration",
+                "Excluded permissions: payment processing, refunds, payout controls, and administrative charges"
+            ],
+            plugins: [
+                "Role-based access plug-ins for workflow approvals and publish controls",
+                "Audit-log connectors for tracking permission changes and operational accountability",
+                "Compliance integrations for least-privilege access and policy enforcement"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
             name: "Adaptive Self Learning",
             aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically"],
             overview: "Strengthens personalization by reusing learned preferences, recurring goals, and prior context to improve future responses.",
