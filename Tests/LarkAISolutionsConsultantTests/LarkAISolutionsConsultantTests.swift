@@ -146,7 +146,7 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
-    func controllerInjectsCompanyKnowledgeBaseContext() async throws {
+    func controllerInjectsMicrosoftKnowledgeBaseContext() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
             provider: provider,
@@ -154,15 +154,16 @@ struct LarkAISolutionsConsultantTests {
             learningStore: InMemoryLearningStore()
         )
 
-        await controller.send("Create a TikTok Shop and Shopify rollout plan for our commerce team")
+        await controller.send("Create a Microsoft 365 and Azure rollout plan for our enterprise team")
 
         let captured = await provider.lastMessages()
         let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
 
-        #expect(knowledgeMessage?.content.contains("Company: TikTok") == true)
-        #expect(knowledgeMessage?.content.contains("Company: Shopify") == true)
+        #expect(knowledgeMessage?.content.contains("Company: Microsoft") == true)
+        #expect(knowledgeMessage?.content.contains("Microsoft 365 apps including Teams") == true)
+        #expect(knowledgeMessage?.content.contains("Azure services for compute, data, AI, identity, security, and integration architecture") == true)
         #expect(knowledgeMessage?.content.contains("Recommended plug-ins:") == true)
-        #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == true)
+        #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == false)
     }
 
     @Test
@@ -178,27 +179,6 @@ struct LarkAISolutionsConsultantTests {
 
         let captured = await provider.lastMessages()
         #expect(!captured.contains(where: { $0.role == .system && $0.content.contains("company knowledge base context") }))
-    }
-
-    @Test
-    func controllerInjectsExpandedPluginCoverage() async throws {
-        let provider = CapturingProvider()
-        let controller = ChatSessionController(
-            provider: provider,
-            store: InMemoryConversationStore(),
-            learningStore: InMemoryLearningStore()
-        )
-
-        await controller.send("Add plugins for Facebook, Instagram, Claude AI, Munus, and Lark")
-
-        let captured = await provider.lastMessages()
-        let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
-
-        #expect(knowledgeMessage?.content.contains("Company: Facebook") == true)
-        #expect(knowledgeMessage?.content.contains("Company: Instagram") == true)
-        #expect(knowledgeMessage?.content.contains("Company: Claude AI") == true)
-        #expect(knowledgeMessage?.content.contains("Company: Munus") == true)
-        #expect(knowledgeMessage?.content.contains("Company: Lark") == true)
     }
 
     @Test
@@ -244,7 +224,7 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
-    func controllerInjectsAnyCrossCanvaAndByteDanceKnowledgeContext() async throws {
+    func controllerIgnoresNonMicrosoftPlatformsInKnowledgeContext() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
             provider: provider,
@@ -252,39 +232,15 @@ struct LarkAISolutionsConsultantTests {
             learningStore: InMemoryLearningStore()
         )
 
-        await controller.send("Add AnyCross, Canva, and ByteDance video and picture generating features with plugin support")
-
-        let captured = await provider.lastMessages()
-        let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
-
-        #expect(knowledgeMessage?.content.contains("Company: AnyCross") == true)
-        #expect(knowledgeMessage?.content.contains("Company: Canva") == true)
-        #expect(knowledgeMessage?.content.contains("Company: ByteDance") == true)
-        #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == true)
-    }
-
-    @Test
-    func controllerInjectsMicrosoftAndTikTokAgencyKnowledgeContext() async throws {
-        let provider = CapturingProvider()
-        let controller = ChatSessionController(
-            provider: provider,
-            store: InMemoryConversationStore(),
-            learningStore: InMemoryLearningStore()
-        )
-
-        await controller.send("Add Microsoft knowledge base and TikTok agency complete knowledge base with all TikTok dashboards")
+        await controller.send("Create a Microsoft rollout and ignore TikTok and Shopify")
 
         let captured = await provider.lastMessages()
         let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
 
         #expect(knowledgeMessage?.content.contains("Company: Microsoft") == true)
-        #expect(knowledgeMessage?.content.contains("Company: TikTok Agency") == true)
-        #expect(knowledgeMessage?.content.contains("TikTok Ads Manager dashboards") == true)
-        #expect(knowledgeMessage?.content.contains("TikTok Business Center dashboards") == true)
-        #expect(knowledgeMessage?.content.contains("TikTok Shop Seller Center dashboards") == true)
-        #expect(knowledgeMessage?.content.contains("TikTok Creator Marketplace dashboards") == true)
-        #expect(knowledgeMessage?.content.contains("TikTok Analytics dashboards") == true)
-        #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == true)
+        #expect(knowledgeMessage?.content.contains("TikTok") == false)
+        #expect(knowledgeMessage?.content.contains("Shopify") == false)
+        #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == false)
     }
 
     @Test
