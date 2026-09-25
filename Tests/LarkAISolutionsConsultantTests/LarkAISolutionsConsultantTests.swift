@@ -288,6 +288,26 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerAddsStandaloneMicrosoftOnlyGuidance() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("A different only Microsoft not connected to any other projects just one separate Microsoft project")
+
+        let captured = await provider.lastMessages()
+        let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
+
+        #expect(knowledgeMessage?.content.contains("Company: Microsoft") == true)
+        #expect(knowledgeMessage?.content.contains("Project scope: Treat this as a standalone Microsoft-only project") == true)
+        #expect(knowledgeMessage?.content.contains("Solution boundary: Keep recommendations inside the Microsoft ecosystem") == true)
+        #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == false)
+    }
+
+    @Test
     func controllerInjectsWebsiteBuildingAndRestrictedPermissionSkills() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(

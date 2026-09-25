@@ -1108,6 +1108,25 @@ private enum CompanyKnowledgeBaseCatalog {
             || crossSignals.contains(where: normalized.contains)
     }
 
+    static func standaloneProjectGuidance(for text: String, matchedEntries: [CompanyKnowledgeBaseEntry]) -> String? {
+        let normalized = text.lowercased()
+        let standaloneSignals = [
+            "standalone",
+            "separate",
+            "only microsoft",
+            "microsoft only",
+            "not connected",
+            "single microsoft project",
+            "one separate microsoft project"
+        ]
+        let names = Set(matchedEntries.map(\.name))
+        guard names == ["Microsoft"], standaloneSignals.contains(where: normalized.contains) else {
+            return nil
+        }
+
+        return "Project scope: Treat this as a standalone Microsoft-only project with no dependencies on unrelated platforms or other projects.\nSolution boundary: Keep recommendations inside the Microsoft ecosystem and avoid assuming cross-project integrations."
+    }
+
     static func crossPlatformPlugins(for entries: [CompanyKnowledgeBaseEntry]) -> [String] {
         var suggestions: [String] = []
 
@@ -1713,9 +1732,12 @@ public final class ChatSessionController {
             crossPluginPayload = ""
         }
 
+        let standaloneGuidance = CompanyKnowledgeBaseCatalog.standaloneProjectGuidance(for: text, matchedEntries: entries)
+            .map { "\n\n\($0)" } ?? ""
+
         return ChatMessage(
             role: .system,
-            content: "Use this company knowledge base context when it improves the response:\n\(payload)\(crossPluginPayload)"
+            content: "Use this company knowledge base context when it improves the response:\n\(payload)\(crossPluginPayload)\(standaloneGuidance)"
         )
     }
 
