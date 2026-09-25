@@ -211,7 +211,10 @@ struct ContentView: View {
         }
     }
 
-    private func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
+}
+
+private extension ContentView {
+    func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
         guard !items.isEmpty else { return }
 
         for item in items {
