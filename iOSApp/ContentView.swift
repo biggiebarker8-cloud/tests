@@ -202,32 +202,35 @@ struct ContentView: View {
                         Task { await viewModel.clear() }
                     }
                 }
-                .onChange(of: selectedPhotoItems) { _, newItems in
-                    Task {
-                        await loadSelectedPhotos(newItems)
-                    }
-                }
             }
-
-            private func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
-                guard !items.isEmpty else { return }
-
-                for item in items {
-                    guard let imageData = try? await item.loadTransferable(type: Data.self) else {
-                        continue
-                    }
-
-                    let mimeType = item.supportedContentTypes
-                        .first(where: { $0.conforms(to: .image) })?
-                        .preferredMIMEType ?? "image/jpeg"
-
-                    if mimeType.hasPrefix("image/") {
-                        viewModel.addImageAttachment(data: imageData, mimeType: mimeType)
-                    }
+            .onChange(of: selectedPhotoItems) { _, newItems in
+                Task {
+                    await loadSelectedPhotos(newItems)
                 }
-
-                selectedPhotoItems = []
             }
         }
+    }
+
+}
+
+private extension ContentView {
+    func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
+        guard !items.isEmpty else { return }
+
+        for item in items {
+            guard let imageData = try? await item.loadTransferable(type: Data.self) else {
+                continue
+            }
+
+            let mimeType = item.supportedContentTypes
+                .first(where: { $0.conforms(to: .image) })?
+                .preferredMIMEType ?? "image/jpeg"
+
+            if mimeType.hasPrefix("image/") {
+                viewModel.addImageAttachment(data: imageData, mimeType: mimeType)
+            }
+        }
+
+        selectedPhotoItems = []
     }
 }

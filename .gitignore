@@ -1,8 +1,11 @@
-.DS_Store
-/.build
-/Packages
-xcuserdata/
+.build/
+.swiftpm/
 DerivedData/
+*.xcuserstate
+xcuserdata/
+LarkAISolutionsConsultant.xcodeproj/
+.DS_Store
+/Packages
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc

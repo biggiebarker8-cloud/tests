@@ -151,7 +151,7 @@ public struct HTTPAIProvider: AIProvider {
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             if let key = configuration.apiKey, !key.isEmpty {
-                request.setValue("******", forHTTPHeaderField: "Authorization")
+                request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
             }
             request.httpBody = try JSONEncoder().encode(payload)
 
