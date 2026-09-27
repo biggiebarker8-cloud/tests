@@ -408,7 +408,7 @@ struct LarkAISolutionsConsultantTests {
             learningStore: InMemoryLearningStore()
         )
 
-        await controller.send("test and add new plugins as become available and add new skills as becomes available and memory focused on my preferences all permissions allowed besides financial and administrative")
+        await controller.send("test and add new plugins as they become available and add new skills as they become available and memory focused on my preferences all permissions allowed besides financial and administrative")
 
         let captured = await provider.lastMessages()
         let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
