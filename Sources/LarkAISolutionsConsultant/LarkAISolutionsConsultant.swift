@@ -3,6 +3,8 @@ import Foundation
 public enum ConsultantError: Error, Equatable {
     case emptyUserInput
     case missingEndpoint
+    case unauthorized
+    case forbidden
     case invalidResponse
 }
 
@@ -60,8 +62,12 @@ public struct AppConfig: Sendable {
     }
 
     public static func fromEnvironment(_ environment: [String: String] = ProcessInfo.processInfo.environment) -> AppConfig {
-        let endpoint = environment["LARK_AI_ENDPOINT"].flatMap(URL.init(string:))
+        let endpoint = environment["LARK_AI_ENDPOINT"]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .flatMap { $0.isEmpty ? nil : URL(string: $0) }
         let apiKey = environment["LARK_AI_API_KEY"]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .flatMap { $0.isEmpty ? nil : $0 }
         let model = environment["LARK_AI_MODEL"] ?? "lark-consultant-v1"
         let retries = Int(environment["LARK_AI_MAX_RETRIES"] ?? "2") ?? 2
 
@@ -100,15 +106,6 @@ public func executeWithRetry<T>(policy: RetryPolicy, operation: @escaping () asy
     }
 
     throw lastError ?? ConsultantError.invalidResponse
-}
-
-public struct MockAIProvider: AIProvider {
-    public init() {}
-
-    public func response(for messages: [ChatMessage]) async throws -> String {
-        let latest = messages.last(where: { $0.role == .user })?.content ?? ""
-        return "Consultant response: \(latest)"
-    }
 }
 
 #if canImport(FoundationNetworking)
@@ -151,14 +148,21 @@ public struct HTTPAIProvider: AIProvider {
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             if let key = configuration.apiKey, !key.isEmpty {
-                request.setValue("******", forHTTPHeaderField: "Authorization")
+                request.setValue(authorizationHeaderValue(for: key), forHTTPHeaderField: "Authorization")
             }
             request.httpBody = try JSONEncoder().encode(payload)
 
             let (data, response) = try await session.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  200..<300 ~= httpResponse.statusCode
-            else {
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw ConsultantError.invalidResponse
+            }
+            guard 200..<300 ~= httpResponse.statusCode else {
+                if httpResponse.statusCode == 401 {
+                    throw ConsultantError.unauthorized
+                }
+                if httpResponse.statusCode == 403 {
+                    throw ConsultantError.forbidden
+                }
                 throw ConsultantError.invalidResponse
             }
 
@@ -174,6 +178,10 @@ public struct HTTPAIProvider: AIProvider {
             policy: RetryPolicy(attempts: max(1, configuration.maxRetryCount + 1)),
             operation: requestOperation
         )
+    }
+
+    private func authorizationHeaderValue(for credential: String) -> String {
+        credential.contains(" ") ? credential : "Bearer " + credential
     }
 }
 
@@ -1615,17 +1623,25 @@ public final class ChatSessionController {
     private let store: ConversationStore
     private let learningStore: LearningStore
     private let learningEngine: LearningEngine
+    private let assistantSystemPrompt: String?
 
     public init(
         provider: AIProvider,
         store: ConversationStore,
         learningStore: LearningStore = InMemoryLearningStore(),
-        learningEngine: LearningEngine = LearningEngine()
+        learningEngine: LearningEngine = LearningEngine(),
+        assistantSystemPrompt: String? = nil
     ) {
         self.provider = provider
         self.store = store
         self.learningStore = learningStore
         self.learningEngine = learningEngine
+        if let assistantSystemPrompt {
+            let trimmedPrompt = assistantSystemPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+            self.assistantSystemPrompt = trimmedPrompt.isEmpty ? nil : trimmedPrompt
+        } else {
+            self.assistantSystemPrompt = nil
+        }
     }
 
     public func bootstrap() async {
@@ -1672,6 +1688,9 @@ public final class ChatSessionController {
             try await store.save(messages)
 
             var providerMessages = messages
+            if let assistantIdentityMessage {
+                providerMessages.insert(assistantIdentityMessage, at: 0)
+            }
 
             if !trimmed.isEmpty {
                 let updatedState = await learningEngine.learn(from: trimmed, existing: memories, profile: learningProfile)
@@ -1715,8 +1734,33 @@ public final class ChatSessionController {
             try await store.save(messages)
             try await learningStore.save(LearningState(memories: memories, profile: learningProfile))
             status = .idle
+        } catch let error as ConsultantError {
+            status = .error(userFacingMessage(for: error))
         } catch {
             status = .error("Unable to get consultant response")
+        }
+    }
+
+    private var assistantIdentityMessage: ChatMessage? {
+        guard let assistantSystemPrompt, !assistantSystemPrompt.isEmpty else {
+            return nil
+        }
+
+        return ChatMessage(role: .system, content: assistantSystemPrompt)
+    }
+
+    private func userFacingMessage(for error: ConsultantError) -> String {
+        switch error {
+        case .emptyUserInput:
+            return "Message cannot be empty"
+        case .missingEndpoint:
+            return "Set LARK_AI_ENDPOINT and LARK_AI_API_KEY to enable real backend chat."
+        case .unauthorized:
+            return "Set LARK_AI_API_KEY or verify your backend credentials."
+        case .forbidden:
+            return "Your backend credentials were accepted but do not have permission for this request."
+        case .invalidResponse:
+            return "The backend returned an invalid response."
         }
     }
 

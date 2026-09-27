@@ -12,13 +12,31 @@ final class ChatViewModel: ObservableObject {
     @Published var input: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    @Published var backendMessage: String?
     @Published var pendingAttachments: [ChatImageAttachment] = []
 
-    private let controller: ChatSessionController
+    private let controller: ChatSessionController?
 
     init() {
-        let config = AppConfig.fromEnvironment()
-        let provider: AIProvider = config.endpoint == nil ? MockAIProvider() : HTTPAIProvider(configuration: config)
+        let environment = ProcessInfo.processInfo.environment
+        let rawEndpoint = environment["LARK_AI_ENDPOINT"]?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let rawAPIKey = environment["LARK_AI_API_KEY"]?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let config = AppConfig.fromEnvironment(environment)
+        let hasEndpointValue = rawEndpoint?.isEmpty == false
+        let hasAPIKeyValue = rawAPIKey?.isEmpty == false
+        if hasEndpointValue && config.endpoint == nil {
+            self.backendMessage = "LARK_AI_ENDPOINT must be a valid URL to connect Karma to a real backend."
+        } else if !hasEndpointValue && !hasAPIKeyValue {
+            self.backendMessage = "Configure LARK_AI_ENDPOINT and LARK_AI_API_KEY to connect Karma to a real backend."
+        } else if !hasEndpointValue {
+            self.backendMessage = "Configure LARK_AI_ENDPOINT to connect Karma to a real backend."
+        } else if !hasAPIKeyValue {
+            self.backendMessage = "Configure LARK_AI_API_KEY to connect Karma to a real backend."
+        } else {
+            self.backendMessage = nil
+        }
 
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
@@ -29,19 +47,40 @@ final class ChatViewModel: ObservableObject {
             .appendingPathComponent("LarkAISolutionsConsultant", isDirectory: true)
             .appendingPathComponent("learning.json")
 
-        self.controller = ChatSessionController(
-            provider: provider,
-            store: FileConversationStore(fileURL: historyURL),
-            learningStore: FileLearningStore(fileURL: learningURL)
-        )
+        if self.backendMessage == nil {
+            self.controller = ChatSessionController(
+                provider: HTTPAIProvider(configuration: config),
+                store: FileConversationStore(fileURL: historyURL),
+                learningStore: FileLearningStore(fileURL: learningURL),
+                assistantSystemPrompt: """
+                You are Karma, a real conversational AI consultant.
+                Keep the chat natural and helpful, stay direct without being rude, and answer as Karma when asked your name.
+                Use the stored conversation and any injected context to keep replies consistent across the session.
+                """
+            )
+        } else {
+            self.controller = nil
+        }
     }
 
     func bootstrap() async {
+        guard let controller else {
+            sync()
+            return
+        }
         await controller.bootstrap()
         sync()
     }
 
     func send() async {
+        if let backendMessage {
+            errorMessage = backendMessage
+            return
+        }
+        guard let controller else {
+            return
+        }
+
         let currentInput = input
         let currentAttachments = pendingAttachments
         input = ""
@@ -51,11 +90,24 @@ final class ChatViewModel: ObservableObject {
     }
 
     func clear() async {
+        guard let controller else {
+            sync()
+            return
+        }
         await controller.clear()
         sync()
     }
 
     private func sync() {
+        guard let controller else {
+            messages = []
+            memories = []
+            topTopics = []
+            userGoals = []
+            isLoading = false
+            return
+        }
+
         messages = controller.messages
         memories = controller.memories
             .sorted(by: { $0.strength > $1.strength })
@@ -116,11 +168,20 @@ struct ContentView: View {
                     .padding(.top, 8)
                 }
 
+                if let backendMessage = viewModel.backendMessage {
+                    Text(backendMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.orange)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                }
+
                 if viewModel.messages.isEmpty {
                     ContentUnavailableView(
-                        "Start a consulting session",
+                        "Start chatting with Karma",
                         systemImage: "message",
-                        description: Text("Ask for implementation advice, architecture support, or rollout guidance.")
+                        description: Text("Connect a backend and ask for implementation advice, architecture support, or rollout guidance.")
                     )
                 } else {
                     List(viewModel.messages) { message in
@@ -172,7 +233,11 @@ struct ContentView: View {
                     Button("Send") {
                         Task { await viewModel.send() }
                     }
-                    .disabled(viewModel.isLoading || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty))
+                    .disabled(
+                        viewModel.isLoading
+                            || viewModel.backendMessage != nil
+                            || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
+                    )
                 }
                 .padding()
 
@@ -195,7 +260,7 @@ struct ContentView: View {
                         .padding(.bottom)
                 }
             }
-            .navigationTitle("Lark AI Consultant")
+            .navigationTitle("Karma")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Clear") {

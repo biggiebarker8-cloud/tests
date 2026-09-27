@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 import Testing
 @testable import LarkAISolutionsConsultant
 
@@ -15,13 +18,101 @@ actor CapturingProvider: AIProvider {
     }
 }
 
+actor FixedResponseProvider: AIProvider {
+    private let reply: String
+
+    init(reply: String = "Captured response") {
+        self.reply = reply
+    }
+
+    func response(for messages: [ChatMessage]) async throws -> String {
+        reply
+    }
+}
+
+final class BasicAuthorizationURLProtocol: URLProtocol {
+    override class func canInit(with request: URLRequest) -> Bool {
+        true
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        guard request.value(forHTTPHeaderField: "Authorization") == "Basic abc123" else {
+            client?.urlProtocol(self, didFailWithError: ConsultantError.invalidResponse)
+            return
+        }
+        let response = HTTPURLResponse(
+            url: request.url ?? URL(string: "https://example.com")!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data(#"{"reply":"ok"}"#.utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+}
+
+final class UnauthorizedURLProtocol: URLProtocol {
+    override class func canInit(with request: URLRequest) -> Bool {
+        true
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        let response = HTTPURLResponse(
+            url: request.url ?? URL(string: "https://example.com")!,
+            statusCode: 401,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data())
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+}
+
+final class ForbiddenURLProtocol: URLProtocol {
+    override class func canInit(with request: URLRequest) -> Bool {
+        true
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        let response = HTTPURLResponse(
+            url: request.url ?? URL(string: "https://example.com")!,
+            statusCode: 403,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data())
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+}
+
 @MainActor
 struct LarkAISolutionsConsultantTests {
     @Test
     func bootstrapLoadsStoredMessages() async throws {
         let seed = [ChatMessage(role: .assistant, content: "Welcome")]
         let store = InMemoryConversationStore(messages: seed)
-        let controller = ChatSessionController(provider: MockAIProvider(), store: store)
+        let controller = ChatSessionController(provider: FixedResponseProvider(), store: store)
 
         await controller.bootstrap()
 
@@ -32,7 +123,7 @@ struct LarkAISolutionsConsultantTests {
     @Test
     func sendAddsUserAndAssistantMessages() async throws {
         let store = InMemoryConversationStore()
-        let controller = ChatSessionController(provider: MockAIProvider(), store: store)
+        let controller = ChatSessionController(provider: FixedResponseProvider(), store: store)
 
         await controller.send("Help me improve adoption")
 
@@ -45,7 +136,7 @@ struct LarkAISolutionsConsultantTests {
     @Test
     func emptyMessageReturnsError() async throws {
         let store = InMemoryConversationStore()
-        let controller = ChatSessionController(provider: MockAIProvider(), store: store)
+        let controller = ChatSessionController(provider: FixedResponseProvider(), store: store)
 
         await controller.send("   ")
 
@@ -60,7 +151,7 @@ struct LarkAISolutionsConsultantTests {
     @Test
     func imageOnlyMessageIsAccepted() async throws {
         let store = InMemoryConversationStore()
-        let controller = ChatSessionController(provider: MockAIProvider(), store: store)
+        let controller = ChatSessionController(provider: FixedResponseProvider(), store: store)
         let attachment = ChatImageAttachment(
             mimeType: "image/png",
             base64Data: Data([0x01, 0x02, 0x03]).base64EncodedString()
@@ -133,7 +224,8 @@ struct LarkAISolutionsConsultantTests {
         let controller = ChatSessionController(
             provider: provider,
             store: InMemoryConversationStore(),
-            learningStore: InMemoryLearningStore()
+            learningStore: InMemoryLearningStore(),
+            assistantSystemPrompt: "You are Karma, a real conversational AI consultant."
         )
 
         await controller.send("I need a deployment strategy for B2B users")
@@ -143,6 +235,115 @@ struct LarkAISolutionsConsultantTests {
         #expect(captured.contains(where: { $0.role == .system && $0.content.contains("learned user memories") }))
         #expect(captured.contains(where: { $0.role == .system && $0.content.contains("User profile context") }))
         #expect(!controller.memories.isEmpty)
+    }
+
+    @Test
+    func controllerInjectsKarmaIdentityContext() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore(),
+            assistantSystemPrompt: "You are Karma, a real conversational AI consultant."
+        )
+
+        await controller.send("Hello there")
+
+        let captured = await provider.lastMessages()
+        #expect(captured.contains(where: { $0.role == .system && $0.content.contains("You are Karma") }))
+    }
+
+    @Test
+    func missingBackendReturnsConfigurationError() async throws {
+        let controller = ChatSessionController(
+            provider: HTTPAIProvider(configuration: AppConfig(endpoint: nil, apiKey: nil)),
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Hello there")
+
+        if case .error(let message) = controller.status {
+            #expect(message.contains("LARK_AI_ENDPOINT"))
+        } else {
+            Issue.record("Expected backend configuration error")
+        }
+    }
+
+    @Test
+    func environmentConfigTrimsEmptyBackendValues() async throws {
+        let config = AppConfig.fromEnvironment([
+            "LARK_AI_ENDPOINT": "   ",
+            "LARK_AI_API_KEY": "   "
+        ])
+
+        #expect(config.endpoint == nil)
+        #expect(config.apiKey == nil)
+    }
+
+    @Test
+    func providerPreservesExplicitAuthorizationHeaderValue() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [BasicAuthorizationURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+
+        let provider = HTTPAIProvider(
+            configuration: AppConfig(
+                endpoint: URL(string: "https://example.com/chat"),
+                apiKey: "Basic abc123"
+            ),
+            session: session
+        )
+        let reply = try await provider.response(for: [ChatMessage(role: .user, content: "Hello")])
+        #expect(reply == "ok")
+    }
+
+    @Test
+    func unauthorizedBackendReturnsCredentialsError() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [UnauthorizedURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+
+        let controller = ChatSessionController(
+            provider: HTTPAIProvider(
+                configuration: AppConfig(endpoint: URL(string: "https://example.com/chat"), apiKey: nil),
+                session: session
+            ),
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Hello there")
+
+        if case .error(let message) = controller.status {
+            #expect(message.contains("LARK_AI_API_KEY"))
+        } else {
+            Issue.record("Expected backend credentials error")
+        }
+    }
+
+    @Test
+    func forbiddenBackendReturnsPermissionError() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [ForbiddenURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+
+        let controller = ChatSessionController(
+            provider: HTTPAIProvider(
+                configuration: AppConfig(endpoint: URL(string: "https://example.com/chat"), apiKey: "token"),
+                session: session
+            ),
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Hello there")
+
+        if case .error(let message) = controller.status {
+            #expect(message.contains("do not have permission"))
+        } else {
+            Issue.record("Expected backend permission error")
+        }
     }
 
     @Test
