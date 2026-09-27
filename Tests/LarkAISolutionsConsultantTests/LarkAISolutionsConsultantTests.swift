@@ -309,6 +309,27 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsSoftwareDevelopmentSkillForCodingUpgradePrompt() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Add ability to code so I can get it to add features and upgrades later")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+        #expect(skillMessage?.content.contains("extension points") == true)
+        #expect(skillMessage?.content.contains("testing, compatibility, and regression considerations") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+        #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
+    }
+
+    @Test
     func controllerInjectsCoreMemoryAndUniverseContinuitySkills() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
