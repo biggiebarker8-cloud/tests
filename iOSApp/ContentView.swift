@@ -14,19 +14,46 @@ final class ChatViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var pendingAttachments: [ChatImageAttachment] = []
 
-    private let controller: ChatSessionController
+    private let controller: ChatSessionController?
+    private let configurationIssue: String?
 
     init() {
         let config = AppConfig.fromEnvironment()
-        let provider: AIProvider = config.endpoint == nil ? MockAIProvider() : HTTPAIProvider(configuration: config)
+        let endpointValue = ProcessInfo.processInfo.environment["LARK_AI_ENDPOINT"]?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard let endpoint = config.endpoint else {
+            if let endpointValue, !endpointValue.isEmpty {
+                configurationIssue = "LARK_AI_ENDPOINT is invalid. Set a valid HTTPS backend URL."
+            } else {
+                configurationIssue = "Set LARK_AI_ENDPOINT to enable chat."
+            }
+            controller = nil
+            return
+        }
+
+        guard let apiKey = config.apiKey, !apiKey.isEmpty else {
+            configurationIssue = "Set LARK_AI_API_KEY to enable chat."
+            controller = nil
+            return
+        }
+
+        let provider: AIProvider = HTTPAIProvider(
+            configuration: AppConfig(
+                endpoint: endpoint,
+                apiKey: apiKey,
+                model: config.model,
+                maxRetryCount: config.maxRetryCount
+            )
+        )
 
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let historyURL = appSupport
-            .appendingPathComponent("LarkAISolutionsConsultant", isDirectory: true)
+            .appendingPathComponent("AIConsultant", isDirectory: true)
             .appendingPathComponent("conversation.json")
         let learningURL = appSupport
-            .appendingPathComponent("LarkAISolutionsConsultant", isDirectory: true)
+            .appendingPathComponent("AIConsultant", isDirectory: true)
             .appendingPathComponent("learning.json")
 
         self.controller = ChatSessionController(
@@ -34,14 +61,24 @@ final class ChatViewModel: ObservableObject {
             store: FileConversationStore(fileURL: historyURL),
             learningStore: FileLearningStore(fileURL: learningURL)
         )
+        self.configurationIssue = nil
     }
 
     func bootstrap() async {
+        guard let controller else {
+            isLoading = false
+            errorMessage = configurationIssue
+            return
+        }
         await controller.bootstrap()
         sync()
     }
 
     func send() async {
+        guard let controller else {
+            errorMessage = configurationIssue
+            return
+        }
         let currentInput = input
         let currentAttachments = pendingAttachments
         input = ""
@@ -51,11 +88,24 @@ final class ChatViewModel: ObservableObject {
     }
 
     func clear() async {
+        guard let controller else {
+            errorMessage = configurationIssue
+            return
+        }
         await controller.clear()
         sync()
     }
 
     private func sync() {
+        guard let controller else {
+            messages = []
+            memories = []
+            topTopics = []
+            userGoals = []
+            isLoading = false
+            errorMessage = configurationIssue
+            return
+        }
         messages = controller.messages
         memories = controller.memories
             .sorted(by: { $0.strength > $1.strength })
@@ -195,7 +245,7 @@ struct ContentView: View {
                         .padding(.bottom)
                 }
             }
-            .navigationTitle("Lark AI Consultant")
+            .navigationTitle("AI Consultant")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Clear") {

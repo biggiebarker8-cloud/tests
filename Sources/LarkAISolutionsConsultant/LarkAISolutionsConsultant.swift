@@ -3,6 +3,8 @@ import Foundation
 public enum ConsultantError: Error, Equatable {
     case emptyUserInput
     case missingEndpoint
+    case unauthorized
+    case forbidden
     case invalidResponse
 }
 
@@ -52,7 +54,7 @@ public struct AppConfig: Sendable {
     public let model: String
     public let maxRetryCount: Int
 
-    public init(endpoint: URL?, apiKey: String?, model: String = "lark-consultant-v1", maxRetryCount: Int = 2) {
+    public init(endpoint: URL?, apiKey: String?, model: String = "consultant-v1", maxRetryCount: Int = 2) {
         self.endpoint = endpoint
         self.apiKey = apiKey
         self.model = model
@@ -60,12 +62,19 @@ public struct AppConfig: Sendable {
     }
 
     public static func fromEnvironment(_ environment: [String: String] = ProcessInfo.processInfo.environment) -> AppConfig {
-        let endpoint = environment["LARK_AI_ENDPOINT"].flatMap(URL.init(string:))
-        let apiKey = environment["LARK_AI_API_KEY"]
-        let model = environment["LARK_AI_MODEL"] ?? "lark-consultant-v1"
+        let endpoint = normalizedNonEmpty(environment["LARK_AI_ENDPOINT"]).flatMap(URL.init(string:))
+        let apiKey = normalizedNonEmpty(environment["LARK_AI_API_KEY"])
+        let model = normalizedNonEmpty(environment["LARK_AI_MODEL"]) ?? "consultant-v1"
         let retries = Int(environment["LARK_AI_MAX_RETRIES"] ?? "2") ?? 2
 
         return AppConfig(endpoint: endpoint, apiKey: apiKey, model: model, maxRetryCount: max(0, retries))
+    }
+
+    private static func normalizedNonEmpty(_ value: String?) -> String? {
+        guard let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else {
+            return nil
+        }
+        return trimmed
     }
 }
 
@@ -150,15 +159,23 @@ public struct HTTPAIProvider: AIProvider {
             var request = URLRequest(url: endpoint)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            if let key = configuration.apiKey, !key.isEmpty {
-                request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
+            if let headerValue = authorizationHeaderValue(from: configuration.apiKey) {
+                request.setValue(headerValue, forHTTPHeaderField: "Authorization")
             }
             request.httpBody = try JSONEncoder().encode(payload)
 
             let (data, response) = try await session.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  200..<300 ~= httpResponse.statusCode
-            else {
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw ConsultantError.invalidResponse
+            }
+            switch httpResponse.statusCode {
+            case 200..<300:
+                break
+            case 401:
+                throw ConsultantError.unauthorized
+            case 403:
+                throw ConsultantError.forbidden
+            default:
                 throw ConsultantError.invalidResponse
             }
 
@@ -175,6 +192,19 @@ public struct HTTPAIProvider: AIProvider {
             operation: requestOperation
         )
     }
+
+    private func authorizationHeaderValue(from apiKey: String?) -> String? {
+        guard let trimmed = apiKey?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else {
+            return nil
+        }
+
+        let lowercased = trimmed.lowercased()
+        if lowercased.hasPrefix("bearer ") || lowercased.hasPrefix("basic ") {
+            return trimmed
+        }
+        return "Bearer " + trimmed
+    }
+
 }
 
 private struct APIRequest: Codable {
@@ -1684,6 +1714,19 @@ public final class ChatSessionController {
             try await store.save(messages)
             try await learningStore.save(LearningState(memories: memories, profile: learningProfile))
             status = .idle
+        } catch let error as ConsultantError {
+            switch error {
+            case .unauthorized:
+                status = .error("Authentication failed. Check your API key.")
+            case .forbidden:
+                status = .error("Access forbidden. Verify backend permissions.")
+            case .missingEndpoint:
+                status = .error("Backend endpoint is not configured.")
+            case .emptyUserInput:
+                status = .error("Message cannot be empty")
+            case .invalidResponse:
+                status = .error("Unable to get consultant response")
+            }
         } catch {
             status = .error("Unable to get consultant response")
         }
