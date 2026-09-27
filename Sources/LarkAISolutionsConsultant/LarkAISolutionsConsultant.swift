@@ -1556,7 +1556,8 @@ private enum SkillKnowledgeBaseCatalog {
         if matchesPullRequestAppInstallPrompt(normalized) {
             matchedEntries.append(pullRequestReviewEntry)
         }
-        return matchedEntries
+        var seenNames = Set<String>()
+        return matchedEntries.filter { seenNames.insert($0.name).inserted }
     }
 
     static func autoSelectedSkillNames(for entries: [SkillKnowledgeBaseEntry], imageAttachments: [ChatImageAttachment]) -> [String] {
