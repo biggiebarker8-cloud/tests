@@ -14,11 +14,17 @@ final class ChatViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var pendingAttachments: [ChatImageAttachment] = []
 
+    let isBackendConfigured: Bool
+    private let backendConfigurationMessage: String
     private let controller: ChatSessionController
 
     init() {
         let config = AppConfig.fromEnvironment()
-        let provider: AIProvider = config.endpoint == nil ? MockAIProvider() : HTTPAIProvider(configuration: config)
+        let hasEndpoint = config.endpoint != nil
+        let hasAPIKey = !(config.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        self.isBackendConfigured = hasEndpoint && hasAPIKey
+        self.backendConfigurationMessage = "Set both LARK_AI_ENDPOINT (valid URL) and LARK_AI_API_KEY to run the assistant."
+        let provider: AIProvider = HTTPAIProvider(configuration: config)
 
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
@@ -34,6 +40,9 @@ final class ChatViewModel: ObservableObject {
             store: FileConversationStore(fileURL: historyURL),
             learningStore: FileLearningStore(fileURL: learningURL)
         )
+        if !isBackendConfigured {
+            errorMessage = backendConfigurationMessage
+        }
     }
 
     func bootstrap() async {
@@ -42,6 +51,10 @@ final class ChatViewModel: ObservableObject {
     }
 
     func send() async {
+        guard isBackendConfigured else {
+            errorMessage = backendConfigurationMessage
+            return
+        }
         let currentInput = input
         let currentAttachments = pendingAttachments
         input = ""
@@ -70,10 +83,10 @@ final class ChatViewModel: ObservableObject {
             errorMessage = nil
         case .idle:
             isLoading = false
-            errorMessage = nil
+            errorMessage = isBackendConfigured ? nil : backendConfigurationMessage
         case .error(let message):
             isLoading = false
-            errorMessage = message
+            errorMessage = isBackendConfigured ? message : backendConfigurationMessage
         }
     }
 
@@ -161,6 +174,7 @@ struct ContentView: View {
                 HStack {
                     TextField("Describe your challenge", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
+                        .disabled(!viewModel.isBackendConfigured)
                     PhotosPicker(
                         selection: $selectedPhotoItems,
                         maxSelectionCount: 6,
@@ -172,7 +186,7 @@ struct ContentView: View {
                     Button("Send") {
                         Task { await viewModel.send() }
                     }
-                    .disabled(viewModel.isLoading || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty))
+                    .disabled(!viewModel.isBackendConfigured || viewModel.isLoading || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty))
                 }
                 .padding()
 
@@ -201,6 +215,7 @@ struct ContentView: View {
                     Button("Clear") {
                         Task { await viewModel.clear() }
                     }
+                    .disabled(!viewModel.isBackendConfigured)
                 }
             }
             .onChange(of: selectedPhotoItems) { _, newItems in
