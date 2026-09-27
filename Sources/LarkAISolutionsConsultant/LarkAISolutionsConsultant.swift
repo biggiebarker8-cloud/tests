@@ -1409,7 +1409,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Voice and Hearing Interaction",
-            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "speech to text", "text to speech", "audio input", "audio output", "speech and hearing", "speach and hearing", "speach"],
+            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "speech to text", "text to speech", "audio input", "audio output", "speech and hearing", "speach and hearing"],
             overview: "Supports voice-first interaction planning with hearing (speech input), speaking (audio output), and conversational turn management.",
             workflows: [
                 "Capture spoken user requests and convert them into structured prompt-ready text",
