@@ -735,7 +735,7 @@ private func normalizedSkillRoutingText(_ text: String) -> String {
     text.replacingOccurrences(
         of: #"\bas becomes? available\b"#,
         with: "as they become available",
-        options: .regularExpression
+        options: [.regularExpression, .caseInsensitive]
     )
 }
 
@@ -1454,7 +1454,7 @@ private enum SkillKnowledgeBaseCatalog {
     ]
 
     static func relevantEntries(for text: String, imageAttachments: [ChatImageAttachment]) -> [SkillKnowledgeBaseEntry] {
-        let normalized = normalizedSkillRoutingText(text.lowercased())
+        let normalized = normalizedSkillRoutingText(text).lowercased()
         let hasImageAttachments = !imageAttachments.isEmpty
         return entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
     }
