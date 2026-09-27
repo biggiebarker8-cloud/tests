@@ -30,9 +30,7 @@ actor FixedResponseProvider: AIProvider {
     }
 }
 
-final class AuthorizationHeaderURLProtocol: URLProtocol {
-    nonisolated(unsafe) static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
-
+final class BasicAuthorizationURLProtocol: URLProtocol {
     override class func canInit(with request: URLRequest) -> Bool {
         true
     }
@@ -42,19 +40,19 @@ final class AuthorizationHeaderURLProtocol: URLProtocol {
     }
 
     override func startLoading() {
-        guard let handler = Self.requestHandler else {
+        guard request.value(forHTTPHeaderField: "Authorization") == "Basic abc123" else {
             client?.urlProtocol(self, didFailWithError: ConsultantError.invalidResponse)
             return
         }
-
-        do {
-            let (response, data) = try handler(request)
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: data)
-            client?.urlProtocolDidFinishLoading(self)
-        } catch {
-            client?.urlProtocol(self, didFailWithError: error)
-        }
+        let response = HTTPURLResponse(
+            url: request.url ?? URL(string: "https://example.com")!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data(#"{"reply":"ok"}"#.utf8))
+        client?.urlProtocolDidFinishLoading(self)
     }
 
     override func stopLoading() {}
@@ -286,18 +284,8 @@ struct LarkAISolutionsConsultantTests {
     @Test
     func providerPreservesExplicitAuthorizationHeaderValue() async throws {
         let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [AuthorizationHeaderURLProtocol.self]
+        configuration.protocolClasses = [BasicAuthorizationURLProtocol.self]
         let session = URLSession(configuration: configuration)
-        AuthorizationHeaderURLProtocol.requestHandler = { request in
-            #expect(request.value(forHTTPHeaderField: "Authorization") == "Basic abc123")
-            let response = HTTPURLResponse(
-                url: try #require(request.url),
-                statusCode: 200,
-                httpVersion: nil,
-                headerFields: nil
-            )!
-            return (response, Data(#"{"reply":"ok"}"#.utf8))
-        }
 
         let provider = HTTPAIProvider(
             configuration: AppConfig(
@@ -306,11 +294,8 @@ struct LarkAISolutionsConsultantTests {
             ),
             session: session
         )
-
         let reply = try await provider.response(for: [ChatMessage(role: .user, content: "Hello")])
-
         #expect(reply == "ok")
-        AuthorizationHeaderURLProtocol.requestHandler = nil
     }
 
     @Test

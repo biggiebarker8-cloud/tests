@@ -62,6 +62,11 @@ final class ChatViewModel: ObservableObject {
     }
 
     func send() async {
+        if let backendMessage {
+            errorMessage = backendMessage
+            return
+        }
+
         let currentInput = input
         let currentAttachments = pendingAttachments
         input = ""
