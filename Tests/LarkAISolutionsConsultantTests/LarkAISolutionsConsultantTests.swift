@@ -192,6 +192,17 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func environmentConfigTrimsEmptyBackendValues() async throws {
+        let config = AppConfig.fromEnvironment([
+            "LARK_AI_ENDPOINT": "   ",
+            "LARK_AI_API_KEY": "   "
+        ])
+
+        #expect(config.endpoint == nil)
+        #expect(config.apiKey == nil)
+    }
+
+    @Test
     func controllerInjectsCompanyKnowledgeBaseContext() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(

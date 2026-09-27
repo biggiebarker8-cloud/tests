@@ -3,6 +3,7 @@ import Foundation
 public enum ConsultantError: Error, Equatable {
     case emptyUserInput
     case missingEndpoint
+    case unauthorized
     case invalidResponse
 }
 
@@ -60,8 +61,12 @@ public struct AppConfig: Sendable {
     }
 
     public static func fromEnvironment(_ environment: [String: String] = ProcessInfo.processInfo.environment) -> AppConfig {
-        let endpoint = environment["LARK_AI_ENDPOINT"].flatMap(URL.init(string:))
+        let endpoint = environment["LARK_AI_ENDPOINT"]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .flatMap { $0.isEmpty ? nil : URL(string: $0) }
         let apiKey = environment["LARK_AI_API_KEY"]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .flatMap { $0.isEmpty ? nil : $0 }
         let model = environment["LARK_AI_MODEL"] ?? "lark-consultant-v1"
         let retries = Int(environment["LARK_AI_MAX_RETRIES"] ?? "2") ?? 2
 
@@ -147,9 +152,13 @@ public struct HTTPAIProvider: AIProvider {
             request.httpBody = try JSONEncoder().encode(payload)
 
             let (data, response) = try await session.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  200..<300 ~= httpResponse.statusCode
-            else {
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw ConsultantError.invalidResponse
+            }
+            guard 200..<300 ~= httpResponse.statusCode else {
+                if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                    throw ConsultantError.unauthorized
+                }
                 throw ConsultantError.invalidResponse
             }
 
@@ -1738,6 +1747,8 @@ public final class ChatSessionController {
             return "Message cannot be empty"
         case .missingEndpoint:
             return "Set LARK_AI_ENDPOINT to enable real backend chat."
+        case .unauthorized:
+            return "Set LARK_AI_API_KEY or verify your backend credentials."
         case .invalidResponse:
             return "The backend returned an invalid response."
         }
