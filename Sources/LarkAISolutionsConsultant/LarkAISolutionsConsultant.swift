@@ -1399,7 +1399,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Assistant Personality Styling",
-            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation", "name is karma", "named karma", "its name is karma", "responds as karma"],
+            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation", "karma", "name is karma", "named karma", "its name is karma", "responds as karma"],
             overview: "Shapes response tone to be blunt, honest, sassy, and lightly sarcastic while still constructive, respectful, and idea-focused.",
             workflows: [
                 "Set tone guidelines that keep direct feedback clear without becoming rude or dismissive",
@@ -1459,6 +1459,27 @@ private enum SkillKnowledgeBaseCatalog {
                 "Memory and retrieval plug-ins for durable recall across sessions",
                 "Feedback connectors that reinforce accepted workflows and revisions",
                 "Analytics integrations that expose learning trends and adoption patterns"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Software Development and Upgrades",
+            aliases: ["software development", "feature upgrade", "feature upgrades", "software upgrade", "software upgrades", "pull request", "pull requests", "code review", "review code", "github review"],
+            overview: "Supports software-delivery work such as feature planning, pull-request review, upgrades, and implementation handoff guidance.",
+            workflows: [
+                "Organize feature and upgrade requests into scoped engineering tasks with dependencies and rollout considerations",
+                "Review pull requests and code changes for correctness, edge cases, and follow-up actions",
+                "Translate product asks into implementation, testing, and release-readiness guidance"
+            ],
+            outputs: [
+                "Pull request review guidance with risks, edge cases, and recommended next actions",
+                "Feature and upgrade breakdowns covering implementation scope, testing needs, and release checkpoints",
+                "Engineering handoff notes for build, validation, and post-change follow-up"
+            ],
+            plugins: [
+                "Source-control integrations for pull request tracking, review status, and branch coordination",
+                "CI connectors for test results, build visibility, and release gating",
+                "Issue-management plug-ins for planning upgrades, follow-ups, and delivery workflows"
             ],
             autoActivateOnImageInput: false
         ),
