@@ -464,7 +464,7 @@ struct LarkAISolutionsConsultantTests {
             learningStore: InMemoryLearningStore()
         )
 
-        await controller.send("Review this Karma config in my pull request")
+        await controller.send("Pull request karma")
 
         let captured = await provider.lastMessages()
         let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
