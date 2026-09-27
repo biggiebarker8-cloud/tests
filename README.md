@@ -35,7 +35,28 @@ Set these environment variables for real API integration:
 - `LARK_AI_MODEL` (optional)
 - `LARK_AI_MAX_RETRIES` (optional)
 
-If `LARK_AI_ENDPOINT` is not set, the app uses a local mock provider. For local simulator development, set the variables in the Xcode scheme's Run environment. iOS apps do not read environment variables from your Mac automatically, and launch environment values are not a suitable production credential store. Use your own HTTPS backend for production; keep provider API keys on the server.
+The iOS app requires both `LARK_AI_ENDPOINT` and `LARK_AI_API_KEY` for live chat. If either is missing, chat input is disabled and setup guidance is shown. For local simulator/device development, set variables in the Xcode scheme's Run environment. iOS apps do not read environment variables from your Mac automatically, and launch environment values are not a suitable production credential store. Use your own HTTPS backend for production; keep provider API keys on the server.
+
+## Run live on iPhone (Lark API)
+1. Install prerequisites on your Mac:
+   - Xcode 16+
+   - XcodeGen (`brew install xcodegen`)
+2. In `/home/runner/work/tests/tests`, run:
+   - `xcodegen generate`
+   - `open LarkAISolutionsConsultant.xcodeproj`
+3. In Xcode, open scheme Run settings and set:
+   - `LARK_AI_ENDPOINT` = your HTTPS Lark API endpoint
+   - `LARK_AI_API_KEY` = your valid API key
+   - Optional: `LARK_AI_MODEL`, `LARK_AI_MAX_RETRIES`
+4. Configure signing for device install:
+   - Target: `LarkAISolutionsConsultantApp`
+   - Signing & Capabilities: select your Apple Development Team
+   - Use a unique bundle identifier if needed
+5. Connect your iPhone, trust the developer profile, then run on the device from Xcode.
+6. Verify the live link:
+   - Open the app on phone
+   - Send a test message
+   - Confirm a real API response (not local mock behavior)
 
 ## Learning and memory capabilities
 - Learns durable memory summaries from user prompts.

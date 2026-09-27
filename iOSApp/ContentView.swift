@@ -13,12 +13,20 @@ final class ChatViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var pendingAttachments: [ChatImageAttachment] = []
+    @Published var setupGuidance: String?
 
     private let controller: ChatSessionController
+    private let isLiveConfigured: Bool
 
     init() {
         let config = AppConfig.fromEnvironment()
-        let provider: AIProvider = config.endpoint == nil ? MockAIProvider() : HTTPAIProvider(configuration: config)
+        let hasEndpoint = config.endpoint != nil
+        let hasAPIKey = !(config.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        self.isLiveConfigured = hasEndpoint && hasAPIKey
+        let provider: AIProvider = isLiveConfigured ? HTTPAIProvider(configuration: config) : MockAIProvider()
+        self.setupGuidance = isLiveConfigured
+            ? nil
+            : "Live API is not configured. In Xcode, open the app scheme Run settings and set LARK_AI_ENDPOINT and LARK_AI_API_KEY."
 
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
@@ -42,6 +50,10 @@ final class ChatViewModel: ObservableObject {
     }
 
     func send() async {
+        guard isLiveConfigured else {
+            errorMessage = setupGuidance
+            return
+        }
         let currentInput = input
         let currentAttachments = pendingAttachments
         input = ""
@@ -74,6 +86,10 @@ final class ChatViewModel: ObservableObject {
         case .error(let message):
             isLoading = false
             errorMessage = message
+        }
+
+        if !isLiveConfigured {
+            errorMessage = setupGuidance
         }
     }
 
@@ -161,6 +177,7 @@ struct ContentView: View {
                 HStack {
                     TextField("Describe your challenge", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
+                        .disabled(viewModel.setupGuidance != nil)
                     PhotosPicker(
                         selection: $selectedPhotoItems,
                         maxSelectionCount: 6,
@@ -168,11 +185,15 @@ struct ContentView: View {
                     ) {
                         Image(systemName: "photo.on.rectangle")
                     }
-                    .disabled(viewModel.isLoading)
+                    .disabled(viewModel.isLoading || viewModel.setupGuidance != nil)
                     Button("Send") {
                         Task { await viewModel.send() }
                     }
-                    .disabled(viewModel.isLoading || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty))
+                    .disabled(
+                        viewModel.isLoading
+                        || viewModel.setupGuidance != nil
+                        || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
+                    )
                 }
                 .padding()
 
