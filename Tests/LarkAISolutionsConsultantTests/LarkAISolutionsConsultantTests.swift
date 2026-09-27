@@ -489,6 +489,23 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerRoutesInflectedPullRequestInstallPromptToSoftwareDevelopmentSkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("installing the application from PR #28")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+    }
+
+    @Test
     func controllerKeepsGenericAppInstallPromptOutOfSoftwareDevelopmentSkill() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
