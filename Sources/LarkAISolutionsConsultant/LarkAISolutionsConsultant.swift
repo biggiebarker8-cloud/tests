@@ -727,6 +727,7 @@ private struct CompanyKnowledgeBaseEntry: Sendable {
 private let aliasNormalizationReplacements = [
     ("speach", "speech")
 ]
+private let aliasNormalizationLocale = Locale(identifier: "en_US_POSIX")
 
 private func containsAlias(in text: String, aliases: [String]) -> Bool {
     let normalizedText = normalizedAliasMatchingText(text)
@@ -739,7 +740,7 @@ private func containsAlias(in text: String, aliases: [String]) -> Bool {
 }
 
 private func normalizedAliasMatchingText(_ text: String) -> String {
-    return aliasNormalizationReplacements.reduce(text.lowercased()) { partialResult, replacement in
+    return aliasNormalizationReplacements.reduce(text.lowercased(with: aliasNormalizationLocale)) { partialResult, replacement in
         let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: replacement.0) + #"(?!\w)"#
         return partialResult.replacingOccurrences(
             of: pattern,

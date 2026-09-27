@@ -415,7 +415,7 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
-    func controllerInjectsKarmaIdentityAndSpeachHearingSkills() async throws {
+    func controllerInjectsKarmaIdentityAndSpeechHearingSkills() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
             provider: provider,
@@ -435,7 +435,7 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
-    func controllerNormalizesSpeachAliasVariants() async throws {
+    func controllerNormalizesSpeechAliasVariants() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
             provider: provider,
