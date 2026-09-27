@@ -433,11 +433,13 @@ struct LarkAISolutionsConsultantTests {
             learningStore: InMemoryLearningStore()
         )
 
-        await controller.send("Build a finance dashboard summarizing financial and administrative metrics for leadership")
+        await controller.send("Build website pages with a dashboard summarizing financial and administrative metrics for leadership")
 
         let captured = await provider.lastMessages()
         let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
 
+        #expect(skillMessage != nil)
+        #expect(skillMessage?.content.contains("Skill: Website Building") == true)
         #expect(skillMessage?.content.contains("Skill: Website Permissions Management") != true)
     }
 }
