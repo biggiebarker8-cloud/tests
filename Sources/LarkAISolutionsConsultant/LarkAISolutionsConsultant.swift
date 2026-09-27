@@ -1296,7 +1296,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Website Permissions Management",
-            aliases: ["website permissions", "all permissions", "all permissions allowed", "permission management", "access control", "permissions except payments", "all permissions allowed besides financial and administrative", "all permissions except financial and administrative"],
+            aliases: ["website permissions", "all permissions", "permission management", "access control", "permissions except payments", "all permissions allowed besides financial and administrative", "all permissions except financial and administrative"],
             overview: "Defines website-role permission bundles for content and operations while excluding payment and administrative charge privileges.",
             workflows: [
                 "Set role-based access for editing, publishing, media, SEO, analytics, and integrations",
@@ -1422,7 +1422,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Plug-in and Skill Automation",
-            aliases: ["auto add plug-ins", "auto-add plug-ins", "auto add plugins", "auto-add plugins", "auto add skills", "auto-add skills", "skills automation", "new plugins as become available", "new skills as becomes available", "add new plugins", "add new skills"],
+            aliases: ["auto add plug-ins", "auto-add plug-ins", "auto add plugins", "auto-add plugins", "auto add skills", "auto-add skills", "skills automation", "new plugins as become available", "new skills as becomes available", "new plugins as they become available", "new skills as they become available", "new plugins available", "new skills available", "add new plugins", "add new skills"],
             overview: "Automatically recommends relevant plug-ins and skills based on prompt intent, matched platforms, available image inputs, and newly available capabilities.",
             workflows: [
                 "Detect platform and creative intent to preselect useful plug-ins and skills",
