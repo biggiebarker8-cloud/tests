@@ -1583,7 +1583,7 @@ private enum SkillKnowledgeBaseCatalog {
             text.range(of: #"\bpull request\b"#, options: .regularExpression) != nil
         let mentionsInstallAction = text.range(of: #"\b(install|download)\b"#, options: .regularExpression) != nil
         let mentionsInstallableArtifact = text.range(
-            of: #"\b(app|application|build|ipa|ios)\b"#,
+            of: #"\b(app|application|build|ipa)\b"#,
             options: .regularExpression
         ) != nil
         let mentionsAppInstall = mentionsInstallAction && mentionsInstallableArtifact
