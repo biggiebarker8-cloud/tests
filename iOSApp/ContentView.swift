@@ -15,7 +15,7 @@ final class ChatViewModel: ObservableObject {
     @Published var backendMessage: String?
     @Published var pendingAttachments: [ChatImageAttachment] = []
 
-    private let controller: ChatSessionController
+    private let controller: ChatSessionController?
 
     init() {
         let environment = ProcessInfo.processInfo.environment
@@ -24,7 +24,6 @@ final class ChatViewModel: ObservableObject {
         let rawAPIKey = environment["LARK_AI_API_KEY"]?
             .trimmingCharacters(in: .whitespacesAndNewlines)
         let config = AppConfig.fromEnvironment(environment)
-        let provider: AIProvider = HTTPAIProvider(configuration: config)
         let hasEndpointValue = rawEndpoint?.isEmpty == false
         let hasAPIKeyValue = rawAPIKey?.isEmpty == false
         if hasEndpointValue && config.endpoint == nil {
@@ -48,19 +47,27 @@ final class ChatViewModel: ObservableObject {
             .appendingPathComponent("LarkAISolutionsConsultant", isDirectory: true)
             .appendingPathComponent("learning.json")
 
-        self.controller = ChatSessionController(
-            provider: provider,
-            store: FileConversationStore(fileURL: historyURL),
-            learningStore: FileLearningStore(fileURL: learningURL),
-            assistantSystemPrompt: """
-            You are Karma, a real conversational AI consultant.
-            Keep the chat natural and helpful, stay direct without being rude, and answer as Karma when asked your name.
-            Use the stored conversation and any injected context to keep replies consistent across the session.
-            """
-        )
+        if self.backendMessage == nil {
+            self.controller = ChatSessionController(
+                provider: HTTPAIProvider(configuration: config),
+                store: FileConversationStore(fileURL: historyURL),
+                learningStore: FileLearningStore(fileURL: learningURL),
+                assistantSystemPrompt: """
+                You are Karma, a real conversational AI consultant.
+                Keep the chat natural and helpful, stay direct without being rude, and answer as Karma when asked your name.
+                Use the stored conversation and any injected context to keep replies consistent across the session.
+                """
+            )
+        } else {
+            self.controller = nil
+        }
     }
 
     func bootstrap() async {
+        guard let controller else {
+            sync()
+            return
+        }
         await controller.bootstrap()
         sync()
     }
@@ -68,6 +75,9 @@ final class ChatViewModel: ObservableObject {
     func send() async {
         if let backendMessage {
             errorMessage = backendMessage
+            return
+        }
+        guard let controller else {
             return
         }
 
@@ -80,11 +90,24 @@ final class ChatViewModel: ObservableObject {
     }
 
     func clear() async {
+        guard let controller else {
+            sync()
+            return
+        }
         await controller.clear()
         sync()
     }
 
     private func sync() {
+        guard let controller else {
+            messages = []
+            memories = []
+            topTopics = []
+            userGoals = []
+            isLoading = false
+            return
+        }
+
         messages = controller.messages
         memories = controller.memories
             .sorted(by: { $0.strength > $1.strength })

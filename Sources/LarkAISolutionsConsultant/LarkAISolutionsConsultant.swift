@@ -1754,7 +1754,7 @@ public final class ChatSessionController {
         case .emptyUserInput:
             return "Message cannot be empty"
         case .missingEndpoint:
-            return "Set LARK_AI_ENDPOINT to enable real backend chat."
+            return "Set LARK_AI_ENDPOINT and LARK_AI_API_KEY to enable real backend chat."
         case .unauthorized:
             return "Set LARK_AI_API_KEY or verify your backend credentials."
         case .forbidden:
