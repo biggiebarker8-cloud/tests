@@ -1275,22 +1275,25 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Website Building",
-            aliases: ["website building", "build website", "website builder", "web builder", "web design", "multiple website building capabilities"],
+            aliases: ["website building", "build website", "website builder", "web builder", "web design", "multiple website building capabilities", "add to home screen", "safari add home screen", "launch from safari", "looks like a app", "looks like app", "web app"],
             overview: "Designs and organizes website-building workflows across landing pages, commerce pages, content hubs, and multi-page site structures.",
             workflows: [
                 "Translate business goals into site architecture, navigation patterns, and conversion pathways",
                 "Plan reusable templates and component systems for multiple websites or campaigns",
-                "Coordinate build, QA, publishing, and iteration workflows across web and content teams"
+                "Coordinate build, QA, publishing, and iteration workflows across web and content teams",
+                "Prepare installable web-app patterns so Safari users can add to Home Screen with app-like launch behavior"
             ],
             outputs: [
                 "Website blueprints, page maps, section-level content briefs, and conversion-focused layout guidance",
                 "Multi-site rollout checklists for branding, SEO readiness, and launch sequencing",
-                "Builder-compatible implementation guidance for forms, CMS content, analytics tags, and integrations"
+                "Builder-compatible implementation guidance for forms, CMS content, analytics tags, and integrations",
+                "Safari Add-to-Home-Screen guidance for app-like icon launch, viewport behavior, and install messaging"
             ],
             plugins: [
                 "Website builder plug-ins for CMS blocks, forms, SEO configuration, and template systems",
                 "Publishing connectors for staged rollouts, content approvals, and release coordination",
-                "Analytics and optimization integrations for funnel visibility and iteration planning"
+                "Analytics and optimization integrations for funnel visibility and iteration planning",
+                "PWA and manifest-validation connectors for home-screen installability and app-like presentation"
             ],
             autoActivateOnImageInput: false
         ),

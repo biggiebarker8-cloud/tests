@@ -309,6 +309,25 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsSafariHomeScreenWebsiteSkillContext() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Also I'll open on safari and launch add Home Screen as it looks like a app")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Website Building") == true)
+        #expect(skillMessage?.content.contains("Safari Add-to-Home-Screen guidance") == true)
+        #expect(skillMessage?.content.contains("PWA and manifest-validation connectors") == true)
+    }
+
+    @Test
     func controllerInjectsCoreMemoryAndUniverseContinuitySkills() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
