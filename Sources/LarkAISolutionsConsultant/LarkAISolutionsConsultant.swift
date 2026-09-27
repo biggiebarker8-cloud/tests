@@ -1296,7 +1296,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Website Permissions Management",
-            aliases: ["website permissions", "all permissions", "permission management", "access control", "permissions except payments", "administrative charges"],
+            aliases: ["website permissions", "all permissions", "all permissions allowed", "permission management", "access control", "permissions except payments", "administrative charges", "besides financial and administrative", "financial and administrative"],
             overview: "Defines website-role permission bundles for content and operations while excluding payment and administrative charge privileges.",
             workflows: [
                 "Set role-based access for editing, publishing, media, SEO, analytics, and integrations",
@@ -1317,15 +1317,15 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Core Memory Vault",
-            aliases: ["core memory", "memory core", "store knowledge", "store memories", "memory continuity", "memory continuality", "daily memory backup", "memory backup"],
+            aliases: ["core memory", "memory core", "store knowledge", "store memories", "memory continuity", "memory continuality", "daily memory backup", "memory backup", "memory focused on my preferences", "focused on my preferences", "my preferences"],
             overview: "Builds persistent memory plans for references, preferences, and reusable knowledge with continuity and backup discipline.",
             workflows: [
-                "Capture durable references from prompts and image-driven creative sessions for future reuse",
+                "Capture durable references and explicit user preferences from prompts and image-driven creative sessions for future reuse",
                 "Organize memory into preference, project, and worldbuilding layers with continuity checkpoints",
                 "Define daily backup and restore routines for memory resilience and long-term context reliability"
             ],
             outputs: [
-                "Core memory schemas for references, insights, and reusable design decisions",
+                "Core memory schemas for preferences, references, insights, and reusable design decisions",
                 "Daily memory backup guidance with continuity checkpoints and recovery notes",
                 "Knowledge-capture plans that support continual learning from user feedback and accepted outputs"
             ],
@@ -1401,7 +1401,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Adaptive Self Learning",
-            aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically", "learn what you like", "how you like it", "analyze everything"],
+            aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically", "learn what you like", "how you like it", "analyze everything", "preferences focused", "focused on my preferences", "my preferences"],
             overview: "Strengthens personalization by reusing learned preferences, recurring goals, and prior context to improve future responses.",
             workflows: [
                 "Reinforce repeated user themes and preferred solution patterns over time",
@@ -1409,7 +1409,7 @@ private enum SkillKnowledgeBaseCatalog {
                 "Promote durable knowledge that sharpens future recommendations"
             ],
             outputs: [
-                "Persistent memory summaries, updated topic trends, and evolving user goals",
+                "Persistent memory summaries, explicit preference tracking, updated topic trends, and evolving user goals",
                 "Recommendations that reflect prior workflows, priorities, and recurring requests",
                 "Context carryover that improves follow-up prompts and multi-turn planning"
             ],
@@ -1422,17 +1422,19 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Plug-in and Skill Automation",
-            aliases: ["auto add plug-ins", "auto-add plug-ins", "auto add plugins", "auto-add plugins", "auto add skills", "auto-add skills", "skills automation"],
-            overview: "Automatically recommends relevant plug-ins and skills based on prompt intent, matched platforms, and available image inputs.",
+            aliases: ["auto add plug-ins", "auto-add plug-ins", "auto add plugins", "auto-add plugins", "auto add skills", "auto-add skills", "skills automation", "new plugins as become available", "new skills as becomes available", "add new plugins", "add new skills"],
+            overview: "Automatically recommends relevant plug-ins and skills based on prompt intent, matched platforms, available image inputs, and newly available capabilities.",
             workflows: [
                 "Detect platform and creative intent to preselect useful plug-ins and skills",
                 "Bundle image, workflow, and platform capabilities into one guided response",
-                "Suggest cross-platform automations when multiple systems are involved"
+                "Suggest cross-platform automations when multiple systems are involved",
+                "Surface newly available plug-ins and skills when they fit the current request"
             ],
             outputs: [
                 "Auto-selected skill lists tailored to the request",
                 "Auto-selected plug-in suggestions aligned to platforms and media workflows",
-                "Guidance for orchestration between creative tools, collaboration tools, and commerce platforms"
+                "Guidance for orchestration between creative tools, collaboration tools, and commerce platforms",
+                "Expansion guidance for newly available plug-ins and skills that match the user's workflow"
             ],
             plugins: [
                 "Intent-routing plug-ins that map prompts to the right capabilities",

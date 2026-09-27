@@ -398,4 +398,29 @@ struct LarkAISolutionsConsultantTests {
         #expect(skillMessage?.content.contains("Skill: Plug-in and Skill Automation") == true)
         #expect(skillMessage?.content.contains("Multimodal Image Input") == true)
     }
+
+    @Test
+    func controllerMatchesRequestedPluginSkillMemoryAndPermissionPrompt() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("test and add new plugins as become available and add new skills as becomes available and memory focused on my preferences all permissions allowed besides financial and administrative")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Plug-in and Skill Automation") == true)
+        #expect(skillMessage?.content.contains("Skill: Core Memory Vault") == true)
+        #expect(skillMessage?.content.contains("Skill: Adaptive Self Learning") == true)
+        #expect(skillMessage?.content.contains("Skill: Website Permissions Management") == true)
+        #expect(skillMessage?.content.contains("newly available plug-ins and skills") == true)
+        #expect(skillMessage?.content.contains("explicit preference tracking") == true)
+        #expect(skillMessage?.content.contains("Excluded permissions: payment processing, refunds, payout controls, and administrative charges") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+        #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
+    }
 }
