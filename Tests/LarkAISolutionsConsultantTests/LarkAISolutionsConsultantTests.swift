@@ -377,6 +377,26 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsKarmaIdentityAndSpeachHearingSkills() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("And responds and knows its name is karma, add speach and hearing ability too")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Assistant Personality Styling") == true)
+        #expect(skillMessage?.content.contains("Assistant identity anchor: respond as Karma when asked for your name") == true)
+        #expect(skillMessage?.content.contains("Skill: Voice and Hearing Interaction") == true)
+        #expect(skillMessage?.content.contains("Speech-to-text") == true)
+    }
+
+    @Test
     func controllerMatchesPictureDesignAliasToImageCreationSkill() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(

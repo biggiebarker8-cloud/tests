@@ -1383,17 +1383,19 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Assistant Personality Styling",
-            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation"],
+            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation", "name is karma", "named karma", "its name is karma", "responds as karma"],
             overview: "Shapes response tone to be blunt, honest, sassy, and lightly sarcastic while still constructive, respectful, and idea-focused.",
             workflows: [
                 "Set tone guidelines that keep direct feedback clear without becoming rude or dismissive",
                 "Blend playful sarcasm with practical steps and actionable idea-development support",
-                "Refine brainstorming style to challenge weak ideas and improve stronger concepts quickly"
+                "Refine brainstorming style to challenge weak ideas and improve stronger concepts quickly",
+                "Preserve assistant identity continuity so name responses stay consistent as Karma when requested"
             ],
             outputs: [
                 "Tone profile settings for blunt/honest but not-mean assistant behavior",
                 "Idea-generation structures that include critique, alternatives, and next-step recommendations",
-                "Style guardrails that preserve respectful language while keeping responses sharp and confident"
+                "Style guardrails that preserve respectful language while keeping responses sharp and confident",
+                "Assistant identity anchor: respond as Karma when asked for your name"
             ],
             plugins: [
                 "Personality-tuning plug-ins for tone presets, guardrails, and response style controls",
@@ -1404,7 +1406,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Voice and Hearing Interaction",
-            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "speech to text", "text to speech", "audio input", "audio output"],
+            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "speech to text", "text to speech", "audio input", "audio output", "speech and hearing", "speach and hearing", "speach"],
             overview: "Supports voice-first interaction planning with hearing (speech input), speaking (audio output), and conversational turn management.",
             workflows: [
                 "Capture spoken user requests and convert them into structured prompt-ready text",
