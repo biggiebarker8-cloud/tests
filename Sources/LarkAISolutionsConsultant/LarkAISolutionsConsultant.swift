@@ -1401,7 +1401,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Core Memory Vault",
-            aliases: ["core memory", "memory core", "store knowledge", "store memories", "memory continuity", "memory continuality", "daily memory backup", "memory backup"],
+            aliases: ["core memory", "memory core", "store knowledge", "store memories", "memory continuity", "memory continuality", "daily memory backup", "memory backup", "memory back up", "memory back up daily", "memory backup daily"],
             overview: "Builds persistent memory plans for references, preferences, and reusable knowledge with continuity and backup discipline.",
             workflows: [
                 "Capture durable references from prompts and image-driven creative sessions for future reuse",
