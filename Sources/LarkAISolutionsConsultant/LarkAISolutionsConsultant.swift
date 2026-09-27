@@ -735,7 +735,13 @@ private func containsAlias(in text: String, aliases: [String]) -> Bool {
 }
 
 private func normalizedAliasMatchingText(_ text: String) -> String {
-    text.lowercased().replacingOccurrences(of: "speach", with: "speech")
+    let replacements = [
+        "speach": "speech"
+    ]
+
+    return replacements.reduce(text.lowercased()) { partialResult, replacement in
+        partialResult.replacingOccurrences(of: replacement.key, with: replacement.value)
+    }
 }
 
 private enum CompanyKnowledgeBaseCatalog {
