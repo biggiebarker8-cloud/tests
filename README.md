@@ -11,6 +11,7 @@ This repository contains the foundation for a standalone iPhone consultant app, 
   - adaptive learning engine (topic extraction + goal tracking)
   - advanced long-term memory store with semantic recall
   - controller layer for MVP chat flow
+
 - iOS app source scaffold in `/iOSApp` using SwiftUI
 - Initial V1 scope and roadmap docs in `/docs`
 - CI workflow to run `swift test` on both pushes and pull requests
