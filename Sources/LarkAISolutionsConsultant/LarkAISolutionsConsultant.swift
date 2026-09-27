@@ -1378,7 +1378,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Apparel Design and DTG Production",
-            aliases: ["hoodie design", "hoodies", "hoodie", "tshirt", "t-shirt", "t shirt", "shirt design", "merch design", "dtg", "direct to garment", "apparel design"],
+            aliases: ["hoodie design", "hoodies", "hoodie", "tshirt", "tshirts", "tshirts design", "t-shirt", "t-shirts", "t-shirts design", "t shirt", "shirt design", "merch design", "dtg", "direct to garment", "apparel design"],
             overview: "Designs hoodie and T-shirt graphics with print-safe composition and DTG-ready output guidance.",
             workflows: [
                 "Translate apparel concepts into front/back print layouts for hoodie and T-shirt use cases",
