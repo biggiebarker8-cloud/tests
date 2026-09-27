@@ -1180,40 +1180,6 @@ private struct SkillKnowledgeBaseEntry: Sendable {
 }
 
 private enum SkillKnowledgeBaseCatalog {
-    private static let assistantPersonalitySkillName = "Assistant Personality Styling"
-    private static let assistantPersonalityDisambiguationAliases = [
-        "assistant personality",
-        "blunt and honest",
-        "not mean",
-        "sassy",
-        "sarcastic",
-        "helpful creating ideas",
-        "idea creation",
-        "name is karma",
-        "named karma",
-        "its name is karma",
-        "responds as karma"
-    ]
-    private static let technicalKarmaAliases = [
-        "karma config",
-        "karma.conf",
-        "karma runner",
-        "karma test",
-        "karma tests",
-        "karma plugin",
-        "karma reporter",
-        "karma coverage",
-        "karma browser",
-        "karma jasmine",
-        "karma webpack",
-        "pull request karma",
-        "karma pull request",
-        "karma pr",
-        "karma code review",
-        "review this karma",
-        "review my karma"
-    ]
-
     static let entries: [SkillKnowledgeBaseEntry] = [
         SkillKnowledgeBaseEntry(
             name: "Image Creation",
@@ -1433,7 +1399,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Assistant Personality Styling",
-            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation", "karma", "name is karma", "named karma", "its name is karma", "responds as karma"],
+            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation", "name is karma", "named karma", "its name is karma", "responds as karma"],
             overview: "Shapes response tone to be blunt, honest, sassy, and lightly sarcastic while still constructive, respectful, and idea-focused.",
             workflows: [
                 "Set tone guidelines that keep direct feedback clear without becoming rude or dismissive",
@@ -1543,18 +1509,7 @@ private enum SkillKnowledgeBaseCatalog {
     static func relevantEntries(for text: String, imageAttachments: [ChatImageAttachment]) -> [SkillKnowledgeBaseEntry] {
         let normalized = text.lowercased()
         let hasImageAttachments = !imageAttachments.isEmpty
-        return entries.filter { entry in
-            guard entry.matches(normalized, hasImageAttachments: hasImageAttachments) else {
-                return false
-            }
-
-            if entry.name == assistantPersonalitySkillName,
-               shouldSuppressAssistantPersonalityMatch(for: normalized) {
-                return false
-            }
-
-            return true
-        }
+        return entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
     }
 
     static func autoSelectedSkillNames(for entries: [SkillKnowledgeBaseEntry], imageAttachments: [ChatImageAttachment]) -> [String] {
@@ -1571,18 +1526,6 @@ private enum SkillKnowledgeBaseCatalog {
     ) -> [String] {
         let plugins = skillEntries.flatMap(\.plugins) + matchedCompanies.flatMap(\.plugins)
         return Array(NSOrderedSet(array: plugins.prefix(8).map { $0 })) as? [String] ?? Array(plugins.prefix(8))
-    }
-
-    private static func shouldSuppressAssistantPersonalityMatch(for text: String) -> Bool {
-        guard containsAlias(in: text, aliases: ["karma"]) else {
-            return false
-        }
-
-        if containsAlias(in: text, aliases: assistantPersonalityDisambiguationAliases) {
-            return false
-        }
-
-        return containsAlias(in: text, aliases: technicalKarmaAliases)
     }
 }
 
