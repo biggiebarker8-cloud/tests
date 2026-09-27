@@ -1581,7 +1581,12 @@ private enum SkillKnowledgeBaseCatalog {
             text.range(of: #"/pull/\d+"#, options: .regularExpression) != nil ||
             text.range(of: #"\bpr\s*#?\d+\b"#, options: .regularExpression) != nil ||
             text.range(of: #"\bpull request\b"#, options: .regularExpression) != nil
-        let mentionsAppInstall = text.contains("app") && (text.contains("install") || text.contains("download"))
+        let mentionsInstallAction = text.range(of: #"\b(install|download)\b"#, options: .regularExpression) != nil
+        let mentionsInstallableArtifact = text.range(
+            of: #"\b(app|application|build|ipa|ios)\b"#,
+            options: .regularExpression
+        ) != nil
+        let mentionsAppInstall = mentionsInstallAction && mentionsInstallableArtifact
         return referencesPullRequest && mentionsAppInstall
     }
 }
