@@ -423,7 +423,7 @@ struct LarkAISolutionsConsultantTests {
             learningStore: InMemoryLearningStore()
         )
 
-        await controller.send("And responds and knows its name is karma, add speach and hearing ability too")
+        await controller.send("And responds and knows its name is karma, add Speach and hearing ability too")
 
         let captured = await provider.lastMessages()
         let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
