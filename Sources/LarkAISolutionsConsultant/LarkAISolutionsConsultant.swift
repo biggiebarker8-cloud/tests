@@ -732,14 +732,11 @@ private func containsAlias(in text: String, aliases: [String]) -> Bool {
 }
 
 private func normalizedSkillRoutingText(_ text: String) -> String {
-    let replacements = [
-        " as become available": " as they become available",
-        " as becomes available": " as they become available"
-    ]
-
-    return replacements.reduce(text) { partial, replacement in
-        partial.replacingOccurrences(of: replacement.key, with: replacement.value)
-    }
+    text.replacingOccurrences(
+        of: #"\bas becomes? available\b"#,
+        with: "as they become available",
+        options: .regularExpression
+    )
 }
 
 private enum CompanyKnowledgeBaseCatalog {
