@@ -1338,24 +1338,48 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Story Universe Continuity",
-            aliases: ["story lines", "storyline", "story continuity", "characters", "character backstory", "lore", "ip", "universe develop", "worldbuilding"],
-            overview: "Manages story universes with recurring characters, lore systems, timeline continuity, and new character/design creation.",
+            aliases: ["story lines", "storyline", "story continuity", "characters", "character backstory", "lore", "ip", "universe develop", "worldbuilding", "episodes", "episode draft", "draft episodes", "different universes", "multi universe", "multiverse continuity"],
+            overview: "Manages story universes with recurring characters, episodic drafting, lore systems, timeline continuity, and new character/design creation.",
             workflows: [
-                "Track storyline arcs, character goals, and backstory dependencies across multi-part narratives",
+                "Track storyline arcs, episode beats, character goals, and backstory dependencies across multi-part narratives",
                 "Create new characters, factions, and visual designs that align with established universe rules",
-                "Maintain lore canon, IP tone guides, and continuity checks during expansion of each universe"
+                "Maintain lore canon, IP tone guides, and continuity checks during expansion of each universe",
+                "Retain backstory memory for separate universes so shared names and events do not conflict"
             ],
             outputs: [
-                "Storyline memory maps with arc status, unresolved threads, and continuity anchors",
+                "Storyline and episode memory maps with arc status, unresolved threads, and continuity anchors",
                 "Character dossiers with traits, backstory, relationships, and visual design references",
-                "Lore and universe bibles covering world rules, timeline chronology, and IP consistency"
+                "Lore and universe bibles covering world rules, timeline chronology, and IP consistency",
+                "Universe-separated continuity ledgers for episode-by-episode character and backstory retention"
             ],
             plugins: [
                 "Character database plug-ins for searchable cast profiles and relationship graphs",
                 "Lore management connectors for canon tracking, timeline validation, and revision history",
-                "Creative ideation plug-ins for generating new character concepts and universe expansions"
+                "Creative ideation plug-ins for generating new character concepts and universe expansions",
+                "Episode planning integrations for drafting, sequencing, and continuity checkpointing"
             ],
             autoActivateOnImageInput: true
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Apparel Design and DTG Production",
+            aliases: ["hoodie design", "hoodies", "hoodie", "tshirt", "t-shirt", "t shirt", "shirt design", "merch design", "dtg", "direct to garment", "apparel design"],
+            overview: "Designs hoodie and T-shirt graphics with print-safe composition and DTG-ready output guidance.",
+            workflows: [
+                "Translate apparel concepts into front/back print layouts for hoodie and T-shirt use cases",
+                "Align typography, illustration density, and placement for wearable readability and brand consistency",
+                "Prepare DTG production handoff details with dimensions, spacing, and color planning"
+            ],
+            outputs: [
+                "Print-ready hoodie and T-shirt design briefs with placement and style direction",
+                "DTG output specs: 30cm wide with 40-50cm long design layouts for production-ready compositions",
+                "Export guidance for transparent-background assets, color-safe design layers, and print QA checks"
+            ],
+            plugins: [
+                "Apparel mockup plug-ins for hoodie and T-shirt placement previews across garment colors",
+                "DTG preflight connectors for sizing validation, print-area checks, and production packaging",
+                "Asset export integrations for layered files, transparent outputs, and vendor handoff bundles"
+            ],
+            autoActivateOnImageInput: false
         ),
         SkillKnowledgeBaseEntry(
             name: "Assistant Personality Styling",

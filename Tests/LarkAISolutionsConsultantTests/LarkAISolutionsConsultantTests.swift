@@ -332,6 +332,28 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsUniverseEpisodeAndApparelDTGSkills() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Deeper lore and creative abilities to draft episodes and characters and backstory memory retention for different universes, hoodies and Tshirts design knowledge and dtg format output at 30cm wide 40-50cm long designs")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Story Universe Continuity") == true)
+        #expect(skillMessage?.content.contains("episode-by-episode") == true)
+        #expect(skillMessage?.content.contains("Skill: Apparel Design and DTG Production") == true)
+        #expect(skillMessage?.content.contains("DTG output specs: 30cm wide with 40-50cm long design layouts") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+        #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
+    }
+
+    @Test
     func controllerInjectsPersonalityAndVoiceHearingSkills() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
