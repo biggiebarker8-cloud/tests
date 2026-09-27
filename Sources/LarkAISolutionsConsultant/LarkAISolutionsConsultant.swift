@@ -147,7 +147,7 @@ public struct HTTPAIProvider: AIProvider {
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             if let key = configuration.apiKey, !key.isEmpty {
-                request.setValue("Bearer " + key, forHTTPHeaderField: "Authorization")
+                request.setValue(authorizationHeaderValue(for: key), forHTTPHeaderField: "Authorization")
             }
             request.httpBody = try JSONEncoder().encode(payload)
 
@@ -174,6 +174,10 @@ public struct HTTPAIProvider: AIProvider {
             policy: RetryPolicy(attempts: max(1, configuration.maxRetryCount + 1)),
             operation: requestOperation
         )
+    }
+
+    private func authorizationHeaderValue(for credential: String) -> String {
+        credential.contains(" ") ? credential : "Bearer " + credential
     }
 }
 

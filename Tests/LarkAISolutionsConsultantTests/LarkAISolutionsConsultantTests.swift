@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 import Testing
 @testable import LarkAISolutionsConsultant
 
@@ -25,6 +28,60 @@ actor FixedResponseProvider: AIProvider {
     func response(for messages: [ChatMessage]) async throws -> String {
         reply
     }
+}
+
+final class AuthorizationHeaderURLProtocol: URLProtocol {
+    nonisolated(unsafe) static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        true
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        guard let handler = Self.requestHandler else {
+            client?.urlProtocol(self, didFailWithError: ConsultantError.invalidResponse)
+            return
+        }
+
+        do {
+            let (response, data) = try handler(request)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
+        }
+    }
+
+    override func stopLoading() {}
+}
+
+final class UnauthorizedURLProtocol: URLProtocol {
+    override class func canInit(with request: URLRequest) -> Bool {
+        true
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        let response = HTTPURLResponse(
+            url: request.url ?? URL(string: "https://example.com")!,
+            statusCode: 401,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data())
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
 }
 
 @MainActor
@@ -200,6 +257,60 @@ struct LarkAISolutionsConsultantTests {
 
         #expect(config.endpoint == nil)
         #expect(config.apiKey == nil)
+    }
+
+    @Test
+    func providerPreservesExplicitAuthorizationHeaderValue() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [AuthorizationHeaderURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        AuthorizationHeaderURLProtocol.requestHandler = { request in
+            #expect(request.value(forHTTPHeaderField: "Authorization") == "Basic abc123")
+            let response = HTTPURLResponse(
+                url: try #require(request.url),
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            return (response, Data(#"{"reply":"ok"}"#.utf8))
+        }
+
+        let provider = HTTPAIProvider(
+            configuration: AppConfig(
+                endpoint: URL(string: "https://example.com/chat"),
+                apiKey: "Basic abc123"
+            ),
+            session: session
+        )
+
+        let reply = try await provider.response(for: [ChatMessage(role: .user, content: "Hello")])
+
+        #expect(reply == "ok")
+        AuthorizationHeaderURLProtocol.requestHandler = nil
+    }
+
+    @Test
+    func unauthorizedBackendReturnsCredentialsError() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [UnauthorizedURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+
+        let controller = ChatSessionController(
+            provider: HTTPAIProvider(
+                configuration: AppConfig(endpoint: URL(string: "https://example.com/chat"), apiKey: nil),
+                session: session
+            ),
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Hello there")
+
+        if case .error(let message) = controller.status {
+            #expect(message.contains("LARK_AI_API_KEY"))
+        } else {
+            Issue.record("Expected backend credentials error")
+        }
     }
 
     @Test
