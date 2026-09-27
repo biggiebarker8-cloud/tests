@@ -725,9 +725,11 @@ private struct CompanyKnowledgeBaseEntry: Sendable {
 }
 
 private func containsAlias(in text: String, aliases: [String]) -> Bool {
-    aliases.contains { alias in
-        let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: alias) + #"(?!\w)"#
-        return text.range(of: pattern, options: .regularExpression) != nil
+    let normalizedText = normalizedSkillRoutingText(text.lowercased())
+
+    return aliases.contains { alias in
+        let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: alias.lowercased()) + #"(?!\w)"#
+        return normalizedText.range(of: pattern, options: .regularExpression) != nil
     }
 }
 
@@ -1459,7 +1461,7 @@ private enum SkillKnowledgeBaseCatalog {
     ]
 
     static func relevantEntries(for text: String, imageAttachments: [ChatImageAttachment]) -> [SkillKnowledgeBaseEntry] {
-        let normalized = normalizedSkillRoutingText(text).lowercased()
+        let normalized = text.lowercased()
         let hasImageAttachments = !imageAttachments.isEmpty
         return entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
     }
