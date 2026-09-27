@@ -1619,8 +1619,12 @@ public final class ChatSessionController {
         self.store = store
         self.learningStore = learningStore
         self.learningEngine = learningEngine
-        self.assistantSystemPrompt = assistantSystemPrompt?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if let assistantSystemPrompt {
+            let trimmedPrompt = assistantSystemPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+            self.assistantSystemPrompt = trimmedPrompt.isEmpty ? nil : trimmedPrompt
+        } else {
+            self.assistantSystemPrompt = nil
+        }
     }
 
     public func bootstrap() async {
