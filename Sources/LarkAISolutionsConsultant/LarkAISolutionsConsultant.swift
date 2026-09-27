@@ -732,7 +732,12 @@ private func containsAlias(in text: String, aliases: [String]) -> Bool {
 }
 
 private func normalizedSkillRoutingText(_ text: String) -> String {
-    text.replacingOccurrences(
+    let lowered = text.lowercased()
+    guard lowered.contains("as become available") || lowered.contains("as becomes available") else {
+        return text
+    }
+
+    return text.replacingOccurrences(
         of: #"\bas becomes? available\b"#,
         with: "as they become available",
         options: [.regularExpression, .caseInsensitive]
