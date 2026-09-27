@@ -1435,7 +1435,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Plug-in and Skill Automation",
-            aliases: ["auto add plug-ins", "auto-add plug-ins", "auto add plugins", "auto-add plugins", "auto add skills", "auto-add skills", "skills automation", "new plug-ins as they become available", "new plugins as they become available", "new skills as they become available", "new plug-ins available", "new plugins available", "new skills available", "add new plug-ins", "add new plugins", "add new skills"],
+            aliases: ["auto add plug-ins", "auto-add plug-ins", "auto add plugins", "auto-add plugins", "auto add skills", "auto-add skills", "skills automation", "new plug-ins as they become available", "new plugins as they become available", "new skills as they become available", "new plug-ins available", "new plugins available", "new skills available", "add new plug-ins", "add new plug-ins as they become available", "add new plugins", "add new plugins as they become available", "add new skills", "add new skills as they become available"],
             overview: "Automatically recommends relevant plug-ins and skills based on prompt intent, matched platforms, available image inputs, and newly available capabilities.",
             workflows: [
                 "Detect platform and creative intent to preselect useful plug-ins and skills",
