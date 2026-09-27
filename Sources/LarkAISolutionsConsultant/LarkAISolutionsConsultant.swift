@@ -1296,7 +1296,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Website Permissions Management",
-            aliases: ["website permissions", "all permissions", "all permissions allowed", "permission management", "access control", "permissions except payments", "administrative charges", "besides financial and administrative", "financial and administrative"],
+            aliases: ["website permissions", "all permissions", "all permissions allowed", "permission management", "access control", "permissions except payments", "administrative charges", "besides financial and administrative", "except financial and administrative"],
             overview: "Defines website-role permission bundles for content and operations while excluding payment and administrative charge privileges.",
             workflows: [
                 "Set role-based access for editing, publishing, media, SEO, analytics, and integrations",
@@ -1317,7 +1317,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Core Memory Vault",
-            aliases: ["core memory", "memory core", "store knowledge", "store memories", "memory continuity", "memory continuality", "daily memory backup", "memory backup", "memory focused on my preferences", "focused on my preferences", "my preferences"],
+            aliases: ["core memory", "memory core", "store knowledge", "store memories", "memory continuity", "memory continuality", "daily memory backup", "memory backup", "memory focused on my preferences"],
             overview: "Builds persistent memory plans for references, preferences, and reusable knowledge with continuity and backup discipline.",
             workflows: [
                 "Capture durable references and explicit user preferences from prompts and image-driven creative sessions for future reuse",
@@ -1401,7 +1401,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Adaptive Self Learning",
-            aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically", "learn what you like", "how you like it", "analyze everything", "preferences focused", "focused on my preferences", "my preferences"],
+            aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically", "learn what you like", "how you like it", "analyze everything", "learn my preferences", "preference learning"],
             overview: "Strengthens personalization by reusing learned preferences, recurring goals, and prior context to improve future responses.",
             workflows: [
                 "Reinforce repeated user themes and preferred solution patterns over time",
@@ -1448,7 +1448,15 @@ private enum SkillKnowledgeBaseCatalog {
     static func relevantEntries(for text: String, imageAttachments: [ChatImageAttachment]) -> [SkillKnowledgeBaseEntry] {
         let normalized = text.lowercased()
         let hasImageAttachments = !imageAttachments.isEmpty
-        return entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
+        var matched = entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
+
+        if normalized.contains("memory focused on my preferences"),
+           !matched.contains(where: { $0.name == "Adaptive Self Learning" }),
+           let adaptiveLearning = entries.first(where: { $0.name == "Adaptive Self Learning" }) {
+            matched.append(adaptiveLearning)
+        }
+
+        return matched
     }
 
     static func autoSelectedSkillNames(for entries: [SkillKnowledgeBaseEntry], imageAttachments: [ChatImageAttachment]) -> [String] {

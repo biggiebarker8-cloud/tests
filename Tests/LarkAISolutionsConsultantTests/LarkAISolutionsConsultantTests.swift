@@ -423,4 +423,21 @@ struct LarkAISolutionsConsultantTests {
         #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
         #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
     }
+
+    @Test
+    func controllerDoesNotMatchPermissionSkillForUnqualifiedFinancialAdministrativePhrase() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Build a finance dashboard summarizing financial and administrative metrics for leadership")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Website Permissions Management") != true)
+    }
 }
