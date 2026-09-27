@@ -1327,6 +1327,27 @@ private enum SkillKnowledgeBaseCatalog {
             autoActivateOnImageInput: false
         ),
         SkillKnowledgeBaseEntry(
+            name: "Software Development and Upgrades",
+            aliases: ["ability to code", "write code", "coding ability", "software development", "developer workflows", "build app features", "add app features", "feature upgrades", "code upgrades", "upgrade the app", "upgrade the codebase"],
+            overview: "Supports software implementation work so future features, upgrades, and refactors can be planned and added cleanly over time.",
+            workflows: [
+                "Turn product ideas into scoped implementation work across app, package, API, and data layers",
+                "Plan extensible feature additions and upgrade paths that preserve compatibility and reduce rewrite risk",
+                "Map validation, refactor, and follow-up work needed to keep future changes easier to ship"
+            ],
+            outputs: [
+                "Implementation guidance covering extension points, impacted components, and upgrade sequencing",
+                "Feature and refactor checklists with testing, compatibility, and regression considerations",
+                "Maintainability recommendations that keep the codebase easier to extend with future capabilities"
+            ],
+            plugins: [
+                "Repository and code-search plug-ins for impact analysis, symbol lookup, and dependency tracing",
+                "Build and test connectors for validation, regression coverage, and safer upgrades",
+                "Roadmap and issue-tracking integrations for feature planning, follow-up work, and release coordination"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
             name: "Core Memory Vault",
             aliases: ["core memory", "memory core", "store knowledge", "store memories", "memory continuity", "memory continuality", "daily memory backup", "memory backup", "memory focused on my preferences"],
             overview: "Builds persistent memory plans for references, preferences, and reusable knowledge with continuity and backup discipline.",
