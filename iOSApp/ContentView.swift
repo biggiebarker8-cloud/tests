@@ -14,11 +14,27 @@ final class ChatViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var pendingAttachments: [ChatImageAttachment] = []
 
-    private let controller: ChatSessionController
+    private let controller: ChatSessionController?
 
     init() {
         let config = AppConfig.fromEnvironment()
-        let provider: AIProvider = config.endpoint == nil ? MockAIProvider() : HTTPAIProvider(configuration: config)
+        guard let endpoint = config.endpoint,
+              let rawKey = config.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !rawKey.isEmpty
+        else {
+            self.controller = nil
+            self.errorMessage = "Set LARK_AI_ENDPOINT and LARK_AI_API_KEY in the scheme Run environment to enable live Lark chat."
+            return
+        }
+
+        let provider: AIProvider = HTTPAIProvider(
+            configuration: AppConfig(
+                endpoint: endpoint,
+                apiKey: rawKey,
+                model: config.model,
+                maxRetryCount: config.maxRetryCount
+            )
+        )
 
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
@@ -37,11 +53,13 @@ final class ChatViewModel: ObservableObject {
     }
 
     func bootstrap() async {
+        guard let controller else { return }
         await controller.bootstrap()
         sync()
     }
 
     func send() async {
+        guard let controller else { return }
         let currentInput = input
         let currentAttachments = pendingAttachments
         input = ""
@@ -51,11 +69,21 @@ final class ChatViewModel: ObservableObject {
     }
 
     func clear() async {
+        guard let controller else { return }
         await controller.clear()
         sync()
     }
 
     private func sync() {
+        guard let controller else {
+            messages = []
+            memories = []
+            topTopics = []
+            userGoals = []
+            isLoading = false
+            return
+        }
+
         messages = controller.messages
         memories = controller.memories
             .sorted(by: { $0.strength > $1.strength })
