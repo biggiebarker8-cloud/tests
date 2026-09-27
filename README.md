@@ -22,7 +22,7 @@ Set these environment variables for real API integration:
 - `LARK_AI_MODEL` (optional)
 - `LARK_AI_MAX_RETRIES` (optional)
 
-The app requires `LARK_AI_ENDPOINT` for live chat. If it is missing, the UI disables sending and prompts you to configure the backend.
+The app requires both `LARK_AI_ENDPOINT` and `LARK_AI_API_KEY` for live chat. If either is missing, the UI disables sending and prompts you to finish the backend configuration.
 
 ## Learning and memory capabilities
 - Learns durable memory summaries from user prompts.

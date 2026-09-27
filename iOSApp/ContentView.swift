@@ -20,9 +20,15 @@ final class ChatViewModel: ObservableObject {
     init() {
         let config = AppConfig.fromEnvironment()
         let provider: AIProvider = HTTPAIProvider(configuration: config)
-        self.backendMessage = config.endpoint == nil
-            ? "Configure LARK_AI_ENDPOINT to connect Karma to a real backend."
-            : nil
+        if config.endpoint == nil && config.apiKey == nil {
+            self.backendMessage = "Configure LARK_AI_ENDPOINT and LARK_AI_API_KEY to connect Karma to a real backend."
+        } else if config.endpoint == nil {
+            self.backendMessage = "Configure LARK_AI_ENDPOINT to connect Karma to a real backend."
+        } else if config.apiKey == nil {
+            self.backendMessage = "Configure LARK_AI_API_KEY to connect Karma to a real backend."
+        } else {
+            self.backendMessage = nil
+        }
 
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
