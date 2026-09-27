@@ -758,12 +758,88 @@ private enum CompanyKnowledgeBaseCatalog {
                 "Azure integration connectors for event processing, identity-aware APIs, and data pipelines",
                 "Power BI dashboard plug-ins for executive reporting, campaign visibility, and operational analytics"
             ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Lark",
+            aliases: ["lark", "larks", "lark knowledge base", "lark suite", "lark docs", "lark base"],
+            overview: "Collaboration and operations platform for chat, docs, workflows, approvals, and knowledge sharing across teams.",
+            products: [
+                "Lark Messenger for threaded team communication and channel coordination",
+                "Lark Docs, Wiki, and Base for shared documentation, SOPs, and operational records",
+                "Lark Approval and workflow automation tools for process governance and routing"
+            ],
+            useCases: [
+                "Centralizing agency or operations playbooks into searchable team knowledge bases",
+                "Running cross-functional approvals for campaigns, content, and operations work",
+                "Connecting chat, docs, and structured records to keep execution and decisions aligned"
+            ],
+            considerations: [
+                "Recommendations should include clear workspace permissions and role boundaries",
+                "Knowledge organization should balance discoverability with governance controls",
+                "Automation should include review checkpoints for policy and quality compliance"
+            ],
+            plugins: [
+                "Lark workflow and approval plug-ins for campaign execution governance",
+                "Knowledge indexing connectors for docs, wiki pages, and shared playbooks",
+                "Operational dashboard integrations for task tracking and team visibility"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "TikTok Agency Running",
+            aliases: ["tiktok", "tik tok", "tiktok knowledge base", "tiktok dashboard", "tiktok dashboards", "tiktok agency", "agency running", "running tiktok"],
+            overview: "Agency-oriented TikTok operations covering content planning, publishing workflows, performance dashboards, and optimization loops.",
+            products: [
+                "TikTok content and campaign operations for short-form publishing workflows",
+                "Agency dashboard practices for tracking delivery, pacing, engagement, and conversion trends",
+                "Creative-test operations for iterating hooks, edits, captions, and CTA variants"
+            ],
+            useCases: [
+                "Running day-to-day TikTok agency operations with repeatable process control",
+                "Standardizing dashboard KPIs and campaign health checks across client accounts",
+                "Coordinating creative production, approvals, posting, and performance reviews"
+            ],
+            considerations: [
+                "Recommendations should separate organic workflows from paid campaign operations",
+                "Dashboard guidance should define metric owners, review cadence, and alert thresholds",
+                "Agency process suggestions should include client reporting and handoff standards"
+            ],
+            plugins: [
+                "TikTok workflow plug-ins for publishing queues, approval gates, and scheduling",
+                "Campaign dashboard connectors for pacing, engagement, and conversion visibility",
+                "Creative performance integrations for rapid test-and-learn loops"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "ByteDance",
+            aliases: ["bytedance", "byte dance", "bytedance knowledge base", "seed dance"],
+            overview: "Platform ecosystem for content and creative operations where governance, workflow consistency, and analytics are key to execution quality.",
+            products: [
+                "Cross-product operational practices for content, creator, and campaign coordination",
+                "Creative production workflows that support rapid iteration and quality control",
+                "Performance-analysis patterns for content planning and optimization"
+            ],
+            useCases: [
+                "Designing repeatable operating models for creative teams and campaign operators",
+                "Building knowledge bases that document process, standards, and decision rationale",
+                "Aligning content execution with measurable outcomes and optimization plans"
+            ],
+            considerations: [
+                "Recommendations should clarify data ownership and cross-team accountability",
+                "Process guidance should include governance checkpoints and escalation paths",
+                "Knowledge artifacts should stay versioned and auditable for operational continuity"
+            ],
+            plugins: [
+                "Creative-ops connectors for handoffs between planning, production, and review",
+                "Knowledge sync plug-ins for SOP updates, changelogs, and policy notes",
+                "Analytics integrations for operational scorecards and optimization reviews"
+            ]
         )
     ]
 
     static func relevantEntries(for text: String) -> [CompanyKnowledgeBaseEntry] {
         let normalized = text.lowercased()
-        return entries.filter { $0.matches(normalized) }
+        let matched = entries.filter { $0.matches(normalized) }
+        return matched.filter { !isExplicitlyExcluded($0, in: normalized) }
     }
 
     static func shouldIncludeCrossPlatformPlugins(for text: String, matchedEntries: [CompanyKnowledgeBaseEntry]) -> Bool {
@@ -801,6 +877,14 @@ private enum CompanyKnowledgeBaseCatalog {
         }
 
         return suggestions
+    }
+
+    private static func isExplicitlyExcluded(_ entry: CompanyKnowledgeBaseEntry, in text: String) -> Bool {
+        entry.aliases.contains { alias in
+            let escapedAlias = NSRegularExpression.escapedPattern(for: alias)
+            let pattern = #"(?<!\w)(?:ignore|excluding|exclude|except|without|not|no)\s+(?:the\s+)?(?:any\s+)?(?:all\s+)?(?:of\s+)?"# + escapedAlias + #"(?!\w)"#
+            return text.range(of: pattern, options: .regularExpression) != nil
+        }
     }
 }
 
@@ -989,6 +1073,27 @@ private enum SkillKnowledgeBaseCatalog {
             autoActivateOnImageInput: true
         ),
         SkillKnowledgeBaseEntry(
+            name: "Alliance Bot and Karma Continuity",
+            aliases: ["alliance bot", "karma build", "karma ai previous version", "previous karma version", "legacy karma"],
+            overview: "Brings forward useful assistant patterns and memory structures from Alliance Bot and prior Karma builds into the current consultant workflow.",
+            workflows: [
+                "Map legacy assistant behaviors into current response templates and capability routing",
+                "Preserve durable preferences, memory references, and recurring user intents across versions",
+                "Define compatibility checkpoints so legacy context improves output without breaking current flows"
+            ],
+            outputs: [
+                "Continuity plan for migrating Alliance Bot and Karma behavior into current sessions",
+                "Legacy-to-current mapping notes for prompts, preferences, and decision styles",
+                "Risk checklist for version drift, missing context, and fallback response handling"
+            ],
+            plugins: [
+                "Migration connectors for importing structured memory and profile context",
+                "Compatibility checks for validating legacy prompt behaviors against current routing",
+                "Session continuity integrations for preserving durable user preferences over updates"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
             name: "Story Universe Continuity",
             aliases: ["story lines", "storyline", "story continuity", "characters", "character backstory", "lore", "ip", "universe develop", "worldbuilding"],
             overview: "Manages story universes with recurring characters, lore systems, timeline continuity, and new character/design creation.",
@@ -1069,6 +1174,27 @@ private enum SkillKnowledgeBaseCatalog {
                 "Memory and retrieval plug-ins for durable recall across sessions",
                 "Feedback connectors that reinforce accepted workflows and revisions",
                 "Analytics integrations that expose learning trends and adoption patterns"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
+            name: "Chat GPT Features",
+            aliases: ["chat gpt", "chat gtp", "chatgpt", "gpt features", "gpt chat features"],
+            overview: "Adds ChatGPT-style conversational capabilities for ideation, drafting, summarization, and assistant-guided problem solving.",
+            workflows: [
+                "Turn broad prompts into structured responses with clear sections and actionable next steps",
+                "Support iterative back-and-forth refinement for plans, drafts, and decision analysis",
+                "Generate summaries, rewrites, and alternatives tailored to user goals and constraints"
+            ],
+            outputs: [
+                "Structured response drafts, summaries, rewrites, and comparison options",
+                "Prompt-driven ideation trees and decision support breakdowns",
+                "Reusable conversational patterns for planning, analysis, and execution support"
+            ],
+            plugins: [
+                "Conversation memory connectors for continuity across multi-turn sessions",
+                "Prompt-template plug-ins for reusable drafting and planning formats",
+                "Response-quality integrations for style guidance and output consistency"
             ],
             autoActivateOnImageInput: false
         ),
