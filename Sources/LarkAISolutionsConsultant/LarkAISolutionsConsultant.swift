@@ -724,6 +724,10 @@ private struct CompanyKnowledgeBaseEntry: Sendable {
     }
 }
 
+private let aliasNormalizationReplacements = [
+    ("speach", "speech")
+]
+
 private func containsAlias(in text: String, aliases: [String]) -> Bool {
     let normalizedText = normalizedAliasMatchingText(text)
 
@@ -735,11 +739,7 @@ private func containsAlias(in text: String, aliases: [String]) -> Bool {
 }
 
 private func normalizedAliasMatchingText(_ text: String) -> String {
-    let replacements = [
-        ("speach", "speech")
-    ]
-
-    return replacements.reduce(text.lowercased()) { partialResult, replacement in
+    return aliasNormalizationReplacements.reduce(text.lowercased()) { partialResult, replacement in
         let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: replacement.0) + #"(?!\w)"#
         return partialResult.replacingOccurrences(
             of: pattern,
