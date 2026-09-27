@@ -12,13 +12,17 @@ final class ChatViewModel: ObservableObject {
     @Published var input: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    @Published var backendMessage: String?
     @Published var pendingAttachments: [ChatImageAttachment] = []
 
     private let controller: ChatSessionController
 
     init() {
         let config = AppConfig.fromEnvironment()
-        let provider: AIProvider = config.endpoint == nil ? MockAIProvider() : HTTPAIProvider(configuration: config)
+        let provider: AIProvider = HTTPAIProvider(configuration: config)
+        self.backendMessage = config.endpoint == nil
+            ? "Configure LARK_AI_ENDPOINT to connect Karma to a real backend."
+            : nil
 
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
@@ -116,11 +120,20 @@ struct ContentView: View {
                     .padding(.top, 8)
                 }
 
+                if let backendMessage = viewModel.backendMessage {
+                    Text(backendMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.orange)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                }
+
                 if viewModel.messages.isEmpty {
                     ContentUnavailableView(
-                        "Start a consulting session",
+                        "Start chatting with Karma",
                         systemImage: "message",
-                        description: Text("Ask for implementation advice, architecture support, or rollout guidance.")
+                        description: Text("Connect a backend and ask for implementation advice, architecture support, or rollout guidance.")
                     )
                 } else {
                     List(viewModel.messages) { message in
@@ -172,7 +185,11 @@ struct ContentView: View {
                     Button("Send") {
                         Task { await viewModel.send() }
                     }
-                    .disabled(viewModel.isLoading || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty))
+                    .disabled(
+                        viewModel.isLoading
+                            || viewModel.backendMessage != nil
+                            || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
+                    )
                 }
                 .padding()
 
@@ -195,7 +212,7 @@ struct ContentView: View {
                         .padding(.bottom)
                 }
             }
-            .navigationTitle("Lark AI Consultant")
+            .navigationTitle("Karma")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Clear") {

@@ -15,13 +15,25 @@ actor CapturingProvider: AIProvider {
     }
 }
 
+actor FixedResponseProvider: AIProvider {
+    private let reply: String
+
+    init(reply: String = "Captured response") {
+        self.reply = reply
+    }
+
+    func response(for messages: [ChatMessage]) async throws -> String {
+        reply
+    }
+}
+
 @MainActor
 struct LarkAISolutionsConsultantTests {
     @Test
     func bootstrapLoadsStoredMessages() async throws {
         let seed = [ChatMessage(role: .assistant, content: "Welcome")]
         let store = InMemoryConversationStore(messages: seed)
-        let controller = ChatSessionController(provider: MockAIProvider(), store: store)
+        let controller = ChatSessionController(provider: FixedResponseProvider(), store: store)
 
         await controller.bootstrap()
 
@@ -32,7 +44,7 @@ struct LarkAISolutionsConsultantTests {
     @Test
     func sendAddsUserAndAssistantMessages() async throws {
         let store = InMemoryConversationStore()
-        let controller = ChatSessionController(provider: MockAIProvider(), store: store)
+        let controller = ChatSessionController(provider: FixedResponseProvider(), store: store)
 
         await controller.send("Help me improve adoption")
 
@@ -45,7 +57,7 @@ struct LarkAISolutionsConsultantTests {
     @Test
     func emptyMessageReturnsError() async throws {
         let store = InMemoryConversationStore()
-        let controller = ChatSessionController(provider: MockAIProvider(), store: store)
+        let controller = ChatSessionController(provider: FixedResponseProvider(), store: store)
 
         await controller.send("   ")
 
@@ -60,7 +72,7 @@ struct LarkAISolutionsConsultantTests {
     @Test
     func imageOnlyMessageIsAccepted() async throws {
         let store = InMemoryConversationStore()
-        let controller = ChatSessionController(provider: MockAIProvider(), store: store)
+        let controller = ChatSessionController(provider: FixedResponseProvider(), store: store)
         let attachment = ChatImageAttachment(
             mimeType: "image/png",
             base64Data: Data([0x01, 0x02, 0x03]).base64EncodedString()
@@ -143,6 +155,38 @@ struct LarkAISolutionsConsultantTests {
         #expect(captured.contains(where: { $0.role == .system && $0.content.contains("learned user memories") }))
         #expect(captured.contains(where: { $0.role == .system && $0.content.contains("User profile context") }))
         #expect(!controller.memories.isEmpty)
+    }
+
+    @Test
+    func controllerInjectsKarmaIdentityContext() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Hello there")
+
+        let captured = await provider.lastMessages()
+        #expect(captured.contains(where: { $0.role == .system && $0.content.contains("You are Karma") }))
+    }
+
+    @Test
+    func missingBackendReturnsConfigurationError() async throws {
+        let controller = ChatSessionController(
+            provider: HTTPAIProvider(configuration: AppConfig(endpoint: nil, apiKey: nil)),
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Hello there")
+
+        if case .error(let message) = controller.status {
+            #expect(message.contains("LARK_AI_ENDPOINT"))
+        } else {
+            Issue.record("Expected backend configuration error")
+        }
     }
 
     @Test

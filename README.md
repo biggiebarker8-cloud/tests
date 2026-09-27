@@ -6,7 +6,7 @@ This repository contains the foundation for a standalone iPhone consultant app, 
 - A Swift package (`LarkAISolutionsConsultant`) with:
   - consultant chat/session models
   - provider abstraction (`AIProvider`)
-  - HTTP + mock providers
+  - HTTP backend provider
   - local conversation persistence
   - adaptive learning engine (topic extraction + goal tracking)
   - advanced long-term memory store with semantic recall
@@ -22,7 +22,7 @@ Set these environment variables for real API integration:
 - `LARK_AI_MODEL` (optional)
 - `LARK_AI_MAX_RETRIES` (optional)
 
-If `LARK_AI_ENDPOINT` is not set, the app uses a local mock provider.
+The app requires `LARK_AI_ENDPOINT` for live chat. If it is missing, the UI disables sending and prompts you to configure the backend.
 
 ## Learning and memory capabilities
 - Learns durable memory summaries from user prompts.

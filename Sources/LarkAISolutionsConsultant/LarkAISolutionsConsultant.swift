@@ -102,15 +102,6 @@ public func executeWithRetry<T>(policy: RetryPolicy, operation: @escaping () asy
     throw lastError ?? ConsultantError.invalidResponse
 }
 
-public struct MockAIProvider: AIProvider {
-    public init() {}
-
-    public func response(for messages: [ChatMessage]) async throws -> String {
-        let latest = messages.last(where: { $0.role == .user })?.content ?? ""
-        return "Consultant response: \(latest)"
-    }
-}
-
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
@@ -151,7 +142,7 @@ public struct HTTPAIProvider: AIProvider {
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             if let key = configuration.apiKey, !key.isEmpty {
-                request.setValue("******", forHTTPHeaderField: "Authorization")
+                request.setValue("Bearer " + key, forHTTPHeaderField: "Authorization")
             }
             request.httpBody = try JSONEncoder().encode(payload)
 
@@ -1671,7 +1662,8 @@ public final class ChatSessionController {
         do {
             try await store.save(messages)
 
-            var providerMessages = messages
+            var providerMessages = [assistantIdentityMessage()]
+            providerMessages.append(contentsOf: messages)
 
             if !trimmed.isEmpty {
                 let updatedState = await learningEngine.learn(from: trimmed, existing: memories, profile: learningProfile)
@@ -1715,8 +1707,32 @@ public final class ChatSessionController {
             try await store.save(messages)
             try await learningStore.save(LearningState(memories: memories, profile: learningProfile))
             status = .idle
+        } catch let error as ConsultantError {
+            status = .error(userFacingMessage(for: error))
         } catch {
             status = .error("Unable to get consultant response")
+        }
+    }
+
+    private func assistantIdentityMessage() -> ChatMessage {
+        ChatMessage(
+            role: .system,
+            content: """
+            You are Karma, a real conversational AI consultant.
+            Keep the chat natural and helpful, stay direct without being rude, and answer as Karma when asked your name.
+            Use the stored conversation and any injected context to keep replies consistent across the session.
+            """
+        )
+    }
+
+    private func userFacingMessage(for error: ConsultantError) -> String {
+        switch error {
+        case .emptyUserInput:
+            return "Message cannot be empty"
+        case .missingEndpoint:
+            return "Set LARK_AI_ENDPOINT to enable real backend chat."
+        case .invalidResponse:
+            return "The backend returned an invalid response."
         }
     }
 
