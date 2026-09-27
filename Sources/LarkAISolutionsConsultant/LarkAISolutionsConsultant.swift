@@ -760,7 +760,7 @@ private enum CompanyKnowledgeBaseCatalog {
         ),
         CompanyKnowledgeBaseEntry(
             name: "TikTok Agency",
-            aliases: ["tiktok agency", "tik tok agency", "tiktok dashboard", "tiktok dashboards", "tt agency"],
+            aliases: ["tiktok agency", "tik tok agency", "tiktok dashboard", "tiktok dashboards", "tt agency", "tiktok agency running", "tiktok running", "running tiktok"],
             overview: "Agency-focused TikTok operating context for campaign execution, creator programs, storefront growth, and multi-account performance management.",
             products: [
                 "TikTok Ads Manager dashboards for campaign, audience, creative, and performance analysis",
@@ -917,7 +917,7 @@ private enum CompanyKnowledgeBaseCatalog {
             overview: "Global technology company known for recommendation systems, creator ecosystems, collaboration software, and large-scale consumer platforms.",
             products: [
                 "Consumer products including TikTok and other content discovery platforms",
-                "ByteDance creative tooling for short-video production, editing, and creator publishing",
+                "ByteDance creative tooling for short-video production, editing, creator publishing, and related creative apps such as CapCut",
                 "AI-assisted video and image generation capabilities for campaign and content workflows",
                 "Enterprise collaboration offerings such as Lark for productivity and workflow management",
                 "Advertising, creator monetization, and ecosystem services built on recommendation infrastructure"
@@ -969,7 +969,7 @@ private enum CompanyKnowledgeBaseCatalog {
         ),
         CompanyKnowledgeBaseEntry(
             name: "AnyCross",
-            aliases: ["anycross", "any cross"],
+            aliases: ["anycross", "any cross", "anyclaw", "any claw"],
             overview: "Cross-platform automation context for coordinating creative assets, campaign operations, and multi-channel publishing.",
             products: [
                 "Cross-platform workflow automation for creative, content, and commerce teams",
@@ -1068,6 +1068,81 @@ private enum CompanyKnowledgeBaseCatalog {
             ]
         ),
         CompanyKnowledgeBaseEntry(
+            name: "ChatGPT",
+            aliases: ["chatgpt", "chat gpt", "chat gtp", "openai"],
+            overview: "OpenAI assistant ecosystem for conversational drafting, design ideation, analysis, and workflow copilots across chat and API surfaces.",
+            products: [
+                "ChatGPT experiences for writing, analysis, brainstorming, and conversational task support",
+                "OpenAI API models for assistants, automation, multimodal prompts, and custom integrations",
+                "Workspace features that support reusable prompts, collaboration, and tool-augmented workflows"
+            ],
+            useCases: [
+                "Adding AI-assisted ideation, drafting, and planning into design and operations workflows",
+                "Powering assistant-style features that connect chat, memory, and external system actions",
+                "Combining conversational support with structured outputs for research, content, and implementation guidance"
+            ],
+            considerations: [
+                "Recommendations should account for prompt grounding, privacy boundaries, and review workflows",
+                "Tool use, retrieval, and memory behavior should be scoped to the business process they support",
+                "Production use should define evaluation standards for quality, safety, and operational reliability"
+            ],
+            plugins: [
+                "Retrieval and knowledge-base plug-ins for grounded answers and reusable context",
+                "Workflow connectors that move ChatGPT outputs into docs, tickets, and collaboration tools",
+                "Prompt, safety, and quality-monitoring integrations for governed AI operations"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Alliance Bot",
+            aliases: ["alliance bot", "alliancebot"],
+            overview: "Operations and coordination bot context for carrying forward prior automations, routines, and assistant-supported team workflows.",
+            products: [
+                "Bot-driven task routing, reminders, and operational coordination patterns",
+                "Conversation handoff support for status updates, checklists, and repeatable team motions",
+                "Knowledge prompts that preserve prior bot behaviors and workflow expectations"
+            ],
+            useCases: [
+                "Recreating existing bot-assisted operations inside a newer assistant experience",
+                "Preserving prior automation habits, routing patterns, and team coordination expectations",
+                "Designing assistant responses that stay aligned with familiar bot-led workflows"
+            ],
+            considerations: [
+                "Migration plans should identify which bot behaviors are required versus optional",
+                "Operational automations should keep approvals, ownership, and audit visibility explicit",
+                "Assistant continuity is strongest when legacy bot routines are translated into clear workflow rules"
+            ],
+            plugins: [
+                "Task-routing plug-ins for reminders, escalations, and status coordination",
+                "Chat and notification connectors for team updates and operational follow-through",
+                "Knowledge-retention integrations that preserve legacy bot playbooks and routines"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
+            name: "Karma AI Legacy",
+            aliases: ["karma ai previous version", "previous karma ai", "karma ai legacy", "old karma ai"],
+            overview: "Legacy assistant context for preserving prior Karma AI behavior, memory expectations, and continuity preferences in newer versions.",
+            products: [
+                "Previous-version assistant behavior patterns, tone expectations, and continuity references",
+                "Memory and personalization expectations shaped by earlier Karma AI interactions",
+                "Workflow carryover for recurring prompts, structured outputs, and assistant-guided planning"
+            ],
+            useCases: [
+                "Bringing forward earlier assistant behavior that users want preserved in a newer experience",
+                "Mapping past personalization and memory habits into updated chat workflows",
+                "Using prior-version expectations to guide continuity for tone, structure, and knowledge reuse"
+            ],
+            considerations: [
+                "Legacy expectations should be translated into explicit modern behaviors instead of assumed implicitly",
+                "Continuity plans should distinguish durable preferences from one-off historical outputs",
+                "Memory behavior should stay transparent so users understand what is carried forward"
+            ],
+            plugins: [
+                "Preference-memory plug-ins for continuity across assistant versions",
+                "Prompt-template connectors that preserve earlier structure and response patterns",
+                "Migration workflows for comparing legacy assistant behavior with current capability coverage"
+            ]
+        ),
+        CompanyKnowledgeBaseEntry(
             name: "Munus",
             aliases: ["munus"],
             overview: "Operations-oriented platform context for coordinating service delivery, internal workflows, and business process execution.",
@@ -1124,14 +1199,23 @@ private enum CompanyKnowledgeBaseCatalog {
         if names.contains("Lark") && names.contains("Claude AI") {
             suggestions.append("Lark + Claude AI workflow plug-ins for summarization, approvals, and knowledge assistance")
         }
+        if names.contains("Lark") && names.contains("Alliance Bot") {
+            suggestions.append("Lark + Alliance Bot workflow plug-ins for operational coordination, reminders, and team updates")
+        }
         if names.contains("Wix") && names.contains("Instagram") {
             suggestions.append("Wix + Instagram lead capture and social commerce handoff automations")
+        }
+        if names.contains("Wix") && names.contains("ChatGPT") {
+            suggestions.append("Wix + ChatGPT website content, SEO, and support workflow plug-ins for faster site operations")
         }
         if names.contains("Munus") && names.contains("Lark") {
             suggestions.append("Munus + Lark operational workflow routing for approvals, updates, and task visibility")
         }
         if names.contains("Canva") && names.contains("TikTok") {
             suggestions.append("Canva + TikTok short-video and image asset workflows with brand-safe publishing handoff")
+        }
+        if names.contains("ByteDance") && names.contains("Canva") {
+            suggestions.append("ByteDance creative apps + Canva asset workflows for design production, edits, and publishing handoff")
         }
         if names.contains("AnyCross") && names.count > 1 {
             suggestions.append("AnyCross orchestration across matched platforms for asset sync, approval routing, and campaign automation")
@@ -1275,7 +1359,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Website Building",
-            aliases: ["website building", "build website", "website builder", "web builder", "web design", "multiple website building capabilities"],
+            aliases: ["website building", "build website", "website builder", "web builder", "web design", "website design", "master website design", "multiple website building capabilities"],
             overview: "Designs and organizes website-building workflows across landing pages, commerce pages, content hubs, and multi-page site structures.",
             workflows: [
                 "Translate business goals into site architecture, navigation patterns, and conversion pathways",
@@ -1317,7 +1401,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Core Memory Vault",
-            aliases: ["core memory", "memory core", "store knowledge", "store memories", "memory continuity", "memory continuality", "daily memory backup", "memory backup"],
+            aliases: ["core memory", "memory core", "store knowledge", "store memories", "memory continuity", "memory continuality", "daily memory backup", "memory backup", "memory back up", "memory back up daily", "memory backup daily"],
             overview: "Builds persistent memory plans for references, preferences, and reusable knowledge with continuity and backup discipline.",
             workflows: [
                 "Capture durable references from prompts and image-driven creative sessions for future reuse",
