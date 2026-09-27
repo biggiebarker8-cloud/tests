@@ -1205,7 +1205,13 @@ private enum SkillKnowledgeBaseCatalog {
         "karma coverage",
         "karma browser",
         "karma jasmine",
-        "karma webpack"
+        "karma webpack",
+        "pull request",
+        "pull requests",
+        "code review",
+        "review code",
+        "review this code",
+        "review my code"
     ]
 
     static let entries: [SkillKnowledgeBaseEntry] = [
