@@ -1399,7 +1399,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Assistant Personality Styling",
-            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation", "karma", "name is karma", "named karma", "its name is karma", "responds as karma"],
+            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation", "name is karma", "named karma", "its name is karma", "responds as karma"],
             overview: "Shapes response tone to be blunt, honest, sassy, and lightly sarcastic while still constructive, respectful, and idea-focused.",
             workflows: [
                 "Set tone guidelines that keep direct feedback clear without becoming rude or dismissive",
