@@ -725,10 +725,17 @@ private struct CompanyKnowledgeBaseEntry: Sendable {
 }
 
 private func containsAlias(in text: String, aliases: [String]) -> Bool {
-    aliases.contains { alias in
-        let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: alias) + #"(?!\w)"#
-        return text.range(of: pattern, options: .regularExpression) != nil
+    let normalizedText = normalizedAliasMatchingText(text)
+
+    return aliases.contains { alias in
+        let normalizedAlias = normalizedAliasMatchingText(alias)
+        let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: normalizedAlias) + #"(?!\w)"#
+        return normalizedText.range(of: pattern, options: .regularExpression) != nil
     }
+}
+
+private func normalizedAliasMatchingText(_ text: String) -> String {
+    text.replacingOccurrences(of: "speach", with: "speech")
 }
 
 private enum CompanyKnowledgeBaseCatalog {
@@ -1409,7 +1416,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Voice and Hearing Interaction",
-            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "voice and hearing", "speech to text", "text to speech", "audio input", "audio output", "speech and hearing", "speach and hearing"],
+            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "voice and hearing", "speech to text", "text to speech", "audio input", "audio output", "speech and hearing"],
             overview: "Supports voice-first interaction planning with hearing (speech input), speaking (audio output), and conversational turn management.",
             workflows: [
                 "Capture spoken user requests and convert them into structured prompt-ready text",
