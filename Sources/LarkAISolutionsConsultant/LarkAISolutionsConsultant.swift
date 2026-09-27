@@ -1464,7 +1464,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Software Development and Upgrades",
-            aliases: ["software development", "feature upgrade", "feature upgrades", "software upgrade", "software upgrades", "pull request", "pull requests", "code review", "review code", "github review"],
+            aliases: ["software development", "feature upgrade", "feature upgrades", "software upgrade", "software upgrades", "pull request", "pull requests", "code review", "review code", "GitHub review"],
             overview: "Supports software-delivery work such as feature planning, pull-request review, upgrades, and implementation handoff guidance.",
             workflows: [
                 "Organize feature and upgrade requests into scoped engineering tasks with dependencies and rollout considerations",
