@@ -426,6 +426,8 @@ struct LarkAISolutionsConsultantTests {
         #expect(knowledgeMessage?.content.contains("Company: Karma AI Legacy") == true)
         #expect(knowledgeMessage?.content.contains("CapCut") == true)
         #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == true)
+        #expect(knowledgeMessage?.content.contains("Wix + ChatGPT website content, SEO, and support workflow plug-ins for faster site operations") == true)
+        #expect(knowledgeMessage?.content.contains("ByteDance creative apps + Canva asset workflows for design production, edits, and publishing handoff") == true)
 
         #expect(skillMessage?.content.contains("Skill: Website Building") == true)
         #expect(skillMessage?.content.contains("Skill: Core Memory Vault") == true)
