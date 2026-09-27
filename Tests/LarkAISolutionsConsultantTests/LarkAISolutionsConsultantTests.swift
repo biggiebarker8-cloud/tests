@@ -167,6 +167,26 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsLarkTikTokAndByteDanceKnowledgeBaseContext() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Start from basics with lark knowledge base and TikTok dashboard agency running knowledge base and bytedance knowledge base")
+
+        let captured = await provider.lastMessages()
+        let knowledgeMessage = captured.first(where: { $0.role == .system && $0.content.contains("company knowledge base context") })
+
+        #expect(knowledgeMessage?.content.contains("Company: Lark") == true)
+        #expect(knowledgeMessage?.content.contains("Company: TikTok Agency Running") == true)
+        #expect(knowledgeMessage?.content.contains("Company: ByteDance") == true)
+        #expect(knowledgeMessage?.content.contains("Cross-platform plug-in ideas:") == true)
+    }
+
+    @Test
     func controllerSkipsKnowledgeBaseContextForUnmatchedPrompt() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
@@ -373,5 +393,41 @@ struct LarkAISolutionsConsultantTests {
         #expect(skillMessage?.content.contains("Skill: Adaptive Self Learning") == true)
         #expect(skillMessage?.content.contains("Skill: Plug-in and Skill Automation") == true)
         #expect(skillMessage?.content.contains("Multimodal Image Input") == true)
+    }
+
+    @Test
+    func controllerInjectsChatGPTFeaturesSkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Add chat gtp features for drafting and assistant ideation")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Chat GPT Features") == true)
+        #expect(skillMessage?.content.contains("ChatGPT-style conversational capabilities") == true)
+    }
+
+    @Test
+    func controllerInjectsAllianceBotAndKarmaContinuitySkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Use parts of alliance bot and karma build")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Alliance Bot and Karma Continuity") == true)
+        #expect(skillMessage?.content.contains("Alliance Bot and Karma behavior") == true)
     }
 }
