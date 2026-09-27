@@ -36,7 +36,12 @@ final class ChatViewModel: ObservableObject {
         self.controller = ChatSessionController(
             provider: provider,
             store: FileConversationStore(fileURL: historyURL),
-            learningStore: FileLearningStore(fileURL: learningURL)
+            learningStore: FileLearningStore(fileURL: learningURL),
+            assistantSystemPrompt: """
+            You are Karma, a real conversational AI consultant.
+            Keep the chat natural and helpful, stay direct without being rude, and answer as Karma when asked your name.
+            Use the stored conversation and any injected context to keep replies consistent across the session.
+            """
         )
     }
 

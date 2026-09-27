@@ -1606,17 +1606,21 @@ public final class ChatSessionController {
     private let store: ConversationStore
     private let learningStore: LearningStore
     private let learningEngine: LearningEngine
+    private let assistantSystemPrompt: String?
 
     public init(
         provider: AIProvider,
         store: ConversationStore,
         learningStore: LearningStore = InMemoryLearningStore(),
-        learningEngine: LearningEngine = LearningEngine()
+        learningEngine: LearningEngine = LearningEngine(),
+        assistantSystemPrompt: String? = nil
     ) {
         self.provider = provider
         self.store = store
         self.learningStore = learningStore
         self.learningEngine = learningEngine
+        self.assistantSystemPrompt = assistantSystemPrompt?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     public func bootstrap() async {
@@ -1662,8 +1666,10 @@ public final class ChatSessionController {
         do {
             try await store.save(messages)
 
-            var providerMessages = [assistantIdentityMessage()]
-            providerMessages.append(contentsOf: messages)
+            var providerMessages = messages
+            if let assistantIdentityMessage {
+                providerMessages.insert(assistantIdentityMessage, at: 0)
+            }
 
             if !trimmed.isEmpty {
                 let updatedState = await learningEngine.learn(from: trimmed, existing: memories, profile: learningProfile)
@@ -1714,15 +1720,12 @@ public final class ChatSessionController {
         }
     }
 
-    private func assistantIdentityMessage() -> ChatMessage {
-        ChatMessage(
-            role: .system,
-            content: """
-            You are Karma, a real conversational AI consultant.
-            Keep the chat natural and helpful, stay direct without being rude, and answer as Karma when asked your name.
-            Use the stored conversation and any injected context to keep replies consistent across the session.
-            """
-        )
+    private var assistantIdentityMessage: ChatMessage? {
+        guard let assistantSystemPrompt, !assistantSystemPrompt.isEmpty else {
+            return nil
+        }
+
+        return ChatMessage(role: .system, content: assistantSystemPrompt)
     }
 
     private func userFacingMessage(for error: ConsultantError) -> String {

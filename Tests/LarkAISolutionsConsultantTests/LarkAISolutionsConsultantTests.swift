@@ -145,7 +145,8 @@ struct LarkAISolutionsConsultantTests {
         let controller = ChatSessionController(
             provider: provider,
             store: InMemoryConversationStore(),
-            learningStore: InMemoryLearningStore()
+            learningStore: InMemoryLearningStore(),
+            assistantSystemPrompt: "You are Karma, a real conversational AI consultant."
         )
 
         await controller.send("I need a deployment strategy for B2B users")
