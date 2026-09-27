@@ -84,6 +84,30 @@ final class UnauthorizedURLProtocol: URLProtocol {
     override func stopLoading() {}
 }
 
+final class ForbiddenURLProtocol: URLProtocol {
+    override class func canInit(with request: URLRequest) -> Bool {
+        true
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        let response = HTTPURLResponse(
+            url: request.url ?? URL(string: "https://example.com")!,
+            statusCode: 403,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data())
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+}
+
 @MainActor
 struct LarkAISolutionsConsultantTests {
     @Test
@@ -310,6 +334,30 @@ struct LarkAISolutionsConsultantTests {
             #expect(message.contains("LARK_AI_API_KEY"))
         } else {
             Issue.record("Expected backend credentials error")
+        }
+    }
+
+    @Test
+    func forbiddenBackendReturnsPermissionError() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [ForbiddenURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+
+        let controller = ChatSessionController(
+            provider: HTTPAIProvider(
+                configuration: AppConfig(endpoint: URL(string: "https://example.com/chat"), apiKey: "token"),
+                session: session
+            ),
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Hello there")
+
+        if case .error(let message) = controller.status {
+            #expect(message.contains("do not have permission"))
+        } else {
+            Issue.record("Expected backend permission error")
         }
     }
 

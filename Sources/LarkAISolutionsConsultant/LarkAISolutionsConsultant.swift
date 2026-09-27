@@ -4,6 +4,7 @@ public enum ConsultantError: Error, Equatable {
     case emptyUserInput
     case missingEndpoint
     case unauthorized
+    case forbidden
     case invalidResponse
 }
 
@@ -156,8 +157,11 @@ public struct HTTPAIProvider: AIProvider {
                 throw ConsultantError.invalidResponse
             }
             guard 200..<300 ~= httpResponse.statusCode else {
-                if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                if httpResponse.statusCode == 401 {
                     throw ConsultantError.unauthorized
+                }
+                if httpResponse.statusCode == 403 {
+                    throw ConsultantError.forbidden
                 }
                 throw ConsultantError.invalidResponse
             }
@@ -1753,6 +1757,8 @@ public final class ChatSessionController {
             return "Set LARK_AI_ENDPOINT to enable real backend chat."
         case .unauthorized:
             return "Set LARK_AI_API_KEY or verify your backend credentials."
+        case .forbidden:
+            return "Your backend credentials were accepted but do not have permission for this request."
         case .invalidResponse:
             return "The backend returned an invalid response."
         }
