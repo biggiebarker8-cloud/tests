@@ -476,6 +476,25 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsSoftwareDevelopmentSkillForPullRequestDownloadAppPrompt() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Pull Request: https://github.com/biggiebarker8-cloud/tests/pull/27 download app")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+        #expect(skillMessage?.content.contains("Pull request review guidance") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+    }
+
+    @Test
     func controllerMatchesPictureDesignAliasToImageCreationSkill() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
