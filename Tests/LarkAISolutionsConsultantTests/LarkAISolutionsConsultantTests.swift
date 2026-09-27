@@ -455,6 +455,23 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerRoutesShorthandPullRequestAppPromptToSoftwareDevelopmentSkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("PR #28 download app")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+    }
+
+    @Test
     func controllerKeepsGenericAppInstallPromptOutOfSoftwareDevelopmentSkill() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
