@@ -731,6 +731,12 @@ private func containsAlias(in text: String, aliases: [String]) -> Bool {
     }
 }
 
+private func normalizedSkillRoutingText(_ text: String) -> String {
+    text
+        .replacingOccurrences(of: "new plugins as become available", with: "new plugins as they become available")
+        .replacingOccurrences(of: "new skills as becomes available", with: "new skills as they become available")
+}
+
 private enum CompanyKnowledgeBaseCatalog {
     static let entries: [CompanyKnowledgeBaseEntry] = [
         CompanyKnowledgeBaseEntry(
@@ -1422,7 +1428,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Plug-in and Skill Automation",
-            aliases: ["auto add plug-ins", "auto-add plug-ins", "auto add plugins", "auto-add plugins", "auto add skills", "auto-add skills", "skills automation", "new plugins as become available", "new skills as becomes available", "new plugins as they become available", "new skills as they become available", "new plugins available", "new skills available", "add new plugins", "add new skills"],
+            aliases: ["auto add plug-ins", "auto-add plug-ins", "auto add plugins", "auto-add plugins", "auto add skills", "auto-add skills", "skills automation", "new plugins as they become available", "new skills as they become available", "new plugins available", "new skills available", "add new plugins", "add new skills"],
             overview: "Automatically recommends relevant plug-ins and skills based on prompt intent, matched platforms, available image inputs, and newly available capabilities.",
             workflows: [
                 "Detect platform and creative intent to preselect useful plug-ins and skills",
@@ -1446,7 +1452,7 @@ private enum SkillKnowledgeBaseCatalog {
     ]
 
     static func relevantEntries(for text: String, imageAttachments: [ChatImageAttachment]) -> [SkillKnowledgeBaseEntry] {
-        let normalized = text.lowercased()
+        let normalized = normalizedSkillRoutingText(text.lowercased())
         let hasImageAttachments = !imageAttachments.isEmpty
         return entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
     }
