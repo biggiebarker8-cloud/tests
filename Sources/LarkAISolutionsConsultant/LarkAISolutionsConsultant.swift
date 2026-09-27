@@ -1180,6 +1180,34 @@ private struct SkillKnowledgeBaseEntry: Sendable {
 }
 
 private enum SkillKnowledgeBaseCatalog {
+    private static let assistantPersonalitySkillName = "Assistant Personality Styling"
+    private static let assistantPersonalityDisambiguationAliases = [
+        "assistant personality",
+        "blunt and honest",
+        "not mean",
+        "sassy",
+        "sarcastic",
+        "helpful creating ideas",
+        "idea creation",
+        "name is karma",
+        "named karma",
+        "its name is karma",
+        "responds as karma"
+    ]
+    private static let technicalKarmaAliases = [
+        "karma config",
+        "karma.conf",
+        "karma runner",
+        "karma test",
+        "karma tests",
+        "karma plugin",
+        "karma reporter",
+        "karma coverage",
+        "karma browser",
+        "karma jasmine",
+        "karma webpack"
+    ]
+
     static let entries: [SkillKnowledgeBaseEntry] = [
         SkillKnowledgeBaseEntry(
             name: "Image Creation",
@@ -1509,7 +1537,18 @@ private enum SkillKnowledgeBaseCatalog {
     static func relevantEntries(for text: String, imageAttachments: [ChatImageAttachment]) -> [SkillKnowledgeBaseEntry] {
         let normalized = text.lowercased()
         let hasImageAttachments = !imageAttachments.isEmpty
-        return entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
+        return entries.filter { entry in
+            guard entry.matches(normalized, hasImageAttachments: hasImageAttachments) else {
+                return false
+            }
+
+            if entry.name == assistantPersonalitySkillName,
+               shouldSuppressAssistantPersonalityMatch(for: normalized) {
+                return false
+            }
+
+            return true
+        }
     }
 
     static func autoSelectedSkillNames(for entries: [SkillKnowledgeBaseEntry], imageAttachments: [ChatImageAttachment]) -> [String] {
@@ -1526,6 +1565,18 @@ private enum SkillKnowledgeBaseCatalog {
     ) -> [String] {
         let plugins = skillEntries.flatMap(\.plugins) + matchedCompanies.flatMap(\.plugins)
         return Array(NSOrderedSet(array: plugins.prefix(8).map { $0 })) as? [String] ?? Array(plugins.prefix(8))
+    }
+
+    private static func shouldSuppressAssistantPersonalityMatch(for text: String) -> Bool {
+        guard containsAlias(in: text, aliases: ["karma"]) else {
+            return false
+        }
+
+        if containsAlias(in: text, aliases: assistantPersonalityDisambiguationAliases) {
+            return false
+        }
+
+        return containsAlias(in: text, aliases: technicalKarmaAliases)
     }
 }
 

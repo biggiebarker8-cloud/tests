@@ -456,6 +456,26 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerSkipsKarmaPersonaForTechnicalKarmaReferences() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Review this Karma config in my pull request")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Assistant Personality Styling") == false)
+        #expect(skillMessage?.content.contains("Assistant identity anchor: respond as Karma when asked for your name") == false)
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+        #expect(skillMessage?.content.contains("Pull request review guidance") == true)
+    }
+
+    @Test
     func controllerMatchesPictureDesignAliasToImageCreationSkill() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
