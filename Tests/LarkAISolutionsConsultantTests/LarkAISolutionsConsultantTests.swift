@@ -1,6 +1,9 @@
 import Foundation
 import Testing
 @testable import LarkAISolutionsConsultant
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 actor CapturingProvider: AIProvider {
     private(set) var capturedMessages: [[ChatMessage]] = []
@@ -15,8 +18,8 @@ actor CapturingProvider: AIProvider {
     }
 }
 
-final class URLProtocolStub: URLProtocol, @unchecked Sendable {
-    static var requestHandler: (@Sendable (URLRequest) throws -> (HTTPURLResponse, Data))?
+final class URLProtocolStub: URLProtocol {
+    nonisolated(unsafe) static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
 
     override class func canInit(with request: URLRequest) -> Bool { true }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
@@ -40,6 +43,7 @@ final class URLProtocolStub: URLProtocol, @unchecked Sendable {
     override func stopLoading() {}
 }
 
+@Suite(.serialized)
 @MainActor
 struct LarkAISolutionsConsultantTests {
     @Test
