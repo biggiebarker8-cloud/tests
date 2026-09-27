@@ -21,15 +21,18 @@ final class ChatViewModel: ObservableObject {
         let environment = ProcessInfo.processInfo.environment
         let rawEndpoint = environment["LARK_AI_ENDPOINT"]?
             .trimmingCharacters(in: .whitespacesAndNewlines)
+        let rawAPIKey = environment["LARK_AI_API_KEY"]?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
         let config = AppConfig.fromEnvironment(environment)
         let provider: AIProvider = HTTPAIProvider(configuration: config)
+        let apiKeyMissing = config.apiKey == nil || rawAPIKey?.isEmpty == true
         if let rawEndpoint, !rawEndpoint.isEmpty, config.endpoint == nil {
             self.backendMessage = "LARK_AI_ENDPOINT must be a valid URL to connect Karma to a real backend."
-        } else if config.endpoint == nil && config.apiKey == nil {
+        } else if config.endpoint == nil && apiKeyMissing {
             self.backendMessage = "Configure LARK_AI_ENDPOINT and LARK_AI_API_KEY to connect Karma to a real backend."
         } else if config.endpoint == nil {
             self.backendMessage = "Configure LARK_AI_ENDPOINT to connect Karma to a real backend."
-        } else if config.apiKey == nil {
+        } else if apiKeyMissing {
             self.backendMessage = "Configure LARK_AI_API_KEY to connect Karma to a real backend."
         } else {
             self.backendMessage = nil
