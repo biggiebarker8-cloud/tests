@@ -373,6 +373,25 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsApparelSkillForTShirtAndMerchAliases() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Help me build T-shirts design and merch design guidance")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Apparel Design and DTG Production") == true)
+        #expect(skillMessage?.content.contains("hoodie and T-shirt design briefs") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+    }
+
+    @Test
     func controllerInjectsPersonalityAndVoiceHearingSkills() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
@@ -396,7 +415,7 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
-    func controllerInjectsKarmaIdentityAndSpeachHearingSkills() async throws {
+    func controllerInjectsKarmaIdentityAndSpeechHearingSkills() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
             provider: provider,
@@ -411,6 +430,24 @@ struct LarkAISolutionsConsultantTests {
 
         #expect(skillMessage?.content.contains("Skill: Assistant Personality Styling") == true)
         #expect(skillMessage?.content.contains("Assistant identity anchor: respond as Karma when asked for your name") == true)
+        #expect(skillMessage?.content.contains("Skill: Voice and Hearing Interaction") == true)
+        #expect(skillMessage?.content.contains("Speech-to-text") == true)
+    }
+
+    @Test
+    func controllerNormalizesSpeechAliasVariants() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Add speach to text support too")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
         #expect(skillMessage?.content.contains("Skill: Voice and Hearing Interaction") == true)
         #expect(skillMessage?.content.contains("Speech-to-text") == true)
     }
