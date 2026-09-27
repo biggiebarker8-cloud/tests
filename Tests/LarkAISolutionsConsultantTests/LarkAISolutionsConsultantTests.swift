@@ -1,6 +1,9 @@
 import Foundation
 import Testing
 @testable import LarkAISolutionsConsultant
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 actor CapturingProvider: AIProvider {
     private(set) var capturedMessages: [[ChatMessage]] = []
@@ -15,8 +18,127 @@ actor CapturingProvider: AIProvider {
     }
 }
 
+final class URLProtocolStub: URLProtocol {
+    nonisolated(unsafe) static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        guard let handler = URLProtocolStub.requestHandler else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badServerResponse))
+            return
+        }
+
+        do {
+            let (response, data) = try handler(request)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
+        }
+    }
+
+    override func stopLoading() {}
+}
+
+@Suite(.serialized)
 @MainActor
 struct LarkAISolutionsConsultantTests {
+    @Test
+    func appConfigNormalizesWhitespaceValues() async throws {
+        let config = AppConfig.fromEnvironment([
+            "LARK_AI_ENDPOINT": "   ",
+            "LARK_AI_API_KEY": "  test-key  ",
+            "LARK_AI_MODEL": "   ",
+            "LARK_AI_MAX_RETRIES": "-1"
+        ])
+
+        #expect(config.endpoint == nil)
+        #expect(config.apiKey == "test-key")
+        #expect(config.model == "consultant-v1")
+        #expect(config.maxRetryCount == 0)
+    }
+
+    @Test
+    func httpProviderBuildsAuthorizationHeader() async throws {
+        let endpoint = try #require(URL(string: "https://example.com/chat"))
+        let session = makeStubbedSession()
+        var capturedAuthorization = ""
+
+        URLProtocolStub.requestHandler = { request in
+            capturedAuthorization = request.value(forHTTPHeaderField: "Authorization") ?? ""
+            let response = HTTPURLResponse(url: endpoint, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, Data(#"{"reply":"ok"}"#.utf8))
+        }
+
+        let provider = HTTPAIProvider(
+            configuration: AppConfig(endpoint: endpoint, apiKey: "test-key"),
+            session: session
+        )
+
+        _ = try await provider.response(for: [ChatMessage(role: .user, content: "Hello")])
+        #expect(capturedAuthorization.hasPrefix("Bearer "))
+        #expect(capturedAuthorization.hasSuffix("test-key"))
+    }
+
+    @Test
+    func httpProviderPreservesFormattedAuthorizationHeader() async throws {
+        let endpoint = try #require(URL(string: "https://example.com/chat"))
+        let session = makeStubbedSession()
+        var capturedAuthorization = ""
+
+        URLProtocolStub.requestHandler = { request in
+            capturedAuthorization = request.value(forHTTPHeaderField: "Authorization") ?? ""
+            let response = HTTPURLResponse(url: endpoint, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, Data(#"{"reply":"ok"}"#.utf8))
+        }
+
+        let provider = HTTPAIProvider(
+            configuration: AppConfig(endpoint: endpoint, apiKey: "Basic dGVzdA=="),
+            session: session
+        )
+
+        _ = try await provider.response(for: [ChatMessage(role: .user, content: "Hello")])
+        #expect(capturedAuthorization == "Basic dGVzdA==")
+    }
+
+    @Test
+    func httpProviderMapsAuthStatusCodes() async throws {
+        let endpoint = try #require(URL(string: "https://example.com/chat"))
+        let session = makeStubbedSession()
+
+        URLProtocolStub.requestHandler = { request in
+            let response = HTTPURLResponse(url: request.url ?? endpoint, statusCode: 401, httpVersion: nil, headerFields: nil)!
+            return (response, Data())
+        }
+
+        let provider = HTTPAIProvider(configuration: AppConfig(endpoint: endpoint, apiKey: "test-key"), session: session)
+        do {
+            _ = try await provider.response(for: [ChatMessage(role: .user, content: "Hello")])
+            Issue.record("Expected unauthorized error")
+        } catch let error as ConsultantError {
+            #expect(error == .unauthorized)
+        } catch {
+            Issue.record("Expected ConsultantError.unauthorized")
+        }
+
+        URLProtocolStub.requestHandler = { request in
+            let response = HTTPURLResponse(url: request.url ?? endpoint, statusCode: 403, httpVersion: nil, headerFields: nil)!
+            return (response, Data())
+        }
+
+        do {
+            _ = try await provider.response(for: [ChatMessage(role: .user, content: "Hello")])
+            Issue.record("Expected forbidden error")
+        } catch let error as ConsultantError {
+            #expect(error == .forbidden)
+        } catch {
+            Issue.record("Expected ConsultantError.forbidden")
+        }
+    }
+
     @Test
     func bootstrapLoadsStoredMessages() async throws {
         let seed = [ChatMessage(role: .assistant, content: "Welcome")]
@@ -27,6 +149,12 @@ struct LarkAISolutionsConsultantTests {
 
         #expect(controller.messages == seed)
         #expect(controller.status == .idle)
+    }
+
+    private func makeStubbedSession() -> URLSession {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [URLProtocolStub.self]
+        return URLSession(configuration: configuration)
     }
 
     @Test

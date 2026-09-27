@@ -6,7 +6,7 @@ This repository contains the foundation for a standalone iPhone consultant app, 
 - A Swift package (`LarkAISolutionsConsultant`) with:
   - consultant chat/session models
   - provider abstraction (`AIProvider`)
-  - HTTP + mock providers
+  - HTTP backend provider
   - local conversation persistence
   - adaptive learning engine (topic extraction + goal tracking)
   - advanced long-term memory store with semantic recall
@@ -23,7 +23,7 @@ xcodegen generate
 open LarkAISolutionsConsultant.xcodeproj
 ```
 
-Select the `LarkAISolutionsConsultantApp` scheme and an iPhone simulator, then press Run. The app starts with a local mock response until an endpoint is configured. To run on your own iPhone, select your Apple development team under Signing & Capabilities in Xcode and choose the device. A signed distribution build requires your Apple signing setup.
+Select the `LarkAISolutionsConsultantApp` scheme and an iPhone simulator, then press Run. The app requires backend configuration before chat can start. To run on your own iPhone, select your Apple development team under Signing & Capabilities in Xcode and choose the device. A signed distribution build requires your Apple signing setup.
 
 The iOS Simulator Build workflow checks that the app compiles. The Swift Tests workflow checks the package separately.
 
@@ -34,7 +34,7 @@ Set these environment variables for real API integration:
 - `LARK_AI_MODEL` (optional)
 - `LARK_AI_MAX_RETRIES` (optional)
 
-If `LARK_AI_ENDPOINT` is not set, the app uses a local mock provider. For local simulator development, set the variables in the Xcode scheme's Run environment. iOS apps do not read environment variables from your Mac automatically, and launch environment values are not a suitable production credential store. Use your own HTTPS backend for production; keep provider API keys on the server.
+If `LARK_AI_ENDPOINT` or `LARK_AI_API_KEY` is missing or invalid, chat stays disabled and shows setup guidance. For local simulator development, set the variables in the Xcode scheme's Run environment. iOS apps do not read environment variables from your Mac automatically, and launch environment values are not a suitable production credential store. Use your own HTTPS backend for production; keep provider API keys on the server.
 
 ## Learning and memory capabilities
 - Learns durable memory summaries from user prompts.
