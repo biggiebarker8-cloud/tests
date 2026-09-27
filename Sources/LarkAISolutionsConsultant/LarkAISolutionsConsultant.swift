@@ -1577,7 +1577,10 @@ private enum SkillKnowledgeBaseCatalog {
     }
 
     private static func matchesPullRequestAppInstallPrompt(_ text: String) -> Bool {
-        let referencesPullRequest = text.contains("github.com") && text.contains("/pull/")
+        let referencesPullRequest =
+            text.range(of: #"/pull/\d+"#, options: .regularExpression) != nil ||
+            text.range(of: #"\bpr\s*#?\d+\b"#, options: .regularExpression) != nil ||
+            text.range(of: #"\bpull request\b"#, options: .regularExpression) != nil
         let mentionsAppInstall = text.contains("app") && (text.contains("install") || text.contains("download"))
         return referencesPullRequest && mentionsAppInstall
     }
