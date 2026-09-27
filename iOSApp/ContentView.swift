@@ -209,6 +209,8 @@ struct ContentView: View {
                 }
             }
         }
+    }
+
     @MainActor
     private func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
         guard !items.isEmpty else { return }
