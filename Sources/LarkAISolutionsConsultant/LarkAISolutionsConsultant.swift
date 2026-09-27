@@ -1401,7 +1401,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Adaptive Self Learning",
-            aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically", "learn what you like", "how you like it", "analyze everything", "learn my preferences", "preference learning"],
+            aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically", "learn what you like", "how you like it", "analyze everything", "learn my preferences", "preference learning", "focused on my preferences"],
             overview: "Strengthens personalization by reusing learned preferences, recurring goals, and prior context to improve future responses.",
             workflows: [
                 "Reinforce repeated user themes and preferred solution patterns over time",
@@ -1448,15 +1448,7 @@ private enum SkillKnowledgeBaseCatalog {
     static func relevantEntries(for text: String, imageAttachments: [ChatImageAttachment]) -> [SkillKnowledgeBaseEntry] {
         let normalized = text.lowercased()
         let hasImageAttachments = !imageAttachments.isEmpty
-        var matched = entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
-
-        if normalized.contains("memory focused on my preferences"),
-           !matched.contains(where: { $0.name == "Adaptive Self Learning" }),
-           let adaptiveLearning = entries.first(where: { $0.name == "Adaptive Self Learning" }) {
-            matched.append(adaptiveLearning)
-        }
-
-        return matched
+        return entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
     }
 
     static func autoSelectedSkillNames(for entries: [SkillKnowledgeBaseEntry], imageAttachments: [ChatImageAttachment]) -> [String] {
