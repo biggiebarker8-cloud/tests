@@ -725,9 +725,22 @@ private struct CompanyKnowledgeBaseEntry: Sendable {
 }
 
 private func containsAlias(in text: String, aliases: [String]) -> Bool {
-    aliases.contains { alias in
-        let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: alias) + #"(?!\w)"#
-        return text.range(of: pattern, options: .regularExpression) != nil
+    let normalizedText = normalizedAliasMatchingText(text)
+
+    return aliases.contains { alias in
+        let normalizedAlias = normalizedAliasMatchingText(alias)
+        let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: normalizedAlias) + #"(?!\w)"#
+        return normalizedText.range(of: pattern, options: .regularExpression) != nil
+    }
+}
+
+private func normalizedAliasMatchingText(_ text: String) -> String {
+    let replacements = [
+        "speach": "speech"
+    ]
+
+    return replacements.reduce(text.lowercased()) { partialResult, replacement in
+        partialResult.replacingOccurrences(of: replacement.key, with: replacement.value)
     }
 }
 
@@ -1365,7 +1378,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Apparel Design and DTG Production",
-            aliases: ["hoodie design", "hoodies", "hoodie", "tshirt", "t-shirt", "t shirt", "shirt design", "merch design", "dtg", "direct to garment", "apparel design"],
+            aliases: ["hoodie design", "hoodies", "hoodie", "tshirt", "tshirts", "tshirts design", "t-shirt", "t-shirts", "t-shirts design", "t shirt", "shirt design", "merch design", "dtg", "direct to garment", "apparel design"],
             overview: "Designs hoodie and T-shirt graphics with print-safe composition and DTG-ready output guidance.",
             workflows: [
                 "Translate apparel concepts into front/back print layouts for hoodie and T-shirt use cases",
@@ -1409,7 +1422,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Voice and Hearing Interaction",
-            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "speech to text", "text to speech", "audio input", "audio output", "speech and hearing", "speach and hearing", "speach"],
+            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "voice and hearing", "voice and hearing ability", "speech to text", "text to speech", "audio input", "audio output", "speech and hearing", "speech and hearing ability"],
             overview: "Supports voice-first interaction planning with hearing (speech input), speaking (audio output), and conversational turn management.",
             workflows: [
                 "Capture spoken user requests and convert them into structured prompt-ready text",
