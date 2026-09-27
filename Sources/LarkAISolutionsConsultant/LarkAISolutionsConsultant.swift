@@ -1296,7 +1296,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Website Permissions Management",
-            aliases: ["website permissions", "all permissions", "all permissions allowed", "permission management", "access control", "permissions except payments", "administrative charges", "besides financial and administrative", "except financial and administrative"],
+            aliases: ["website permissions", "all permissions", "all permissions allowed", "permission management", "access control", "permissions except payments", "besides financial and administrative", "except financial and administrative"],
             overview: "Defines website-role permission bundles for content and operations while excluding payment and administrative charge privileges.",
             workflows: [
                 "Set role-based access for editing, publishing, media, SEO, analytics, and integrations",
