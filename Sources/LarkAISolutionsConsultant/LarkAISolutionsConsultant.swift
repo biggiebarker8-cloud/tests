@@ -725,7 +725,7 @@ private struct CompanyKnowledgeBaseEntry: Sendable {
 }
 
 private let aliasNormalizationReplacements = [
-    ("speach", "speech")
+    "speach": "speech"
 ]
 private let aliasNormalizationLocale = Locale(identifier: "en_US_POSIX")
 
@@ -740,14 +740,31 @@ private func containsAlias(in text: String, aliases: [String]) -> Bool {
 }
 
 private func normalizedAliasMatchingText(_ text: String) -> String {
-    return aliasNormalizationReplacements.reduce(text.lowercased(with: aliasNormalizationLocale)) { partialResult, replacement in
-        let pattern = #"(?<!\w)"# + NSRegularExpression.escapedPattern(for: replacement.0) + #"(?!\w)"#
-        return partialResult.replacingOccurrences(
-            of: pattern,
-            with: replacement.1,
-            options: .regularExpression
-        )
+    let lowercased = text.lowercased(with: aliasNormalizationLocale)
+    var normalized = ""
+    var token = ""
+
+    func flushToken() {
+        guard !token.isEmpty else { return }
+        normalized += aliasNormalizationReplacements[token] ?? token
+        token.removeAll(keepingCapacity: true)
     }
+
+    for character in lowercased {
+        if isAliasTokenCharacter(character) {
+            token.append(character)
+        } else {
+            flushToken()
+            normalized.append(character)
+        }
+    }
+
+    flushToken()
+    return normalized
+}
+
+private func isAliasTokenCharacter(_ character: Character) -> Bool {
+    character == "_" || character.unicodeScalars.allSatisfy { CharacterSet.alphanumerics.contains($0) }
 }
 
 private enum CompanyKnowledgeBaseCatalog {
