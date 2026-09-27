@@ -1275,22 +1275,25 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Website Building",
-            aliases: ["website building", "build website", "website builder", "web builder", "web design", "multiple website building capabilities"],
+            aliases: ["website building", "build website", "website builder", "web builder", "web design", "multiple website building capabilities", "add to home screen", "safari add home screen", "launch from safari", "looks like a app", "looks like app", "web app"],
             overview: "Designs and organizes website-building workflows across landing pages, commerce pages, content hubs, and multi-page site structures.",
             workflows: [
                 "Translate business goals into site architecture, navigation patterns, and conversion pathways",
                 "Plan reusable templates and component systems for multiple websites or campaigns",
-                "Coordinate build, QA, publishing, and iteration workflows across web and content teams"
+                "Coordinate build, QA, publishing, and iteration workflows across web and content teams",
+                "Prepare installable web-app patterns so Safari users can add to Home Screen with app-like launch behavior"
             ],
             outputs: [
                 "Website blueprints, page maps, section-level content briefs, and conversion-focused layout guidance",
                 "Multi-site rollout checklists for branding, SEO readiness, and launch sequencing",
-                "Builder-compatible implementation guidance for forms, CMS content, analytics tags, and integrations"
+                "Builder-compatible implementation guidance for forms, CMS content, analytics tags, and integrations",
+                "Safari Add-to-Home-Screen guidance for app-like icon launch, viewport behavior, and install messaging"
             ],
             plugins: [
                 "Website builder plug-ins for CMS blocks, forms, SEO configuration, and template systems",
                 "Publishing connectors for staged rollouts, content approvals, and release coordination",
-                "Analytics and optimization integrations for funnel visibility and iteration planning"
+                "Analytics and optimization integrations for funnel visibility and iteration planning",
+                "PWA and manifest-validation connectors for home-screen installability and app-like presentation"
             ],
             autoActivateOnImageInput: false
         ),
@@ -1338,38 +1341,64 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Story Universe Continuity",
-            aliases: ["story lines", "storyline", "story continuity", "characters", "character backstory", "lore", "ip", "universe develop", "worldbuilding"],
-            overview: "Manages story universes with recurring characters, lore systems, timeline continuity, and new character/design creation.",
+            aliases: ["story lines", "storyline", "story continuity", "characters", "character backstory", "lore", "ip", "universe develop", "worldbuilding", "episodes", "episode draft", "draft episodes", "different universes", "multi universe", "multiverse continuity"],
+            overview: "Manages story universes with recurring characters, episodic drafting, lore systems, timeline continuity, and new character/design creation.",
             workflows: [
-                "Track storyline arcs, character goals, and backstory dependencies across multi-part narratives",
+                "Track storyline arcs, episode beats, character goals, and backstory dependencies across multi-part narratives",
                 "Create new characters, factions, and visual designs that align with established universe rules",
-                "Maintain lore canon, IP tone guides, and continuity checks during expansion of each universe"
+                "Maintain lore canon, IP tone guides, and continuity checks during expansion of each universe",
+                "Retain backstory memory for separate universes so shared names and events do not conflict"
             ],
             outputs: [
-                "Storyline memory maps with arc status, unresolved threads, and continuity anchors",
+                "Storyline and episode memory maps with arc status, unresolved threads, and continuity anchors",
                 "Character dossiers with traits, backstory, relationships, and visual design references",
-                "Lore and universe bibles covering world rules, timeline chronology, and IP consistency"
+                "Lore and universe bibles covering world rules, timeline chronology, and IP consistency",
+                "Universe-separated continuity ledgers for episode-by-episode character and backstory retention"
             ],
             plugins: [
                 "Character database plug-ins for searchable cast profiles and relationship graphs",
                 "Lore management connectors for canon tracking, timeline validation, and revision history",
-                "Creative ideation plug-ins for generating new character concepts and universe expansions"
+                "Creative ideation plug-ins for generating new character concepts and universe expansions",
+                "Episode planning integrations for drafting, sequencing, and continuity checkpointing"
             ],
             autoActivateOnImageInput: true
         ),
         SkillKnowledgeBaseEntry(
+            name: "Apparel Design and DTG Production",
+            aliases: ["hoodie design", "hoodies", "hoodie", "tshirt", "t-shirt", "t shirt", "shirt design", "merch design", "dtg", "direct to garment", "apparel design"],
+            overview: "Designs hoodie and T-shirt graphics with print-safe composition and DTG-ready output guidance.",
+            workflows: [
+                "Translate apparel concepts into front/back print layouts for hoodie and T-shirt use cases",
+                "Align typography, illustration density, and placement for wearable readability and brand consistency",
+                "Prepare DTG production handoff details with dimensions, spacing, and color planning"
+            ],
+            outputs: [
+                "Print-ready hoodie and T-shirt design briefs with placement and style direction",
+                "DTG output specs: 30cm wide with 40-50cm long design layouts for production-ready compositions",
+                "Export guidance for transparent-background assets, color-safe design layers, and print QA checks"
+            ],
+            plugins: [
+                "Apparel mockup plug-ins for hoodie and T-shirt placement previews across garment colors",
+                "DTG preflight connectors for sizing validation, print-area checks, and production packaging",
+                "Asset export integrations for layered files, transparent outputs, and vendor handoff bundles"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
             name: "Assistant Personality Styling",
-            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation"],
+            aliases: ["assistant personality", "blunt and honest", "not mean", "sassy", "sarcastic", "helpful creating ideas", "idea creation", "name is karma", "named karma", "its name is karma", "responds as karma"],
             overview: "Shapes response tone to be blunt, honest, sassy, and lightly sarcastic while still constructive, respectful, and idea-focused.",
             workflows: [
                 "Set tone guidelines that keep direct feedback clear without becoming rude or dismissive",
                 "Blend playful sarcasm with practical steps and actionable idea-development support",
-                "Refine brainstorming style to challenge weak ideas and improve stronger concepts quickly"
+                "Refine brainstorming style to challenge weak ideas and improve stronger concepts quickly",
+                "Preserve assistant identity continuity so name responses stay consistent as Karma when requested"
             ],
             outputs: [
                 "Tone profile settings for blunt/honest but not-mean assistant behavior",
                 "Idea-generation structures that include critique, alternatives, and next-step recommendations",
-                "Style guardrails that preserve respectful language while keeping responses sharp and confident"
+                "Style guardrails that preserve respectful language while keeping responses sharp and confident",
+                "Assistant identity anchor: respond as Karma when asked for your name"
             ],
             plugins: [
                 "Personality-tuning plug-ins for tone presets, guardrails, and response style controls",
@@ -1380,7 +1409,7 @@ private enum SkillKnowledgeBaseCatalog {
         ),
         SkillKnowledgeBaseEntry(
             name: "Voice and Hearing Interaction",
-            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "speech to text", "text to speech", "audio input", "audio output"],
+            aliases: ["voice abilities", "hearing abilities", "voice", "hearing", "speech to text", "text to speech", "audio input", "audio output", "speech and hearing", "speach and hearing", "speach"],
             overview: "Supports voice-first interaction planning with hearing (speech input), speaking (audio output), and conversational turn management.",
             workflows: [
                 "Capture spoken user requests and convert them into structured prompt-ready text",

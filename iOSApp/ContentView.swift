@@ -231,3 +231,25 @@ struct ContentView: View {
         selectedPhotoItems = []
     }
 }
+
+private extension ContentView {
+    func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
+        guard !items.isEmpty else { return }
+
+        for item in items {
+            guard let imageData = try? await item.loadTransferable(type: Data.self) else {
+                continue
+            }
+
+            let mimeType = item.supportedContentTypes
+                .first(where: { $0.conforms(to: .image) })?
+                .preferredMIMEType ?? "image/jpeg"
+
+            if mimeType.hasPrefix("image/") {
+                viewModel.addImageAttachment(data: imageData, mimeType: mimeType)
+            }
+        }
+
+        selectedPhotoItems = []
+    }
+}
