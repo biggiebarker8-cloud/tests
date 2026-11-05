@@ -435,4 +435,107 @@ struct LarkAISolutionsConsultantTests {
         #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
         #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
     }
+
+    @Test
+    func controllerRoutesPullRequestAppInstallPromptToSoftwareDevelopmentSkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Pull Request: https://github.com/biggiebarker8-cloud/tests/pull/28 install working app on my phone")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+        #expect(skillMessage?.content.contains("Pull request review guidance") == true)
+    }
+
+    @Test
+    func controllerRoutesShorthandPullRequestAppPromptToSoftwareDevelopmentSkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("PR #28 download app")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+    }
+
+    @Test
+    func controllerRoutesPullRequestBuildPromptToSoftwareDevelopmentSkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("download the ios build from pull request 28")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+    }
+
+    @Test
+    func controllerRoutesInflectedPullRequestInstallPromptToSoftwareDevelopmentSkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("installing the application from PR #28")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+    }
+
+    @Test
+    func controllerRoutesHyphenatedPullRequestPluralPromptToSoftwareDevelopmentSkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("pull-request 28 downloads ipa")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+    }
+
+    @Test
+    func controllerKeepsGenericAppInstallPromptOutOfSoftwareDevelopmentSkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Install working app on my phone")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") != true)
+    }
 }

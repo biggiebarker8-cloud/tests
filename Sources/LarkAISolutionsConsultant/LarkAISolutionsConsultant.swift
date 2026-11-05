@@ -1251,6 +1251,28 @@ private struct SkillKnowledgeBaseEntry: Sendable {
 }
 
 private enum SkillKnowledgeBaseCatalog {
+    private static let pullRequestReviewEntry = SkillKnowledgeBaseEntry(
+        name: "Software Development and Upgrades",
+        aliases: [],
+        overview: "Handles software-delivery requests around pull requests, app build/install follow-up, implementation changes, and upgrade guidance.",
+        workflows: [
+            "Review pull request context and identify the requested code or release outcome",
+            "Translate app install or build phrasing into concrete software-development next steps",
+            "Provide implementation, debugging, and upgrade guidance tied to the referenced change"
+        ],
+        outputs: [
+            "Pull request review guidance with implementation-focused follow-up",
+            "Build, install, and release-readiness recommendations for the referenced app changes",
+            "Upgrade notes, validation steps, and risk callouts for the requested software change"
+        ],
+        plugins: [
+            "Repository review plug-ins for pull request inspection and change analysis",
+            "Build and release connectors for validation, packaging, and deployment workflows",
+            "Issue-tracking integrations for implementation follow-up and upgrade planning"
+        ],
+        autoActivateOnImageInput: false
+    )
+
     static let entries: [SkillKnowledgeBaseEntry] = [
         SkillKnowledgeBaseEntry(
             name: "Image Creation",
@@ -1530,7 +1552,12 @@ private enum SkillKnowledgeBaseCatalog {
     static func relevantEntries(for text: String, imageAttachments: [ChatImageAttachment]) -> [SkillKnowledgeBaseEntry] {
         let normalized = text.lowercased()
         let hasImageAttachments = !imageAttachments.isEmpty
-        return entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
+        var matchedEntries = entries.filter { $0.matches(normalized, hasImageAttachments: hasImageAttachments) }
+        if matchesPullRequestAppInstallPrompt(normalized) {
+            matchedEntries.append(pullRequestReviewEntry)
+        }
+        var seenNames = Set<String>()
+        return matchedEntries.filter { seenNames.insert($0.name).inserted }
     }
 
     static func autoSelectedSkillNames(for entries: [SkillKnowledgeBaseEntry], imageAttachments: [ChatImageAttachment]) -> [String] {
@@ -1547,6 +1574,23 @@ private enum SkillKnowledgeBaseCatalog {
     ) -> [String] {
         let plugins = skillEntries.flatMap(\.plugins) + matchedCompanies.flatMap(\.plugins)
         return Array(NSOrderedSet(array: plugins.prefix(8).map { $0 })) as? [String] ?? Array(plugins.prefix(8))
+    }
+
+    private static func matchesPullRequestAppInstallPrompt(_ text: String) -> Bool {
+        let referencesPullRequest =
+            text.range(of: #"/pull/\d+"#, options: .regularExpression) != nil ||
+            text.range(of: #"\bpr\s*#?\d+\b"#, options: .regularExpression) != nil ||
+            text.range(of: #"\bpull(?: |-)?request\s*#?\d+\b"#, options: .regularExpression) != nil
+        let mentionsInstallAction = text.range(
+            of: #"\b(install(?:s|ing|ed)?|download(?:s|ing|ed)?)\b"#,
+            options: .regularExpression
+        ) != nil
+        let mentionsInstallableArtifact = text.range(
+            of: #"\b(app|application|build|ipa)\b"#,
+            options: .regularExpression
+        ) != nil
+        let mentionsAppInstall = mentionsInstallAction && mentionsInstallableArtifact
+        return referencesPullRequest && mentionsAppInstall
     }
 }
 
