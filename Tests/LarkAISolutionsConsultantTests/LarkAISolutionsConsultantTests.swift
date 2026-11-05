@@ -309,6 +309,25 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsSafariHomeScreenWebsiteSkillContext() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Also I'll open on safari and launch add Home Screen as it looks like a app")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Website Building") == true)
+        #expect(skillMessage?.content.contains("Safari Add-to-Home-Screen guidance") == true)
+        #expect(skillMessage?.content.contains("PWA and manifest-validation connectors") == true)
+    }
+
+    @Test
     func controllerInjectsCoreMemoryAndUniverseContinuitySkills() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
@@ -332,6 +351,47 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsUniverseEpisodeAndApparelDTGSkills() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Deeper lore and creative abilities to draft episodes and characters and backstory memory retention for different universes, hoodies and Tshirts design knowledge and dtg format output at 30cm wide 40-50cm long designs")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Story Universe Continuity") == true)
+        #expect(skillMessage?.content.contains("episode-by-episode") == true)
+        #expect(skillMessage?.content.contains("Skill: Apparel Design and DTG Production") == true)
+        #expect(skillMessage?.content.contains("DTG output specs: 30cm wide with 40-50cm long design layouts") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+        #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
+    }
+
+    @Test
+    func controllerInjectsApparelSkillForHoodieAndMerchAliases() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Help me build a hoodie merch design with print-safe layout guidance")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Apparel Design and DTG Production") == true)
+        #expect(skillMessage?.content.contains("hoodie and T-shirt design briefs") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+    }
+
+    @Test
     func controllerInjectsPersonalityAndVoiceHearingSkills() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(
@@ -352,6 +412,86 @@ struct LarkAISolutionsConsultantTests {
         #expect(skillMessage?.content.contains("Text-to-speech") == true)
         #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
         #expect(skillMessage?.content.contains("Auto-selected plug-ins:") == true)
+    }
+
+    @Test
+    func controllerInjectsKarmaIdentityAndSpeechHearingSkills() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("And responds and knows its name is karma, add Speach and hearing ability too")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Assistant Personality Styling") == true)
+        #expect(skillMessage?.content.contains("Assistant identity anchor: respond as Karma when asked for your name") == true)
+        #expect(skillMessage?.content.contains("Skill: Voice and Hearing Interaction") == true)
+        #expect(skillMessage?.content.contains("Speech-to-text") == true)
+    }
+
+    @Test
+    func controllerInjectsPullRequestAndKarmaSkills() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Review this pull request and your name is Karma")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Assistant Personality Styling") == true)
+        #expect(skillMessage?.content.contains("Assistant identity anchor: respond as Karma when asked for your name") == true)
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+        #expect(skillMessage?.content.contains("Pull request review guidance") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
+    }
+
+    @Test
+    func controllerSkipsKarmaPersonaForTechnicalKarmaReferences() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Pull request karma")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Assistant Personality Styling") == false)
+        #expect(skillMessage?.content.contains("Assistant identity anchor: respond as Karma when asked for your name") == false)
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+        #expect(skillMessage?.content.contains("Pull request review guidance") == true)
+    }
+
+    @Test
+    func controllerInjectsSoftwareDevelopmentSkillForPullRequestDownloadAppPrompt() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("Pull Request: https://github.com/biggiebarker8-cloud/tests/pull/27 download app")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Software Development and Upgrades") == true)
+        #expect(skillMessage?.content.contains("Pull request review guidance") == true)
+        #expect(skillMessage?.content.contains("Auto-selected skills:") == true)
     }
 
     @Test

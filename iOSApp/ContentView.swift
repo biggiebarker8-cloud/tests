@@ -13,6 +13,7 @@ final class ChatViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var pendingAttachments: [ChatImageAttachment] = []
+    @Published var setupGuidance: String?
 
     private let controller: ChatSessionController?
 
@@ -23,7 +24,7 @@ final class ChatViewModel: ObservableObject {
               !rawKey.isEmpty
         else {
             self.controller = nil
-            self.errorMessage = "Set LARK_AI_ENDPOINT and LARK_AI_API_KEY in the scheme Run environment to enable live Lark chat."
+            self.setupGuidance = "Live API is not configured. In Xcode, open the app scheme Run settings and set LARK_AI_ENDPOINT and LARK_AI_API_KEY."
             return
         }
 
@@ -189,6 +190,7 @@ struct ContentView: View {
                 HStack {
                     TextField("Describe your challenge", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
+                        .disabled(viewModel.setupGuidance != nil)
                     PhotosPicker(
                         selection: $selectedPhotoItems,
                         maxSelectionCount: 6,
@@ -196,11 +198,15 @@ struct ContentView: View {
                     ) {
                         Image(systemName: "photo.on.rectangle")
                     }
-                    .disabled(viewModel.isLoading)
+                    .disabled(viewModel.isLoading || viewModel.setupGuidance != nil)
                     Button("Send") {
                         Task { await viewModel.send() }
                     }
-                    .disabled(viewModel.isLoading || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty))
+                    .disabled(
+                        viewModel.isLoading
+                        || viewModel.setupGuidance != nil
+                        || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
+                    )
                 }
                 .padding()
 
@@ -242,6 +248,7 @@ struct ContentView: View {
 }
 
 private extension ContentView {
+    @MainActor
     func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
         guard !items.isEmpty else { return }
 
