@@ -24,7 +24,7 @@ xcodegen generate
 open LarkAISolutionsConsultant.xcodeproj
 ```
 
-Select the `LarkAISolutionsConsultantApp` scheme and an iPhone simulator, then press Run. The app starts with a local mock response until an endpoint is configured. To run on your own iPhone, select your Apple development team under Signing & Capabilities in Xcode and choose the device. A signed distribution build requires your Apple signing setup.
+Select the `LarkAISolutionsConsultantApp` scheme and an iPhone simulator, then press Run. The app requires live Lark configuration (`LARK_AI_ENDPOINT` and `LARK_AI_API_KEY`) before chat is enabled. To run on your own iPhone, select your Apple development team under Signing & Capabilities in Xcode and choose the device. A signed distribution build requires your Apple signing setup.
 
 The iOS Simulator Build workflow checks that the app compiles. The Swift Tests workflow checks the package separately.
 

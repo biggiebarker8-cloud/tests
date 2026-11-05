@@ -15,18 +15,27 @@ final class ChatViewModel: ObservableObject {
     @Published var pendingAttachments: [ChatImageAttachment] = []
     @Published var setupGuidance: String?
 
-    private let controller: ChatSessionController
-    private let isLiveConfigured: Bool
+    private let controller: ChatSessionController?
 
     init() {
         let config = AppConfig.fromEnvironment()
-        let hasEndpoint = config.endpoint != nil
-        let hasAPIKey = !(config.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-        self.isLiveConfigured = hasEndpoint && hasAPIKey
-        let provider: AIProvider = isLiveConfigured ? HTTPAIProvider(configuration: config) : MockAIProvider()
-        self.setupGuidance = isLiveConfigured
-            ? nil
-            : "Live API is not configured. In Xcode, open the app scheme Run settings and set LARK_AI_ENDPOINT and LARK_AI_API_KEY."
+        guard let endpoint = config.endpoint,
+              let rawKey = config.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !rawKey.isEmpty
+        else {
+            self.controller = nil
+            self.setupGuidance = "Live API is not configured. In Xcode, open the app scheme Run settings and set LARK_AI_ENDPOINT and LARK_AI_API_KEY."
+            return
+        }
+
+        let provider: AIProvider = HTTPAIProvider(
+            configuration: AppConfig(
+                endpoint: endpoint,
+                apiKey: rawKey,
+                model: config.model,
+                maxRetryCount: config.maxRetryCount
+            )
+        )
 
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
@@ -45,15 +54,13 @@ final class ChatViewModel: ObservableObject {
     }
 
     func bootstrap() async {
+        guard let controller else { return }
         await controller.bootstrap()
         sync()
     }
 
     func send() async {
-        guard isLiveConfigured else {
-            errorMessage = setupGuidance
-            return
-        }
+        guard let controller else { return }
         let currentInput = input
         let currentAttachments = pendingAttachments
         input = ""
@@ -63,11 +70,21 @@ final class ChatViewModel: ObservableObject {
     }
 
     func clear() async {
+        guard let controller else { return }
         await controller.clear()
         sync()
     }
 
     private func sync() {
+        guard let controller else {
+            messages = []
+            memories = []
+            topTopics = []
+            userGoals = []
+            isLoading = false
+            return
+        }
+
         messages = controller.messages
         memories = controller.memories
             .sorted(by: { $0.strength > $1.strength })
@@ -86,10 +103,6 @@ final class ChatViewModel: ObservableObject {
         case .error(let message):
             isLoading = false
             errorMessage = message
-        }
-
-        if !isLiveConfigured {
-            errorMessage = setupGuidance
         }
     }
 
