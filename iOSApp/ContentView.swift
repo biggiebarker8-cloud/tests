@@ -122,6 +122,7 @@ final class ChatViewModel: ObservableObject {
 
 struct ContentView: View {
     @ObservedObject var viewModel: ChatViewModel
+    @StateObject private var voiceController = VoiceInteractionController()
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
 
     var body: some View {
@@ -154,9 +155,21 @@ struct ContentView: View {
                 } else {
                     List(viewModel.messages) { message in
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(message.role.rawValue.capitalized)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            HStack {
+                                Text(message.role.rawValue.capitalized)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                if message.role == .assistant {
+                                    Button {
+                                        voiceController.speak(message.content)
+                                    } label: {
+                                        Image(systemName: "speaker.wave.2")
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel("Read response aloud")
+                                }
+                            }
                             Text(message.content)
                         }
                         .padding(.vertical, 4)
@@ -188,7 +201,7 @@ struct ContentView: View {
                 }
 
                 HStack {
-                    TextField("Describe your challenge", text: $viewModel.input)
+                    TextField("Ask about a photo or describe a challenge", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
                         .disabled(viewModel.setupGuidance != nil)
                     PhotosPicker(
@@ -199,16 +212,61 @@ struct ContentView: View {
                         Image(systemName: "photo.on.rectangle")
                     }
                     .disabled(viewModel.isLoading || viewModel.setupGuidance != nil)
+                    .accessibilityLabel("Add an image to ask about")
+                    Button {
+                        if voiceController.isListening {
+                            voiceController.stopListening()
+                        } else {
+                            Task {
+                                await voiceController.startListening { transcript in
+                                    viewModel.input = transcript
+                                }
+                            }
+                        }
+                    } label: {
+                        Image(systemName: voiceController.isListening ? "stop.circle.fill" : "mic")
+                    }
+                    .disabled(
+                        viewModel.isLoading
+                        || viewModel.setupGuidance != nil
+                        || voiceController.isFinishingRecognition
+                    )
+                    .accessibilityLabel(voiceController.isListening ? "Stop voice input" : "Start voice input")
                     Button("Send") {
+                        voiceController.stopListening()
                         Task { await viewModel.send() }
                     }
                     .disabled(
                         viewModel.isLoading
                         || viewModel.setupGuidance != nil
+                        || voiceController.isFinishingRecognition
                         || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
                     )
                 }
                 .padding()
+
+                if voiceController.isListening {
+                    Label("Listening… spoken words appear in the text field", systemImage: "waveform")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else if voiceController.isFinishingRecognition {
+                    Label("Finishing transcription…", systemImage: "waveform")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                if voiceController.isSpeaking {
+                    Button("Stop speaking", systemImage: "stop.fill") {
+                        voiceController.stopSpeaking()
+                    }
+                    .font(.footnote)
+                }
+                if let voiceError = voiceController.errorMessage {
+                    Text(voiceError)
+                        .foregroundStyle(.red)
+                        .font(.footnote)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                }
 
                 if !viewModel.pendingAttachments.isEmpty {
                     HStack(spacing: 12) {
@@ -242,6 +300,10 @@ struct ContentView: View {
                     await loadSelectedPhotos(newItems)
                 }
             }
+            .onDisappear {
+                voiceController.stopListening()
+                voiceController.stopSpeaking()
+            }
         }
     }
 
@@ -253,16 +315,21 @@ private extension ContentView {
         guard !items.isEmpty else { return }
 
         for item in items {
-            guard let imageData = try? await item.loadTransferable(type: Data.self) else {
-                continue
-            }
+            do {
+                guard let imageData = try await item.loadTransferable(type: Data.self) else {
+                    viewModel.errorMessage = "Couldn't load a selected image. Please try selecting it again."
+                    continue
+                }
 
-            let mimeType = item.supportedContentTypes
-                .first(where: { $0.conforms(to: .image) })?
-                .preferredMIMEType ?? "image/jpeg"
+                let mimeType = item.supportedContentTypes
+                    .first(where: { $0.conforms(to: .image) })?
+                    .preferredMIMEType ?? "image/jpeg"
 
-            if mimeType.hasPrefix("image/") {
-                viewModel.addImageAttachment(data: imageData, mimeType: mimeType)
+                if mimeType.hasPrefix("image/") {
+                    viewModel.addImageAttachment(data: imageData, mimeType: mimeType)
+                }
+            } catch {
+                viewModel.errorMessage = "Couldn't load a selected image: \(error.localizedDescription)"
             }
         }
 

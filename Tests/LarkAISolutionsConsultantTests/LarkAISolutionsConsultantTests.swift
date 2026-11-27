@@ -351,6 +351,25 @@ struct LarkAISolutionsConsultantTests {
     }
 
     @Test
+    func controllerInjectsEmotionalSupportCheckInSkill() async throws {
+        let provider = CapturingProvider()
+        let controller = ChatSessionController(
+            provider: provider,
+            store: InMemoryConversationStore(),
+            learningStore: InMemoryLearningStore()
+        )
+
+        await controller.send("I need an emotional support check-in. I've been feeling overwhelmed.")
+
+        let captured = await provider.lastMessages()
+        let skillMessage = captured.first(where: { $0.role == .system && $0.content.contains("skill context") })
+
+        #expect(skillMessage?.content.contains("Skill: Emotional Support Check-ins") == true)
+        #expect(skillMessage?.content.contains("without judgment") == true)
+        #expect(skillMessage?.content.contains("immediate local emergency or crisis support") == true)
+    }
+
+    @Test
     func controllerInjectsUniverseEpisodeAndApparelDTGSkills() async throws {
         let provider = CapturingProvider()
         let controller = ChatSessionController(

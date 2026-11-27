@@ -12,7 +12,7 @@ This repository contains the foundation for a standalone iPhone consultant app, 
   - advanced long-term memory store with semantic recall
   - controller layer for MVP chat flow
 
-- iOS app source scaffold in `/iOSApp` using SwiftUI
+- SwiftUI iOS app in `/iOSApp` with photo-library image input, on-device speech-to-text, and spoken assistant responses
 - Initial V1 scope and roadmap docs in `/docs`
 - CI workflow to run `swift test` on both pushes and pull requests
 
@@ -64,7 +64,8 @@ The iOS app requires both `LARK_AI_ENDPOINT` and `LARK_AI_API_KEY` for live chat
 - Tracks top topics and recent user goals over time.
 - Recalls relevant memories and injects them into provider prompts for personalization.
 - Persists both conversation history and learning state across sessions.
-- Supports multimodal prompts with image attachments (common image MIME types).
+- Supports multimodal prompts with image attachments (common image MIME types); image understanding depends on the configured API model supporting vision.
+- Use the photo picker to ask questions about images, tap the microphone to dictate editable text using on-device speech recognition, and tap an assistant response's speaker icon to hear it read aloud. Microphone and speech permissions are requested when voice input is first used.
 - Accepts both native `reply` API responses and OpenAI-style `choices[].message.content` responses.
 - Injects built-in company knowledge base and plugin context for TikTok, TikTok Agency, Microsoft, Facebook, Instagram, Wix, Shopify, Amazon, Lark, Claude AI, Munus, ByteDance, Canva, and AnyCross when prompts reference those platforms.
 - Adds cross-platform plugin suggestions when prompts ask for integrations, connectors, plugins, or multi-platform workflows.
