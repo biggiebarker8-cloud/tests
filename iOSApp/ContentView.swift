@@ -54,6 +54,10 @@ struct ContentView: View {
                                     .accessibilityLabel("Read response aloud")
                                 }
                             }
+                            if !message.attachments.isEmpty {
+                                Label("Photos sent: \(message.attachments.count)", systemImage: "photo")
+                                    .font(.caption)
+                            }
                             Text(message.content)
                         }
                         .padding(.vertical, 4)
@@ -90,7 +94,9 @@ struct ContentView: View {
                         .padding(.horizontal)
                 }
 
+                PhotoDraftStatus(viewModel: viewModel)
                 HStack {
+                    if viewModel.usesOpenAI { PhotoInput(viewModel: viewModel) }
                     TextField("Ask your consultant", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
                         .disabled(viewModel.setupGuidance != nil)
@@ -118,10 +124,7 @@ struct ContentView: View {
                         Task { await viewModel.send() }
                     }
                     .disabled(
-                        viewModel.isLoading
-                        || viewModel.setupGuidance != nil
-                        || voiceController.isFinishingRecognition
-                        || viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        !viewModel.canSend || voiceController.isFinishingRecognition
                     )
                 }
                 .padding()
@@ -167,7 +170,7 @@ struct ContentView: View {
             }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
-                    Button("OpenAI") { showingOpenAI = true }.disabled(viewModel.isLoading)
+                    Button("OpenAI") { showingOpenAI = true }.disabled(viewModel.isLoading || viewModel.isPreparingPhotos)
                     Button("Sources") { showingSources = true }
                     Button("Memories") { showingMemories = true }
                 }

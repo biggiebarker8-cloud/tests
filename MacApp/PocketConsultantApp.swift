@@ -37,6 +37,9 @@ private struct MacChatView: View {
                         VStack(alignment: .leading, spacing: 5) {
                             Text(message.role == .user ? "You" : "Pocket Consultant")
                                 .font(.caption.bold()).foregroundStyle(.secondary)
+                            if !message.attachments.isEmpty {
+                                Label("Photos sent: \(message.attachments.count)", systemImage: "photo").font(.caption)
+                            }
                             Text(message.content).textSelection(.enabled)
                         }
                         .padding(.vertical, 5)
@@ -56,20 +59,22 @@ private struct MacChatView: View {
                     }
                 }
                 if let error = viewModel.errorMessage { Text(error).foregroundStyle(.red) }
+                PhotoDraftStatus(viewModel: viewModel)
                 HStack {
+                    if viewModel.usesOpenAI { PhotoInput(viewModel: viewModel) }
                     TextField("Ask your consultant", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
                         .disabled(viewModel.setupGuidance != nil)
-                        .onSubmit { if canSend { Task { await viewModel.send() } } }
+                        .onSubmit { if viewModel.canSend { Task { await viewModel.send() } } }
                     if viewModel.isLoading { ProgressView().controlSize(.small) }
                     Button("Send") { Task { await viewModel.send() } }
-                        .disabled(!canSend)
+                        .disabled(!viewModel.canSend)
                 }
             }
             .padding()
         }
         .toolbar {
-            Button("OpenAI", systemImage: "key") { showingOpenAI = true }.disabled(viewModel.isLoading)
+            Button("OpenAI", systemImage: "key") { showingOpenAI = true }.disabled(viewModel.isLoading || viewModel.isPreparingPhotos)
             Button("Memories", systemImage: "books.vertical") { showingMemories = true }
             Button("Sources", systemImage: "doc.text.magnifyingglass") { showingSources = true }
             Button("Clear chat", systemImage: "trash") { confirmingClear = true }
@@ -88,10 +93,5 @@ private struct MacChatView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { viewModel.refreshAvailability() }
         }
-    }
-
-    private var canSend: Bool {
-        viewModel.setupGuidance == nil && !viewModel.isLoading &&
-            !viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }

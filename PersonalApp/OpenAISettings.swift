@@ -70,7 +70,7 @@ struct OpenAISettings: View {
                     #if os(iOS)
                         .textInputAutocapitalization(.never)
                     #endif
-                    Text("Sending a message shares it, recent chat and relevant memory excerpts with OpenAI. Usage is billed to your API project. The key is saved in this device’s Keychain.")
+                    Text("Sending a message shares it, any photos attached to it, recent chat and relevant memory excerpts with OpenAI. Usage is billed to your API project. The key is saved in this device’s Keychain.")
                         .font(.footnote)
                     Button("Save key and use OpenAI") {
                         do {

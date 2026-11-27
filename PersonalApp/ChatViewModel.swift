@@ -9,6 +9,12 @@ final class ChatViewModel: ObservableObject {
     @Published var userGoals: [String] = []
     @Published var input: String = ""
     @Published var isLoading: Bool = false
+    @Published var isPreparingPhotos = false
+    @Published var pendingPhotos: [ChatImageAttachment] = []
+    var canSend: Bool {
+        setupGuidance == nil && !isLoading && !isPreparingPhotos &&
+            (!input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || (usesOpenAI && !pendingPhotos.isEmpty))
+    }
     @Published var errorMessage: String?
     @Published var setupGuidance: String?
     @Published private(set) var usesOpenAI = UserDefaults.standard.bool(forKey: PersonalOpenAIKey.selection)
@@ -17,6 +23,7 @@ final class ChatViewModel: ObservableObject {
     func selectOpenAI(_ enabled: Bool) {
         UserDefaults.standard.set(enabled, forKey: PersonalOpenAIKey.selection)
         usesOpenAI = enabled
+        if !enabled { pendingPhotos.removeAll() }
         errorMessage = nil
         refreshAvailability()
     }
@@ -62,11 +69,13 @@ final class ChatViewModel: ObservableObject {
 
     func send() async {
         refreshAvailability()
-        guard setupGuidance == nil, !isLoading else { return }
+        guard canSend else { return }
         isLoading = true
         let currentInput = input
         input = ""
-        await controller.send(currentInput)
+        let photos = pendingPhotos
+        pendingPhotos.removeAll()
+        await controller.send(currentInput, imageAttachments: photos)
         sync()
     }
 

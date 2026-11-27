@@ -1,6 +1,6 @@
 # Pocket Consultant for iPhone and Mac
 
-This personal build supports OpenAI and Apple on-device chat. Open **OpenAI**, enter your personal OpenAI API key in the secure field, then select **Save key and use OpenAI**. Enter the key separately on each device. The app stores the key in Keychain. Only sending a message calls the OpenAI Responses API. The request uses `gpt-5.4-mini`, includes recent turns and relevant context, and sets `store: false`. OpenAI bills your API project. For a distributed app with a shared developer key, keep that key on an authenticated backend.
+This personal build supports OpenAI and Apple on-device chat. Open **OpenAI**, enter your personal OpenAI API key in the secure field, then select **Save key and use OpenAI**. Enter the key separately on each device. The app stores the key in Keychain. Only sending a message calls the OpenAI Responses API. The request uses `gpt-5.4-mini`, includes photos attached to the current message, recent text turns and relevant context, and sets `store: false`. OpenAI bills your API project. For a distributed app with a shared developer key, keep that key on an authenticated backend.
 
 Apple on-device chat remains available before you select OpenAI and after you remove the key. Neither chat route uses a Lark account or endpoint. Conversation history and the optional archive of dated user memories stay in the app’s local container. In OpenAI mode, sending a question shares selected context with OpenAI.
 
@@ -21,7 +21,7 @@ open LarkAISolutionsConsultant.xcodeproj
 
 Select the LarkAISolutionsConsultantApp target. In Signing & Capabilities, select your Apple development team. Connect your iPhone, choose it as the run destination, and press Run. Enable Developer Mode on the iPhone if Xcode requests it.
 
-The archive screen supports iOS 17 and later. OpenAI chat supports iOS 17 or later. Apple chat requires iOS 26 or later, a device and language supported by Apple Intelligence, and a ready on-device model. The composer displays the model's status. Voice dictation uses the device's speech recognizer, and the speaker button reads replies aloud. This build accepts text and dictation.
+The archive screen supports iOS 17 and later. OpenAI chat supports iOS 17 or later. Apple chat requires iOS 26 or later, a device and language supported by Apple Intelligence, and a ready on-device model. The composer displays the model's status. Voice dictation uses the device's speech recognizer, and the speaker button reads replies aloud. In OpenAI mode, use the photo button to attach up to six photos on iPhone or Mac, then press Send. On iPhone you can dictate the question and play the answer aloud. Photos are resized and sent as JPEGs. Follow-up turns include recent text. Reattach a photo to have the model inspect it again.
 
 ## Personal memories
 

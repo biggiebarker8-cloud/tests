@@ -33,3 +33,17 @@ import Testing
         try OpenAIConsultant.reply(from: Data(), status: 200)
     }
 }
+
+@Test func onlyExplicitlyAttachedPhotosGoToOpenAI() throws {
+    let previous = ChatImageAttachment(mimeType: "image/jpeg", base64Data: "older-fixture")
+    let selected = ChatImageAttachment(mimeType: "image/jpeg", base64Data: "current-fixture")
+    let messages = [ChatMessage(role: .user, content: "earlier", attachments: [previous]),
+                    ChatMessage(role: .user, content: "", attachments: [selected])]
+    let request = try OpenAIConsultant.request(for: messages, key: "test-only")
+    let data = try #require(request.httpBody)
+    let body = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+    let turns = try #require(body["input"] as? [[String: Any]])
+    let parts = try #require(turns.last?["content"] as? [[String: String]])
+    #expect(parts == [["type": "input_image", "image_url": "data:image/jpeg;base64,current-fixture"]])
+    #expect(!String(decoding: data, as: UTF8.self).contains("older-fixture"))
+}

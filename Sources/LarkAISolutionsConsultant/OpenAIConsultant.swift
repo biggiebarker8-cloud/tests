@@ -51,14 +51,25 @@ public struct OpenAIConsultant: AIProvider {
         guard !key.isEmpty else { throw OpenAIConsultantError.keyUnavailable }
         guard let latest = messages.last, latest.role == .user else { throw ConsultantError.emptyUserInput }
         let context = messages.filter { $0.role == .system }.map { String($0.content.prefix(3000)) }
-        var input: [[String: String]] = []
+        var input: [[String: Any]] = []
         if !context.isEmpty {
             input.append(["role": "user", "content": "Reference material supplied by the app:\n" + context.joined(separator: "\n\n")])
         }
-        input += messages.dropLast().filter { $0.role != .system }.suffix(6).map {
+        input += messages.dropLast().filter { $0.role != .system && !$0.content.isEmpty }.suffix(6).map {
             ["role": $0.role.rawValue, "content": String($0.content.prefix(2400))]
         }
-        input.append(["role": "user", "content": latest.content])
+        if latest.attachments.isEmpty {
+            input.append(["role": "user", "content": latest.content])
+        } else {
+            var parts: [[String: String]] = []
+            if !latest.content.isEmpty {
+                parts.append(["type": "input_text", "text": latest.content])
+            }
+            parts += latest.attachments.map { photo in
+                ["type": "input_image", "image_url": "data:\(photo.mimeType);base64,\(photo.base64Data)"]
+            }
+            input.append(["role": "user", "content": parts])
+        }
         var request = URLRequest(url: URL(string: "https://api.openai.com/v1/responses")!)
         request.httpMethod = "POST"
         request.timeoutInterval = 90
