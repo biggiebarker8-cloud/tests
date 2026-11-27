@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f7fb">
+    <title>Lark AI Consultant</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/" aria-label="Lark AI Consultant home">
+          <span class="brand-mark">L</span>
+          <span><strong>Lark</strong><small>AI CONSULTANT</small></span>
+        </a>
+        <button id="new-chat" class="new-chat" type="button"><span>＋</span> New conversation</button>
+        <div class="sidebar-note">
+          <span class="note-icon">✳</span>
+          <p>Clear thinking for your next big move.</p>
+        </div>
+        <div class="sidebar-bottom">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-label">Checking connection…</span>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div class="mobile-brand"><span class="brand-mark">L</span> Lark AI Consultant</div>
+          <div class="connection"><span class="status-dot" id="mobile-status-dot"></span><span id="mobile-status-label">Connecting</span></div>
+          <button id="clear-chat" class="clear-button" type="button" title="Clear conversation">Clear chat</button>
+        </header>
+
+        <div class="conversation" id="conversation" aria-live="polite">
+          <section class="welcome" id="welcome">
+            <div class="welcome-icon">✳</div>
+            <p class="eyebrow">YOUR THINKING PARTNER</p>
+            <h1>What are you<br><span>working through?</span></h1>
+            <p class="welcome-copy">Bring a challenge, an idea, or a plan. We’ll shape the next steps together.</p>
+            <div class="suggestions">
+              <button type="button" class="suggestion">Help me map out a launch plan</button>
+              <button type="button" class="suggestion">I’m weighing two business ideas</button>
+              <button type="button" class="suggestion">How could I improve this workflow?</button>
+            </div>
+          </section>
+          <div id="messages" class="messages"></div>
+        </div>
+
+        <form id="chat-form" class="composer-wrap">
+          <div id="attachment-list" class="attachment-list" hidden></div>
+          <div class="composer">
+            <label class="attach-button" for="image-input" title="Attach images" aria-label="Attach images">＋</label>
+            <input id="image-input" type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple hidden>
+            <textarea id="prompt" rows="1" maxlength="20000" placeholder="Ask anything…"></textarea>
+            <button id="send-button" class="send-button" type="submit" aria-label="Send message" disabled>↑</button>
+          </div>
+          <p class="composer-hint">Lark can make mistakes. Check important information.</p>
+          <p id="error-message" class="error-message" role="alert" hidden></p>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
