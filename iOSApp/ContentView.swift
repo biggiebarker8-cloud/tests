@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 import UniformTypeIdentifiers
 import LarkAISolutionsConsultant
+import UIKit
 
 @MainActor
 final class ChatViewModel: ObservableObject {
@@ -14,11 +15,29 @@ final class ChatViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var pendingAttachments: [ChatImageAttachment] = []
     @Published var setupGuidance: String?
+    @Published var generatedImage: UIImage?
+    @Published var isGeneratingImage = false
+    @Published var imageSize: GeneratedImageSize = .portrait
 
     private let controller: ChatSessionController?
+    private let imageGenerator: HTTPImageGenerator?
+    var imageGenerationAvailable: Bool { imageGenerator != nil }
 
     init() {
         let config = AppConfig.fromEnvironment()
+        let environment = ProcessInfo.processInfo.environment
+        if let endpointString = environment["LARK_AI_IMAGE_ENDPOINT"],
+           let endpoint = URL(string: endpointString),
+           let apiKey = environment["LARK_AI_IMAGE_API_KEY"],
+           !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            self.imageGenerator = HTTPImageGenerator(
+                endpoint: endpoint,
+                apiKey: apiKey,
+                model: environment["LARK_AI_IMAGE_MODEL"] ?? "gpt-image-1.5"
+            )
+        } else {
+            self.imageGenerator = nil
+        }
         guard let endpoint = config.endpoint,
               let rawKey = config.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines),
               !rawKey.isEmpty
@@ -65,6 +84,7 @@ final class ChatViewModel: ObservableObject {
         let currentAttachments = pendingAttachments
         input = ""
         pendingAttachments = []
+        isLoading = true
         await controller.send(currentInput, imageAttachments: currentAttachments)
         sync()
     }
@@ -117,6 +137,31 @@ final class ChatViewModel: ObservableObject {
 
     func clearPendingAttachments() {
         pendingAttachments = []
+    }
+
+    func generateImage() async {
+        guard let imageGenerator else {
+            errorMessage = "Configure LARK_AI_IMAGE_ENDPOINT and LARK_AI_IMAGE_API_KEY to create images."
+            return
+        }
+        let prompt = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !prompt.isEmpty else {
+            errorMessage = "Describe the image you want to create."
+            return
+        }
+        isGeneratingImage = true
+        errorMessage = nil
+        defer { isGeneratingImage = false }
+        do {
+            let data = try await imageGenerator.generate(prompt: prompt, size: imageSize)
+            guard let image = UIImage(data: data) else {
+                errorMessage = "The image service returned unreadable image data."
+                return
+            }
+            generatedImage = image
+        } catch {
+            errorMessage = "Couldn't create image: \(error.localizedDescription)"
+        }
     }
 }
 
@@ -199,11 +244,37 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
                 }
+                if let guidance = viewModel.setupGuidance {
+                    Text(guidance)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal)
+                }
+
+                if let generatedImage = viewModel.generatedImage {
+                    VStack {
+                        Image(uiImage: generatedImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxHeight: 240)
+                            .accessibilityLabel("Generated image")
+                        HStack {
+                            ShareLink(item: Image(uiImage: generatedImage), preview: SharePreview("Generated image", image: Image(uiImage: generatedImage))) {
+                                Label("Share image", systemImage: "square.and.arrow.up")
+                            }
+                            Button("Dismiss image") {
+                                viewModel.generatedImage = nil
+                            }
+                        }
+                        .font(.footnote)
+                    }
+                    .padding(.horizontal)
+                }
 
                 HStack {
                     TextField("Ask about a photo or describe a challenge", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
-                        .disabled(viewModel.setupGuidance != nil)
+                        .disabled(viewModel.setupGuidance != nil && !viewModel.imageGenerationAvailable)
                     PhotosPicker(
                         selection: $selectedPhotoItems,
                         maxSelectionCount: 6,
@@ -228,6 +299,7 @@ struct ContentView: View {
                     }
                     .disabled(
                         viewModel.isLoading
+                        || viewModel.isGeneratingImage
                         || viewModel.setupGuidance != nil
                         || voiceController.isFinishingRecognition
                     )
@@ -238,12 +310,37 @@ struct ContentView: View {
                     }
                     .disabled(
                         viewModel.isLoading
+                        || viewModel.isGeneratingImage
                         || viewModel.setupGuidance != nil
                         || voiceController.isFinishingRecognition
                         || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
                     )
                 }
                 .padding()
+
+                HStack {
+                    Picker("Image format", selection: $viewModel.imageSize) {
+                        Text("Portrait").tag(GeneratedImageSize.portrait)
+                        Text("Square").tag(GeneratedImageSize.square)
+                        Text("Landscape").tag(GeneratedImageSize.landscape)
+                    }
+                    Button {
+                        Task { await viewModel.generateImage() }
+                    } label: {
+                        Label("Create image", systemImage: "sparkles")
+                    }
+                }
+                .disabled(viewModel.isGeneratingImage || viewModel.isLoading || voiceController.isListening || voiceController.isFinishingRecognition)
+
+                if !viewModel.pendingAttachments.isEmpty {
+                    Text("Create image uses text only; attached photos are for chat.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
+                if viewModel.isGeneratingImage {
+                    ProgressView("Creating image…")
+                }
 
                 if voiceController.isListening {
                     Label("Listening… spoken words appear in the text field", systemImage: "waveform")
