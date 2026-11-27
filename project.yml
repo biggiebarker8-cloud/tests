@@ -18,9 +18,10 @@ targets:
         product: LarkAISolutionsConsultant
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.creatoralliancenetwork.larkconsultant
+        PRODUCT_BUNDLE_IDENTIFIER: com.creatoralliancenetwork.consultant.personal.local
         SWIFT_VERSION: '6.0'
         IPHONEOS_DEPLOYMENT_TARGET: '17.0'
+        INFOPLIST_KEY_CFBundleDisplayName: 'Pocket Consultant'
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_NSMicrophoneUsageDescription: 'Lark AI Consultant uses the microphone only while you tap voice input to transcribe speech on this device.'
@@ -32,3 +33,4 @@ schemes:
     build:
       targets:
         LarkAISolutionsConsultantApp: all
+

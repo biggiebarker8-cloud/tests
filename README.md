@@ -1,89 +1,22 @@
-# Lark AI Solutions Consultant
+# Pocket Consultant for iPhone
 
-This repository contains the foundation for a standalone iPhone consultant app, built to evolve feature-by-feature.
+This personal build uses Apple's on-device text model. Conversation history and learned memories are stored in the app's own container. It has its own bundle identifier. The iPhone chat does not use the Swift package's HTTP provider, a service account, a Lark endpoint or an API key. The model's identity is Apple. The app can run with an optional archive of dated user memories.
 
-## What is included
-- A Swift package (`LarkAISolutionsConsultant`) with:
-  - consultant chat/session models
-  - provider abstraction (`AIProvider`)
-  - HTTP + mock providers
-  - local conversation persistence
-  - adaptive learning engine (topic extraction + goal tracking)
-  - advanced long-term memory store with semantic recall
-  - controller layer for MVP chat flow
+## Install a personal build
 
-- SwiftUI iOS app in `/iOSApp` with photo-library image input, on-device speech-to-text, and spoken assistant responses
-- Initial V1 scope and roadmap docs in `/docs`
-- CI workflow to run `swift test` on both pushes and pull requests
-
-## Build the iPhone app
-On a Mac with Xcode 16 or later, install XcodeGen (`brew install xcodegen`), then run:
+On a Mac with Xcode 26 or later and XcodeGen installed, run these commands from the project folder.
 
 ```bash
 xcodegen generate
 open LarkAISolutionsConsultant.xcodeproj
 ```
 
-Select the `LarkAISolutionsConsultantApp` scheme and an iPhone simulator, then press Run. The app requires live Lark configuration (`LARK_AI_ENDPOINT` and `LARK_AI_API_KEY`) before chat is enabled. To run on your own iPhone, select your Apple development team under Signing & Capabilities in Xcode and choose the device. A signed distribution build requires your Apple signing setup.
+Select the LarkAISolutionsConsultantApp target. In Signing & Capabilities, select your Apple development team. Connect your iPhone, choose it as the run destination, and press Run. Enable Developer Mode on the iPhone if Xcode requests it.
 
-The iOS Simulator Build workflow checks that the app compiles. The Swift Tests workflow checks the package separately.
+The archive screen supports iOS 17 and later. Chat requires iOS 26 or later, a device and language supported by Apple Intelligence, and a ready on-device model. The composer displays the model's status. Voice dictation uses the device's speech recognizer, and the speaker button reads replies aloud. This build accepts text and dictation.
 
-## Configuration
-Set these environment variables for real API integration:
-- `LARK_AI_ENDPOINT`
-- `LARK_AI_API_KEY`
-- `LARK_AI_MODEL` (optional)
-- `LARK_AI_MAX_RETRIES` (optional)
+## Personal memories
 
-The iOS app requires both `LARK_AI_ENDPOINT` and `LARK_AI_API_KEY` for live chat. If either is missing, chat input is disabled and setup guidance is shown. For local simulator/device development, set variables in the Xcode scheme's Run environment. iOS apps do not read environment variables from your Mac automatically, and launch environment values are not a suitable production credential store. Use your own HTTPS backend for production; keep provider API keys on the server.
+Before running XcodeGen, place the optional ConsultantMemory.json in iOSApp. Use a JSON array of objects with string fields id, title, source, date and text, plus a keywords array of lowercase words. The Memories screen can display and search the archive without a model. During a chat, up to three matching excerpts are included in the Apple model's local prompt. Clearing chat resets conversation and learned history. The bundled source archive stays available.
 
-## Run live on iPhone (Lark API)
-1. Install prerequisites on your Mac:
-   - Xcode 16+
-   - XcodeGen (`brew install xcodegen`)
-2. In `/home/runner/work/tests/tests`, run:
-   - `xcodegen generate`
-   - `open LarkAISolutionsConsultant.xcodeproj`
-3. In Xcode, open scheme Run settings and set:
-   - `LARK_AI_ENDPOINT` = your HTTPS Lark API endpoint
-   - `LARK_AI_API_KEY` = your valid API key
-   - Optional: `LARK_AI_MODEL`, `LARK_AI_MAX_RETRIES`
-4. Configure signing for device install:
-   - Target: `LarkAISolutionsConsultantApp`
-   - Signing & Capabilities: select your Apple Development Team
-   - Use a unique bundle identifier if needed
-5. Connect your iPhone, trust the developer profile, then run on the device from Xcode.
-6. Verify the live link:
-   - Open the app on phone
-   - Send a test message
-   - Confirm a real API response (not local mock behavior)
-
-## Learning and memory capabilities
-- Learns durable memory summaries from user prompts.
-- Reinforces recurring themes to strengthen important memories.
-- Tracks top topics and recent user goals over time.
-- Recalls relevant memories and injects them into provider prompts for personalization.
-- Persists both conversation history and learning state across sessions.
-- Supports multimodal prompts with image attachments (common image MIME types); image understanding depends on the configured API model supporting vision.
-- Use the photo picker to ask questions about images, tap the microphone to dictate editable text using on-device speech recognition, and tap an assistant response's speaker icon to hear it read aloud. Microphone and speech permissions are requested when voice input is first used.
-- Accepts both native `reply` API responses and OpenAI-style `choices[].message.content` responses.
-- Injects built-in company knowledge base and plugin context for TikTok, TikTok Agency, Microsoft, Facebook, Instagram, Wix, Shopify, Amazon, Lark, Claude AI, Munus, ByteDance, Canva, and AnyCross when prompts reference those platforms.
-- Adds cross-platform plugin suggestions when prompts ask for integrations, connectors, plugins, or multi-platform workflows.
-- Injects built-in skill context for image creation, image editing, comic book creation, picture design, short video creation, website building, website permissions management (excluding payment/admin charge privileges), core memory vault, story universe continuity, assistant personality styling, voice and hearing interaction, adaptive self-learning, and auto-selected plug-ins/skills when prompts or image inputs indicate those workflows.
-- Injects structured domain templates for rollout planning, architecture guidance, and security governance prompts to make responses easier to extend and reuse.
-
-## Testing
-```bash
-swift test
-```
-
-## Documentation
-- `docs/V1_SCOPE.md`
-- `docs/ROADMAP.md`
-
-
-## Optional personal memory file
-
-For a personal device build, place `ConsultantMemory.json` inside `iOSApp/` before running XcodeGen. The file contains a JSON array of records. Each record has string fields `id`, `title`, `source`, `date`, and `text`, plus a `keywords` array of lowercase words. The app displays these records under **Memories** even before chat is configured. When you send a question, up to three keyword-matched excerpts go to the configured chat endpoint with that question. Clear resets the chat and learned history. The reference file is part of the app and is retained on reset.
-
-This personal resource is ignored by Git. For distribution to anyone else, remove it and regenerate and rebuild the project.
+Git ignores the personal JSON file. Remove it and regenerate the project before distributing a copy to someone else.

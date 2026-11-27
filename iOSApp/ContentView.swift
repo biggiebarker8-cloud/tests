@@ -1,6 +1,4 @@
 import SwiftUI
-import PhotosUI
-import UniformTypeIdentifiers
 import LarkAISolutionsConsultant
 
 @MainActor
@@ -12,7 +10,6 @@ final class ChatViewModel: ObservableObject {
     @Published var input: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
-    @Published var pendingAttachments: [ChatImageAttachment] = []
     @Published var setupGuidance: String?
 
     let referenceArchive: ReferenceArchive
@@ -21,24 +18,8 @@ final class ChatViewModel: ObservableObject {
     init() {
         let archive = ReferenceArchive()
         self.referenceArchive = archive
-        let config = AppConfig.fromEnvironment()
-        guard let endpoint = config.endpoint,
-              let rawKey = config.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !rawKey.isEmpty
-        else {
-            self.controller = nil
-            self.setupGuidance = "Live API is not configured. In Xcode, open the app scheme Run settings and set LARK_AI_ENDPOINT and LARK_AI_API_KEY."
-            return
-        }
-
-        let provider: AIProvider = HTTPAIProvider(
-            configuration: AppConfig(
-                endpoint: endpoint,
-                apiKey: rawKey,
-                model: config.model,
-                maxRetryCount: config.maxRetryCount
-            )
-        )
+        self.setupGuidance = OnDeviceConsultant.availabilityMessage
+        let provider = OnDeviceConsultant()
 
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
@@ -57,18 +38,19 @@ final class ChatViewModel: ObservableObject {
     }
 
     func bootstrap() async {
+        setupGuidance = OnDeviceConsultant.availabilityMessage
         guard let controller else { return }
         await controller.bootstrap()
         sync()
     }
 
     func send() async {
-        guard let controller else { return }
+        setupGuidance = OnDeviceConsultant.availabilityMessage
+        guard setupGuidance == nil, let controller, !isLoading else { return }
+        isLoading = true
         let currentInput = input
-        let currentAttachments = pendingAttachments
         input = ""
-        pendingAttachments = []
-        await controller.send(currentInput, imageAttachments: currentAttachments)
+        await controller.send(currentInput)
         sync()
     }
 
@@ -109,25 +91,14 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
-    func addImageAttachment(data: Data, mimeType: String) {
-        pendingAttachments.append(
-            ChatImageAttachment(
-                mimeType: mimeType,
-                base64Data: data.base64EncodedString()
-            )
-        )
-    }
 
-    func clearPendingAttachments() {
-        pendingAttachments = []
-    }
 }
 
 struct ContentView: View {
     @ObservedObject var viewModel: ChatViewModel
     @StateObject private var voiceController = VoiceInteractionController()
+    @Environment(\.scenePhase) private var scenePhase
     @State private var showingMemories = false
-    @State private var selectedPhotoItems: [PhotosPickerItem] = []
 
     var body: some View {
         NavigationStack {
@@ -154,7 +125,7 @@ struct ContentView: View {
                     ContentUnavailableView(
                         "Start a consulting session",
                         systemImage: "message",
-                        description: Text("Ask for implementation advice, architecture support, or rollout guidance.")
+                        description: Text("Chat uses Apple’s on-device model. Open Memories to read your saved notes.")
                     )
                 } else {
                     List(viewModel.messages) { message in
@@ -196,6 +167,12 @@ struct ContentView: View {
                     .padding(.horizontal)
                 }
 
+                if let guidance = viewModel.setupGuidance {
+                    Text(guidance).font(.footnote).padding(.horizontal)
+                    Button("Check on-device model") {
+                        viewModel.setupGuidance = OnDeviceConsultant.availabilityMessage
+                    }
+                }
                 if let error = viewModel.errorMessage {
                     Text(error)
                         .foregroundStyle(.red)
@@ -205,18 +182,9 @@ struct ContentView: View {
                 }
 
                 HStack {
-                    TextField("Ask about a photo or describe a challenge", text: $viewModel.input)
+                    TextField("Ask your on-device consultant", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
                         .disabled(viewModel.setupGuidance != nil)
-                    PhotosPicker(
-                        selection: $selectedPhotoItems,
-                        maxSelectionCount: 6,
-                        matching: .images
-                    ) {
-                        Image(systemName: "photo.on.rectangle")
-                    }
-                    .disabled(viewModel.isLoading || viewModel.setupGuidance != nil)
-                    .accessibilityLabel("Add an image to ask about")
                     Button {
                         if voiceController.isListening {
                             voiceController.stopListening()
@@ -244,7 +212,7 @@ struct ContentView: View {
                         viewModel.isLoading
                         || viewModel.setupGuidance != nil
                         || voiceController.isFinishingRecognition
-                        || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
+                        || viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     )
                 }
                 .padding()
@@ -272,26 +240,15 @@ struct ContentView: View {
                         .padding(.horizontal)
                 }
 
-                if !viewModel.pendingAttachments.isEmpty {
-                    HStack(spacing: 12) {
-                        Text("Attached images: \(viewModel.pendingAttachments.count)")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                        Button("Remove") {
-                            viewModel.clearPendingAttachments()
-                        }
-                        .font(.footnote)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                }
-
                 if viewModel.isLoading {
                     ProgressView("Consulting…")
                         .padding(.bottom)
                 }
             }
-            .navigationTitle("Lark AI Consultant")
+            .navigationTitle("Pocket Consultant")
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active { viewModel.setupGuidance = OnDeviceConsultant.availabilityMessage }
+            }
             .sheet(isPresented: $showingMemories) {
                 ReferenceMemoriesView(archive: viewModel.referenceArchive)
             }
@@ -305,11 +262,7 @@ struct ContentView: View {
                     Button("Clear") {
                         Task { await viewModel.clear() }
                     }
-                }
-            }
-            .onChange(of: selectedPhotoItems) { _, newItems in
-                Task {
-                    await loadSelectedPhotos(newItems)
+                    .disabled(viewModel.isLoading)
                 }
             }
             .onDisappear {
@@ -320,32 +273,3 @@ struct ContentView: View {
     }
 
 }
-
-private extension ContentView {
-    @MainActor
-    func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
-        guard !items.isEmpty else { return }
-
-        for item in items {
-            do {
-                guard let imageData = try await item.loadTransferable(type: Data.self) else {
-                    viewModel.errorMessage = "Couldn't load a selected image. Please try selecting it again."
-                    continue
-                }
-
-                let mimeType = item.supportedContentTypes
-                    .first(where: { $0.conforms(to: .image) })?
-                    .preferredMIMEType ?? "image/jpeg"
-
-                if mimeType.hasPrefix("image/") {
-                    viewModel.addImageAttachment(data: imageData, mimeType: mimeType)
-                }
-            } catch {
-                viewModel.errorMessage = "Couldn't load a selected image: \(error.localizedDescription)"
-            }
-        }
-
-        selectedPhotoItems = []
-    }
-}
-
