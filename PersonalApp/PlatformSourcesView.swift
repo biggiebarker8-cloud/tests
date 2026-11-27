@@ -2,13 +2,14 @@ import SwiftUI
 import LarkAISolutionsConsultant
 
 struct PlatformSourcesView: View {
+    let providerName: String
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
             List {
                 Section("This build") {
-                    LabeledContent("Chat model", value: "Apple · on device")
+                    LabeledContent("Chat model", value: providerName)
                     LabeledContent("Lark account", value: "Disconnected")
                     LabeledContent("TikTok account", value: "Disconnected")
                 }

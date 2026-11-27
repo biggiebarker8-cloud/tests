@@ -7,6 +7,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var showingMemories = false
     @State private var showingSources = false
+    @State private var showingOpenAI = false
 
     var body: some View {
         NavigationStack {
@@ -33,7 +34,7 @@ struct ContentView: View {
                     ContentUnavailableView(
                         "Start a consulting session",
                         systemImage: "message",
-                        description: Text("Chat uses Apple’s on-device model. Open Memories to read your saved notes.")
+                        description: Text("Chat provider: \(viewModel.providerName). Open Memories to read your saved notes.")
                     )
                 } else {
                     List(viewModel.messages) { message in
@@ -78,7 +79,7 @@ struct ContentView: View {
                 if let guidance = viewModel.setupGuidance {
                     Text(guidance).font(.footnote).padding(.horizontal)
                     Button("Check on-device model") {
-                        viewModel.setupGuidance = OnDeviceConsultant.availabilityMessage
+                        viewModel.refreshAvailability()
                     }
                 }
                 if let error = viewModel.errorMessage {
@@ -90,7 +91,7 @@ struct ContentView: View {
                 }
 
                 HStack {
-                    TextField("Ask your on-device consultant", text: $viewModel.input)
+                    TextField("Ask your consultant", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
                         .disabled(viewModel.setupGuidance != nil)
                     Button {
@@ -155,16 +156,18 @@ struct ContentView: View {
             }
             .navigationTitle("Pocket Consultant")
             .onChange(of: scenePhase) { _, newPhase in
-                if newPhase == .active { viewModel.setupGuidance = OnDeviceConsultant.availabilityMessage }
+                if newPhase == .active { viewModel.refreshAvailability() }
             }
             .sheet(isPresented: $showingMemories) {
                 ReferenceMemoriesView(viewModel: viewModel)
             }
+            .sheet(isPresented: $showingOpenAI) { OpenAISettings(viewModel: viewModel) }
             .sheet(isPresented: $showingSources) {
-                PlatformSourcesView()
+                PlatformSourcesView(providerName: viewModel.providerName)
             }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
+                    Button("OpenAI") { showingOpenAI = true }.disabled(viewModel.isLoading)
                     Button("Sources") { showingSources = true }
                     Button("Memories") { showingMemories = true }
                 }

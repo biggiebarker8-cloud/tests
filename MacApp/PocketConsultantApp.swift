@@ -19,6 +19,7 @@ private struct MacChatView: View {
     @ObservedObject var viewModel: ChatViewModel
     @State private var showingMemories = false
     @State private var showingSources = false
+    @State private var showingOpenAI = false
     @State private var confirmingClear = false
     @Environment(\.scenePhase) private var scenePhase
 
@@ -27,7 +28,7 @@ private struct MacChatView: View {
             if viewModel.messages.isEmpty {
                 ContentUnavailableView(
                     "Start a conversation", systemImage: "bubble.left.and.bubble.right",
-                    description: Text("Chat on this Mac, or open Memories to read your saved notes.")
+                    description: Text("Chat provider: \(viewModel.providerName). Open Memories to read your saved notes.")
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -51,12 +52,12 @@ private struct MacChatView: View {
                 if let guidance = viewModel.setupGuidance {
                     HStack {
                         Text(guidance).font(.callout)
-                        Button("Check again") { viewModel.setupGuidance = OnDeviceConsultant.availabilityMessage }
+                        Button("Check again") { viewModel.refreshAvailability() }
                     }
                 }
                 if let error = viewModel.errorMessage { Text(error).foregroundStyle(.red) }
                 HStack {
-                    TextField("Ask your on-device consultant", text: $viewModel.input)
+                    TextField("Ask your consultant", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
                         .disabled(viewModel.setupGuidance != nil)
                         .onSubmit { if canSend { Task { await viewModel.send() } } }
@@ -68,6 +69,7 @@ private struct MacChatView: View {
             .padding()
         }
         .toolbar {
+            Button("OpenAI", systemImage: "key") { showingOpenAI = true }.disabled(viewModel.isLoading)
             Button("Memories", systemImage: "books.vertical") { showingMemories = true }
             Button("Sources", systemImage: "doc.text.magnifyingglass") { showingSources = true }
             Button("Clear chat", systemImage: "trash") { confirmingClear = true }
@@ -79,11 +81,12 @@ private struct MacChatView: View {
         .sheet(isPresented: $showingMemories) {
             ReferenceMemoriesView(viewModel: viewModel).frame(minWidth: 560, minHeight: 400)
         }
+        .sheet(isPresented: $showingOpenAI) { OpenAISettings(viewModel: viewModel) }
         .sheet(isPresented: $showingSources) {
-            PlatformSourcesView().frame(minWidth: 560, minHeight: 400)
+            PlatformSourcesView(providerName: viewModel.providerName).frame(minWidth: 560, minHeight: 400)
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { viewModel.setupGuidance = OnDeviceConsultant.availabilityMessage }
+            if phase == .active { viewModel.refreshAvailability() }
         }
     }
 

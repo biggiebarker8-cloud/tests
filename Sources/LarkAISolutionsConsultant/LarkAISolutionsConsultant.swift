@@ -1862,6 +1862,8 @@ public final class ChatSessionController {
             try await store.save(messages)
             try await learningStore.save(LearningState(memories: memories, profile: learningProfile))
             status = .idle
+        } catch let error as OpenAIConsultantError {
+            status = .error(error.localizedDescription)
         } catch {
             status = .error("Unable to get consultant response")
         }

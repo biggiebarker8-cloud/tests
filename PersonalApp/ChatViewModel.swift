@@ -11,6 +11,19 @@ final class ChatViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var setupGuidance: String?
+    @Published private(set) var usesOpenAI = UserDefaults.standard.bool(forKey: PersonalOpenAIKey.selection)
+    var providerName: String { usesOpenAI ? "OpenAI · " + OpenAIConsultant.model : "Apple · on device" }
+
+    func selectOpenAI(_ enabled: Bool) {
+        UserDefaults.standard.set(enabled, forKey: PersonalOpenAIKey.selection)
+        usesOpenAI = enabled
+        errorMessage = nil
+        refreshAvailability()
+    }
+
+    func refreshAvailability() {
+        setupGuidance = usesOpenAI ? nil : OnDeviceConsultant.availabilityMessage
+    }
 
     @Published private(set) var referenceArchive: ReferenceArchive
     private let importedFile: URL
@@ -23,11 +36,10 @@ final class ChatViewModel: ObservableObject {
             .appendingPathComponent("LarkAISolutionsConsultant", isDirectory: true)
         let importedFile = support.appendingPathComponent("imported-notes.json")
         let archive = ReferenceArchive(importedFile: importedFile)
-        let provider = ReferenceAwareProvider(base: OnDeviceConsultant(), archive: archive)
+        let provider = ReferenceAwareProvider(base: PersonalChatProvider(), archive: archive)
         self.importedFile = importedFile
         self.referenceArchive = archive
         self.provider = provider
-        self.setupGuidance = OnDeviceConsultant.availabilityMessage
         let historyURL = support.appendingPathComponent("conversation.json")
         let learningURL = support.appendingPathComponent("learning.json")
 
@@ -36,10 +48,11 @@ final class ChatViewModel: ObservableObject {
             store: FileConversationStore(fileURL: historyURL),
             learningStore: FileLearningStore(fileURL: learningURL)
         )
+        refreshAvailability()
     }
 
     func bootstrap() async {
-        setupGuidance = OnDeviceConsultant.availabilityMessage
+        refreshAvailability()
         guard !didBootstrap else { return }
         didBootstrap = true
         isLoading = true
@@ -48,7 +61,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func send() async {
-        setupGuidance = OnDeviceConsultant.availabilityMessage
+        refreshAvailability()
         guard setupGuidance == nil, !isLoading else { return }
         isLoading = true
         let currentInput = input
