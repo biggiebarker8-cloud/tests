@@ -29,7 +29,7 @@ jobs:
             ARCHS=arm64 CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual
           app="build/Build/Products/Release/Pocket Consultant.app"
           codesign --verify --deep --strict "$app"
-          lipo "$app/Contents/MacOS/Pocket Consultant" -verify_arch arm64
+          lipo -verify_arch arm64 "$app/Contents/MacOS/Pocket Consultant"
           python3 - "$app/Contents/MacOS/Pocket Consultant" <<'PYTHON'
           import subprocess, sys
           with subprocess.Popen([sys.argv[1]]) as app:
