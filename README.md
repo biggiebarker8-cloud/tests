@@ -80,3 +80,10 @@ swift test
 ## Documentation
 - `docs/V1_SCOPE.md`
 - `docs/ROADMAP.md`
+
+
+## Optional personal memory file
+
+For a personal device build, place `ConsultantMemory.json` inside `iOSApp/` before running XcodeGen. The file contains a JSON array of records. Each record has string fields `id`, `title`, `source`, `date`, and `text`, plus a `keywords` array of lowercase words. The app displays these records under **Memories** even before chat is configured. When you send a question, up to three keyword-matched excerpts go to the configured chat endpoint with that question. Clear resets the chat and learned history. The reference file is part of the app and is retained on reset.
+
+This personal resource is ignored by Git. For distribution to anyone else, remove it and regenerate and rebuild the project.

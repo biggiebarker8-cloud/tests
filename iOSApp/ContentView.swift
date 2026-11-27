@@ -15,9 +15,12 @@ final class ChatViewModel: ObservableObject {
     @Published var pendingAttachments: [ChatImageAttachment] = []
     @Published var setupGuidance: String?
 
+    let referenceArchive: ReferenceArchive
     private let controller: ChatSessionController?
 
     init() {
+        let archive = ReferenceArchive()
+        self.referenceArchive = archive
         let config = AppConfig.fromEnvironment()
         guard let endpoint = config.endpoint,
               let rawKey = config.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -47,7 +50,7 @@ final class ChatViewModel: ObservableObject {
             .appendingPathComponent("learning.json")
 
         self.controller = ChatSessionController(
-            provider: provider,
+            provider: ReferenceAwareProvider(base: provider, archive: archive),
             store: FileConversationStore(fileURL: historyURL),
             learningStore: FileLearningStore(fileURL: learningURL)
         )
@@ -123,6 +126,7 @@ final class ChatViewModel: ObservableObject {
 struct ContentView: View {
     @ObservedObject var viewModel: ChatViewModel
     @StateObject private var voiceController = VoiceInteractionController()
+    @State private var showingMemories = false
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
 
     var body: some View {
@@ -288,7 +292,15 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Lark AI Consultant")
+            .sheet(isPresented: $showingMemories) {
+                ReferenceMemoriesView(archive: viewModel.referenceArchive)
+            }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if !viewModel.referenceArchive.entries.isEmpty || viewModel.referenceArchive.warning != nil {
+                        Button("Memories") { showingMemories = true }
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Clear") {
                         Task { await viewModel.clear() }
@@ -336,3 +348,4 @@ private extension ContentView {
         selectedPhotoItems = []
     }
 }
+
