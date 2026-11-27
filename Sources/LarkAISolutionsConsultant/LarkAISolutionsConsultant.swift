@@ -1548,6 +1548,27 @@ private enum SkillKnowledgeBaseCatalog {
             autoActivateOnImageInput: false
         ),
         SkillKnowledgeBaseEntry(
+            name: "Emotional Support Check-ins",
+            aliases: ["emotional support", "emotional check-in", "emotional check in", "support check-in", "support check in", "feeling overwhelmed", "mental health check-in", "mental health check in"],
+            overview: "Provides compassionate, non-clinical check-ins to help users reflect on feelings and choose a manageable next step.",
+            workflows: [
+                "Listen without judgment, acknowledge the user's feelings, and let them choose how much to share",
+                "Offer a gentle check-in about what feels most important right now and what kind of support would help",
+                "Suggest simple grounding or coping steps and help identify a trusted person to contact when appropriate"
+            ],
+            outputs: [
+                "Warm, concise emotional check-ins with one gentle question at a time",
+                "Practical, user-chosen next steps without pressure or judgment",
+                "Clear guidance to seek immediate local emergency or crisis support if the user may be in imminent danger"
+            ],
+            plugins: [
+                "Optional, user-controlled links to verified local crisis resources where available",
+                "Trusted-contact handoff suggestions that require the user's choice and configured contact details",
+                "Private journaling and check-in history tools with clear user control over saved data"
+            ],
+            autoActivateOnImageInput: false
+        ),
+        SkillKnowledgeBaseEntry(
             name: "Adaptive Self Learning",
             aliases: ["self learning", "self-learning", "maximum self learning", "adaptive learning", "learn automatically", "learn what you like", "how you like it", "analyze everything"],
             overview: "Strengthens personalization by reusing learned preferences, recurring goals, and prior context to improve future responses.",

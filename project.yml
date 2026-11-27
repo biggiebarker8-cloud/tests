@@ -23,6 +23,8 @@ targets:
         IPHONEOS_DEPLOYMENT_TARGET: '17.0'
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: 'Lark AI Consultant uses the microphone only while you tap voice input to transcribe speech on this device.'
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: 'Lark AI Consultant uses on-device speech recognition to turn your spoken words into editable text.'
         TARGETED_DEVICE_FAMILY: '1'
         CODE_SIGN_STYLE: Automatic
 schemes:
