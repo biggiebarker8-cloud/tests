@@ -1,104 +1,12 @@
 import SwiftUI
 import LarkAISolutionsConsultant
 
-@MainActor
-final class ChatViewModel: ObservableObject {
-    @Published var messages: [ChatMessage] = []
-    @Published var memories: [LearnedMemory] = []
-    @Published var topTopics: [String] = []
-    @Published var userGoals: [String] = []
-    @Published var input: String = ""
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String?
-    @Published var setupGuidance: String?
-
-    let referenceArchive: ReferenceArchive
-    private let controller: ChatSessionController?
-
-    init() {
-        let archive = ReferenceArchive()
-        self.referenceArchive = archive
-        self.setupGuidance = OnDeviceConsultant.availabilityMessage
-        let provider = OnDeviceConsultant()
-
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            ?? FileManager.default.temporaryDirectory
-        let historyURL = appSupport
-            .appendingPathComponent("LarkAISolutionsConsultant", isDirectory: true)
-            .appendingPathComponent("conversation.json")
-        let learningURL = appSupport
-            .appendingPathComponent("LarkAISolutionsConsultant", isDirectory: true)
-            .appendingPathComponent("learning.json")
-
-        self.controller = ChatSessionController(
-            provider: ReferenceAwareProvider(base: provider, archive: archive),
-            store: FileConversationStore(fileURL: historyURL),
-            learningStore: FileLearningStore(fileURL: learningURL)
-        )
-    }
-
-    func bootstrap() async {
-        setupGuidance = OnDeviceConsultant.availabilityMessage
-        guard let controller else { return }
-        await controller.bootstrap()
-        sync()
-    }
-
-    func send() async {
-        setupGuidance = OnDeviceConsultant.availabilityMessage
-        guard setupGuidance == nil, let controller, !isLoading else { return }
-        isLoading = true
-        let currentInput = input
-        input = ""
-        await controller.send(currentInput)
-        sync()
-    }
-
-    func clear() async {
-        guard let controller else { return }
-        await controller.clear()
-        sync()
-    }
-
-    private func sync() {
-        guard let controller else {
-            messages = []
-            memories = []
-            topTopics = []
-            userGoals = []
-            isLoading = false
-            return
-        }
-
-        messages = controller.messages
-        memories = controller.memories
-            .sorted(by: { $0.strength > $1.strength })
-            .prefix(5)
-            .map { $0 }
-        topTopics = controller.learningProfile.topTopics
-        userGoals = Array(controller.learningProfile.userGoals.suffix(3))
-
-        switch controller.status {
-        case .loading:
-            isLoading = true
-            errorMessage = nil
-        case .idle:
-            isLoading = false
-            errorMessage = nil
-        case .error(let message):
-            isLoading = false
-            errorMessage = message
-        }
-    }
-
-
-}
-
 struct ContentView: View {
     @ObservedObject var viewModel: ChatViewModel
     @StateObject private var voiceController = VoiceInteractionController()
     @Environment(\.scenePhase) private var scenePhase
     @State private var showingMemories = false
+    @State private var showingSources = false
 
     var body: some View {
         NavigationStack {
@@ -250,13 +158,15 @@ struct ContentView: View {
                 if newPhase == .active { viewModel.setupGuidance = OnDeviceConsultant.availabilityMessage }
             }
             .sheet(isPresented: $showingMemories) {
-                ReferenceMemoriesView(archive: viewModel.referenceArchive)
+                ReferenceMemoriesView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $showingSources) {
+                PlatformSourcesView()
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    if !viewModel.referenceArchive.entries.isEmpty || viewModel.referenceArchive.warning != nil {
-                        Button("Memories") { showingMemories = true }
-                    }
+                ToolbarItemGroup(placement: .topBarLeading) {
+                    Button("Sources") { showingSources = true }
+                    Button("Memories") { showingMemories = true }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Clear") {

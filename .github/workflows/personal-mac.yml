@@ -1,0 +1,38 @@
+name: Personal Mac app
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify active macOS SDK
+        run: |
+          xcodebuild -version
+          sdk=$(xcrun --sdk macosx --show-sdk-version)
+          test "${sdk%%.*}" -ge 26
+      - name: Generate project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Build and verify the Apple silicon app
+        run: |
+          xcodebuild build -project LarkAISolutionsConsultant.xcodeproj \
+            -scheme PocketConsultantMac -configuration Release \
+            -destination 'generic/platform=macOS' -derivedDataPath build \
+            ARCHS=arm64 CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual
+          app="build/Build/Products/Release/Pocket Consultant.app"
+          codesign --verify --deep --strict "$app"
+          lipo -verify_arch arm64 "$app/Contents/MacOS/Pocket Consultant"
+          ditto -c -k --keepParent "$app" Pocket-Consultant-Mac.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pocket-Consultant-Mac
+          path: Pocket-Consultant-Mac.zip
+          if-no-files-found: error
