@@ -28,6 +28,15 @@ Select the `LarkAISolutionsConsultantApp` scheme and an iPhone simulator, then p
 
 The iOS Simulator Build workflow checks that the app compiles. The Swift Tests workflow checks the package separately.
 
+## Run the browser app
+The browser version includes a responsive chat interface and a same-origin Node.js proxy. Keep the Lark API key on the server; do not put it in browser code or client-side storage.
+
+1. Install Node.js 18 or later.
+2. Set `LARK_AI_ENDPOINT` and `LARK_AI_API_KEY` in the server environment. Optionally set `LARK_AI_MODEL`, `PORT`, and `HOST` (defaults to `lark-consultant-v1`, `4173`, and `127.0.0.1`).
+3. Run `npm run start:web` and open `http://localhost:4173`.
+
+The browser keeps conversation history in that browser's local storage. Image attachments are sent through the server proxy and support JPEG, PNG, GIF, and WebP files (up to six images, 5 MB each). For production, put the app behind HTTPS and configure the server environment through your hosting provider's secret management.
+
 ## Configuration
 Set these environment variables for real API integration:
 - `LARK_AI_ENDPOINT`
@@ -75,6 +84,7 @@ The iOS app requires both `LARK_AI_ENDPOINT` and `LARK_AI_API_KEY` for live chat
 ## Testing
 ```bash
 swift test
+npm run test:web
 ```
 
 ## Documentation

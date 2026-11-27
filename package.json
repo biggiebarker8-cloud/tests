@@ -1,0 +1,9 @@
+{
+  "name": "lark-ai-consultant-browser",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start:web": "node web/server.mjs",
+    "test:web": "node --test web/server.test.mjs"
+  }
+}
