@@ -9,3 +9,4 @@ LarkAISolutionsConsultant.xcodeproj/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+/iOSApp/ConsultantMemory.json

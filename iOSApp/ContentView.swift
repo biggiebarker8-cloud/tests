@@ -1,129 +1,13 @@
 import SwiftUI
-import PhotosUI
-import UniformTypeIdentifiers
 import LarkAISolutionsConsultant
-
-@MainActor
-final class ChatViewModel: ObservableObject {
-    @Published var messages: [ChatMessage] = []
-    @Published var memories: [LearnedMemory] = []
-    @Published var topTopics: [String] = []
-    @Published var userGoals: [String] = []
-    @Published var input: String = ""
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String?
-    @Published var pendingAttachments: [ChatImageAttachment] = []
-    @Published var setupGuidance: String?
-
-    private let controller: ChatSessionController?
-
-    init() {
-        let config = AppConfig.fromEnvironment()
-        guard let endpoint = config.endpoint,
-              let rawKey = config.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !rawKey.isEmpty
-        else {
-            self.controller = nil
-            self.setupGuidance = "Live API is not configured. In Xcode, open the app scheme Run settings and set LARK_AI_ENDPOINT and LARK_AI_API_KEY."
-            return
-        }
-
-        let provider: AIProvider = HTTPAIProvider(
-            configuration: AppConfig(
-                endpoint: endpoint,
-                apiKey: rawKey,
-                model: config.model,
-                maxRetryCount: config.maxRetryCount
-            )
-        )
-
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            ?? FileManager.default.temporaryDirectory
-        let historyURL = appSupport
-            .appendingPathComponent("LarkAISolutionsConsultant", isDirectory: true)
-            .appendingPathComponent("conversation.json")
-        let learningURL = appSupport
-            .appendingPathComponent("LarkAISolutionsConsultant", isDirectory: true)
-            .appendingPathComponent("learning.json")
-
-        self.controller = ChatSessionController(
-            provider: provider,
-            store: FileConversationStore(fileURL: historyURL),
-            learningStore: FileLearningStore(fileURL: learningURL)
-        )
-    }
-
-    func bootstrap() async {
-        guard let controller else { return }
-        await controller.bootstrap()
-        sync()
-    }
-
-    func send() async {
-        guard let controller else { return }
-        let currentInput = input
-        let currentAttachments = pendingAttachments
-        input = ""
-        pendingAttachments = []
-        await controller.send(currentInput, imageAttachments: currentAttachments)
-        sync()
-    }
-
-    func clear() async {
-        guard let controller else { return }
-        await controller.clear()
-        sync()
-    }
-
-    private func sync() {
-        guard let controller else {
-            messages = []
-            memories = []
-            topTopics = []
-            userGoals = []
-            isLoading = false
-            return
-        }
-
-        messages = controller.messages
-        memories = controller.memories
-            .sorted(by: { $0.strength > $1.strength })
-            .prefix(5)
-            .map { $0 }
-        topTopics = controller.learningProfile.topTopics
-        userGoals = Array(controller.learningProfile.userGoals.suffix(3))
-
-        switch controller.status {
-        case .loading:
-            isLoading = true
-            errorMessage = nil
-        case .idle:
-            isLoading = false
-            errorMessage = nil
-        case .error(let message):
-            isLoading = false
-            errorMessage = message
-        }
-    }
-
-    func addImageAttachment(data: Data, mimeType: String) {
-        pendingAttachments.append(
-            ChatImageAttachment(
-                mimeType: mimeType,
-                base64Data: data.base64EncodedString()
-            )
-        )
-    }
-
-    func clearPendingAttachments() {
-        pendingAttachments = []
-    }
-}
 
 struct ContentView: View {
     @ObservedObject var viewModel: ChatViewModel
     @StateObject private var voiceController = VoiceInteractionController()
-    @State private var selectedPhotoItems: [PhotosPickerItem] = []
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var showingMemories = false
+    @State private var showingSources = false
+    @State private var showingOpenAI = false
 
     var body: some View {
         NavigationStack {
@@ -150,7 +34,7 @@ struct ContentView: View {
                     ContentUnavailableView(
                         "Start a consulting session",
                         systemImage: "message",
-                        description: Text("Ask for implementation advice, architecture support, or rollout guidance.")
+                        description: Text("Chat provider: \(viewModel.providerName). Open Memories to read your saved notes.")
                     )
                 } else {
                     List(viewModel.messages) { message in
@@ -169,6 +53,10 @@ struct ContentView: View {
                                     .buttonStyle(.plain)
                                     .accessibilityLabel("Read response aloud")
                                 }
+                            }
+                            if !message.attachments.isEmpty {
+                                Label("Photos sent: \(message.attachments.count)", systemImage: "photo")
+                                    .font(.caption)
                             }
                             Text(message.content)
                         }
@@ -192,6 +80,12 @@ struct ContentView: View {
                     .padding(.horizontal)
                 }
 
+                if let guidance = viewModel.setupGuidance {
+                    Text(guidance).font(.footnote).padding(.horizontal)
+                    Button("Check on-device model") {
+                        viewModel.refreshAvailability()
+                    }
+                }
                 if let error = viewModel.errorMessage {
                     Text(error)
                         .foregroundStyle(.red)
@@ -200,19 +94,12 @@ struct ContentView: View {
                         .padding(.horizontal)
                 }
 
+                PhotoDraftStatus(viewModel: viewModel)
                 HStack {
-                    TextField("Ask about a photo or describe a challenge", text: $viewModel.input)
+                    if viewModel.usesOpenAI { PhotoInput(viewModel: viewModel) }
+                    TextField("Ask your consultant", text: $viewModel.input)
                         .textFieldStyle(.roundedBorder)
                         .disabled(viewModel.setupGuidance != nil)
-                    PhotosPicker(
-                        selection: $selectedPhotoItems,
-                        maxSelectionCount: 6,
-                        matching: .images
-                    ) {
-                        Image(systemName: "photo.on.rectangle")
-                    }
-                    .disabled(viewModel.isLoading || viewModel.setupGuidance != nil)
-                    .accessibilityLabel("Add an image to ask about")
                     Button {
                         if voiceController.isListening {
                             voiceController.stopListening()
@@ -237,10 +124,7 @@ struct ContentView: View {
                         Task { await viewModel.send() }
                     }
                     .disabled(
-                        viewModel.isLoading
-                        || viewModel.setupGuidance != nil
-                        || voiceController.isFinishingRecognition
-                        || (viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
+                        !viewModel.canSend || voiceController.isFinishingRecognition
                     )
                 }
                 .padding()
@@ -268,36 +152,33 @@ struct ContentView: View {
                         .padding(.horizontal)
                 }
 
-                if !viewModel.pendingAttachments.isEmpty {
-                    HStack(spacing: 12) {
-                        Text("Attached images: \(viewModel.pendingAttachments.count)")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                        Button("Remove") {
-                            viewModel.clearPendingAttachments()
-                        }
-                        .font(.footnote)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                }
-
                 if viewModel.isLoading {
                     ProgressView("Consulting…")
                         .padding(.bottom)
                 }
             }
-            .navigationTitle("Lark AI Consultant")
+            .navigationTitle("Pocket Consultant")
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active { viewModel.refreshAvailability() }
+            }
+            .sheet(isPresented: $showingMemories) {
+                ReferenceMemoriesView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $showingOpenAI) { OpenAISettings(viewModel: viewModel) }
+            .sheet(isPresented: $showingSources) {
+                PlatformSourcesView(providerName: viewModel.providerName)
+            }
             .toolbar {
+                ToolbarItemGroup(placement: .topBarLeading) {
+                    Button("OpenAI") { showingOpenAI = true }.disabled(viewModel.isLoading || viewModel.isPreparingPhotos)
+                    Button("Sources") { showingSources = true }
+                    Button("Memories") { showingMemories = true }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Clear") {
                         Task { await viewModel.clear() }
                     }
-                }
-            }
-            .onChange(of: selectedPhotoItems) { _, newItems in
-                Task {
-                    await loadSelectedPhotos(newItems)
+                    .disabled(viewModel.isLoading)
                 }
             }
             .onDisappear {
@@ -307,32 +188,4 @@ struct ContentView: View {
         }
     }
 
-}
-
-private extension ContentView {
-    @MainActor
-    func loadSelectedPhotos(_ items: [PhotosPickerItem]) async {
-        guard !items.isEmpty else { return }
-
-        for item in items {
-            do {
-                guard let imageData = try await item.loadTransferable(type: Data.self) else {
-                    viewModel.errorMessage = "Couldn't load a selected image. Please try selecting it again."
-                    continue
-                }
-
-                let mimeType = item.supportedContentTypes
-                    .first(where: { $0.conforms(to: .image) })?
-                    .preferredMIMEType ?? "image/jpeg"
-
-                if mimeType.hasPrefix("image/") {
-                    viewModel.addImageAttachment(data: imageData, mimeType: mimeType)
-                }
-            } catch {
-                viewModel.errorMessage = "Couldn't load a selected image: \(error.localizedDescription)"
-            }
-        }
-
-        selectedPhotoItems = []
-    }
 }

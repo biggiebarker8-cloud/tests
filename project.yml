@@ -3,6 +3,7 @@ options:
   bundleIdPrefix: com.creatoralliancenetwork
   deploymentTarget:
     iOS: '17.0'
+    macOS: '14.0'
   xcodeVersion: '16.0'
 packages:
   ConsultantCore:
@@ -13,22 +14,48 @@ targets:
     platform: iOS
     sources:
       - path: iOSApp
+      - path: PersonalApp
     dependencies:
       - package: ConsultantCore
         product: LarkAISolutionsConsultant
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.creatoralliancenetwork.larkconsultant
+        PRODUCT_BUNDLE_IDENTIFIER: com.creatoralliancenetwork.consultant.personal.local
         SWIFT_VERSION: '6.0'
         IPHONEOS_DEPLOYMENT_TARGET: '17.0'
+        INFOPLIST_KEY_CFBundleDisplayName: 'Pocket Consultant'
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_NSMicrophoneUsageDescription: 'Lark AI Consultant uses the microphone only while you tap voice input to transcribe speech on this device.'
-        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: 'Lark AI Consultant uses on-device speech recognition to turn your spoken words into editable text.'
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: 'Pocket Consultant uses the microphone only while you tap voice input to transcribe speech on this device.'
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: 'Pocket Consultant uses on-device speech recognition to turn your spoken words into editable text.'
         TARGETED_DEVICE_FAMILY: '1'
         CODE_SIGN_STYLE: Automatic
+  PocketConsultantMac:
+    type: application
+    platform: macOS
+    sources:
+      - path: MacApp
+      - path: PersonalApp
+    dependencies:
+      - package: ConsultantCore
+        product: LarkAISolutionsConsultant
+    settings:
+      base:
+        PRODUCT_NAME: 'Pocket Consultant'
+        PRODUCT_BUNDLE_IDENTIFIER: com.creatoralliancenetwork.consultant.personal.mac
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
+        ENABLE_USER_SELECTED_FILES: readonly
+        SWIFT_VERSION: '6.0'
 schemes:
+  PocketConsultantMac:
+    build:
+      targets:
+        PocketConsultantMac: all
   LarkAISolutionsConsultantApp:
     build:
       targets:
         LarkAISolutionsConsultantApp: all
+
