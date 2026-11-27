@@ -34,8 +34,13 @@ Set these environment variables for real API integration:
 - `LARK_AI_API_KEY`
 - `LARK_AI_MODEL` (optional)
 - `LARK_AI_MAX_RETRIES` (optional)
+- `LARK_AI_IMAGE_ENDPOINT` (optional HTTPS URL for an OpenAI-compatible image generations endpoint)
+- `LARK_AI_IMAGE_API_KEY` (required for image generation)
+- `LARK_AI_IMAGE_MODEL` (optional; defaults to `gpt-image-1.5`)
 
 The iOS app requires both `LARK_AI_ENDPOINT` and `LARK_AI_API_KEY` for live chat. If either is missing, chat input is disabled and setup guidance is shown. For local simulator/device development, set variables in the Xcode scheme's Run environment. iOS apps do not read environment variables from your Mac automatically, and launch environment values are not a suitable production credential store. Use your own HTTPS backend for production; keep provider API keys on the server.
+
+To create an image, enter a description, choose portrait (1024x1536), square (1024x1024), or landscape (1536x1024), and tap **Create image**. The app requests `high` quality from the separately configured image endpoint and displays a returned `data[0].b64_json` image for sharing. Actual visual quality depends on the model, prompt, and provider. It does not send attached photos to the image generator or save generated images automatically. The service must support the configured model, size, high quality, and OpenAI-compatible base64 response; generation may incur provider charges. Use an authenticated backend proxy in production instead of embedding a provider key in the app.
 
 ## Run live on iPhone (Lark API)
 1. Install prerequisites on your Mac:
